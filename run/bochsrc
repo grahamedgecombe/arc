@@ -1,0 +1,13 @@
+megs: 32
+romimage: file=/usr/share/bochs/BIOS-bochs-latest
+vgaromimage: file=/usr/share/bochs/VGABIOS-lgpl-latest
+ata0-master: type=disk, mode=flat, cylinders=2, heads=255, spt=63, translation=lba, path=disk.img
+boot: disk
+log: bochs.log
+mouse: enabled=0
+clock: sync=realtime
+cpu: ips=200000
+config_interface: wx
+display_library: wx
+magic_break: enabled = 1
+
