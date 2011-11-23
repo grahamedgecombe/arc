@@ -66,7 +66,7 @@ MB_FLAGS    equ (MB_FLAGS_ALIGN | MB_FLAGS_MMAP)
 MB_CHECKSUM equ -(MB_MAGIC + MB_FLAGS)
 
 ; includes initialization code and lower-half data
-[section .init align=MB_ALIGN]
+[section .init.lower align=MB_ALIGN]
 ; the multiboot header
 dd MB_MAGIC
 dd MB_FLAGS
@@ -154,7 +154,7 @@ start:
   jmp rax
 
 ; the higher-half code
-[section .text]
+[section .init.higher]
 .next:
   ; re-load the GDTR with a virtual base address
   mov rax, [gdtr + 2]
