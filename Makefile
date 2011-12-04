@@ -16,9 +16,9 @@
 
 ARCH=x86_64-pc-elf
 
-CC=clang
-CFLAGS=-std=c99 -O3 -Wall -pedantic -ccc-host-triple $(ARCH) \
-  -fno-stack-protector -ffreestanding -mno-red-zone -mcmodel=large -Iinclude
+CC=$(ARCH)-gcc
+CFLAGS=-std=c1x -O3 -Wall -pedantic -ffreestanding -mno-red-zone \
+       -mcmodel=large -Iinclude
 
 AS=nasm
 ASFLAGS=-f elf64 -Ox
