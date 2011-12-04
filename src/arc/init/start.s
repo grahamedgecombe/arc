@@ -199,10 +199,6 @@ start:
   pop rsi
   pop rdi
 
-  ; adjust the multiboot pointer for virtual memory
-  mov rax, qword KERNEL_VMA
-  add rsi, rax
-
   ; set up the new stack (GRUB's is in lower memory)
   mov rbp, 0
   mov rsp, qword stack + STACK_SIZE
