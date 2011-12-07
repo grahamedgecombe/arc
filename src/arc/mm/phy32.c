@@ -14,15 +14,17 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <arc/init.h>
-#include <arc/tty.h>
 #include <arc/mm/phy32.h>
 
-void init(uint32_t magic, multiboot_t *multiboot)
+void *phy32_to_virt(void *ptr)
 {
-  tty_init();
-  tty_puts("Hello, World!\n");
+  uintptr_t i = (uintptr_t) ptr;
+  i += PHY32_BASE;
+  return (void *) i;
+}
 
-  multiboot = phy32_to_virt(multiboot);
+uintptr_t aphy32_to_virt(uintptr_t addr)
+{
+  return addr + PHY32_BASE;
 }
 

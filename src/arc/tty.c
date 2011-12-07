@@ -17,17 +17,18 @@
 #include <arc/tty.h>
 #include <arc/cpu/port.h>
 #include <arc/lock/spinlock.h>
+#include <arc/mm/phy32.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
 
 /* the address of the video buffers */
-#define VIDEO_BUFFER_MGA 0xFFFF8000000B0000
-#define VIDEO_BUFFER_CGA 0xFFFF8000000B8000
+#define VIDEO_BUFFER_MGA 0xB0000
+#define VIDEO_BUFFER_CGA 0xB8000
 
 /* the addresses of useful fields in the BIOS data area */
-#define BDA_VGA_MODE 0xFFFF800000000449
-#define BDA_VGA_PORT 0xFFFF800000000463
+#define BDA_VGA_MODE 0x449
+#define BDA_VGA_PORT 0x463
 
 /* CRTC addresses */
 #define CRTC_CURSOR_LOW  0x0F
@@ -166,12 +167,12 @@ static void crtc_sync(void)
 void tty_init(void)
 {
   /* grab the VGA mode and port base from the BIOS data area */
-  uint8_t vga_mode      = *((uint8_t *)  /*ap2v*/(BDA_VGA_MODE));
-          vga_port_base = *((uint16_t *) /*ap2v*/(BDA_VGA_PORT));
+  uint8_t vga_mode      = *((uint8_t *)  aphy32_to_virt(BDA_VGA_MODE));
+          vga_port_base = *((uint16_t *) aphy32_to_virt(BDA_VGA_PORT));
 
   /* grab the appropriate pointer to the video buffer */
   bool mga = (vga_mode & 0x30) == 0x30;
-  video_buf = (uint16_t *) /*ap2v*/(mga ? VIDEO_BUFFER_MGA : VIDEO_BUFFER_CGA);
+  video_buf = (uint16_t *) aphy32_to_virt(mga ? VIDEO_BUFFER_MGA : VIDEO_BUFFER_CGA);
 
   /* reset the cursor and the attributes */
   row = 0;

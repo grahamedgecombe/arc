@@ -78,7 +78,8 @@ boot_pml4:
   dq (boot_pml3 + PG_PRESENT + PG_WRITABLE)
   times (TABLE_SIZE / 2 - 1) dq 0
   dq (boot_pml3 + PG_PRESENT + PG_WRITABLE)
-  times (TABLE_SIZE / 2 - 2) dq 0
+  times (TABLE_SIZE / 2 - 3) dq 0
+  dq (identity_pml3 + PG_PRESENT + PG_WRITABLE)
   dq (boot_pml4 + PG_PRESENT + PG_WRITABLE + PG_NO_EXEC)
 
 boot_pml3:
@@ -88,6 +89,42 @@ boot_pml3:
 boot_pml2:
   dq (0x0 + PG_PRESENT + PG_WRITABLE + PG_BIG)
   times (TABLE_SIZE - 1) dq 0
+
+identity_pml3:
+  times (TABLE_SIZE - 4) dq 0
+; dq (0x00000000 + PG_PRESENT + PG_WRITABLE + PG_BIG + PG_NO_EXEC)
+; dq (0x40000000 + PG_PRESENT + PG_WRITABLE + PG_BIG + PG_NO_EXEC)
+; dq (0x80000000 + PG_PRESENT + PG_WRITABLE + PG_BIG + PG_NO_EXEC)
+; dq (0xC0000000 + PG_PRESENT + PG_WRITABLE + PG_BIG + PG_NO_EXEC)
+  dq (identity_pml2a + PG_PRESENT + PG_WRITABLE)
+  dq (identity_pml2b + PG_PRESENT + PG_WRITABLE)
+  dq (identity_pml2c + PG_PRESENT + PG_WRITABLE)
+  dq (identity_pml2d + PG_PRESENT + PG_WRITABLE)
+
+identity_pml2a:
+  %assign pg 0
+  %rep TABLE_SIZE
+    dq (pg + PG_PRESENT + PG_WRITABLE + PG_BIG + PG_NO_EXEC)
+    %assign pg pg+PAGE_SIZE*TABLE_SIZE
+  %endrep
+
+identity_pml2b:
+  %rep TABLE_SIZE
+    dq (pg + PG_PRESENT + PG_WRITABLE + PG_BIG + PG_NO_EXEC)
+    %assign pg pg+PAGE_SIZE*TABLE_SIZE
+  %endrep
+
+identity_pml2c:
+  %rep TABLE_SIZE
+    dq (pg + PG_PRESENT + PG_WRITABLE + PG_BIG + PG_NO_EXEC)
+    %assign pg pg+PAGE_SIZE*TABLE_SIZE
+  %endrep
+
+identity_pml2d:
+  %rep TABLE_SIZE
+    dq (pg + PG_PRESENT + PG_WRITABLE + PG_BIG + PG_NO_EXEC)
+    %assign pg pg+PAGE_SIZE*TABLE_SIZE
+  %endrep
 
 ; the global descriptor table
 gdt:
@@ -104,7 +141,7 @@ gdt:
     dw 0x9200
     dw 0x00CF
 gdtr:
-  dw $ - gdt - 1
+  dw gdtr - gdt - 1
   dq gdt
 
 ; the entry point of the kernel executable
