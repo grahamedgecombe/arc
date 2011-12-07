@@ -22,11 +22,11 @@
 #include <stdint.h>
 #include <string.h>
 
-/* the address of the video buffers */
+/* the physical addresses of the video buffers */
 #define VIDEO_BUFFER_MGA 0xB0000
 #define VIDEO_BUFFER_CGA 0xB8000
 
-/* the addresses of useful fields in the BIOS data area */
+/* the physical addresses of useful fields in the BIOS data area */
 #define BDA_VGA_MODE 0x449
 #define BDA_VGA_PORT 0x463
 

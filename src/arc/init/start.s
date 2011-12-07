@@ -92,10 +92,6 @@ boot_pml2:
 
 identity_pml3:
   times (TABLE_SIZE - 4) dq 0
-; dq (0x00000000 + PG_PRESENT + PG_WRITABLE + PG_BIG + PG_NO_EXEC)
-; dq (0x40000000 + PG_PRESENT + PG_WRITABLE + PG_BIG + PG_NO_EXEC)
-; dq (0x80000000 + PG_PRESENT + PG_WRITABLE + PG_BIG + PG_NO_EXEC)
-; dq (0xC0000000 + PG_PRESENT + PG_WRITABLE + PG_BIG + PG_NO_EXEC)
   dq (identity_pml2a + PG_PRESENT + PG_WRITABLE)
   dq (identity_pml2b + PG_PRESENT + PG_WRITABLE)
   dq (identity_pml2c + PG_PRESENT + PG_WRITABLE)
