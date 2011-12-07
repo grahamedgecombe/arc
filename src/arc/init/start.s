@@ -243,7 +243,7 @@ start:
   invlpg [0x0]
 
   ; clear the RFLAGS register
-  push qword 0x0
+  push 0x0
   popf
 
   ; call the kernel
