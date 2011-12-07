@@ -17,12 +17,50 @@
 #include <arc/init.h>
 #include <arc/tty.h>
 #include <arc/mm/phy32.h>
+#include <string.h>
+
+static void print_banner(void)
+{
+  const char *banner = "Arc Operating System";
+  int gap_len = TTY_WIDTH / 2 - strlen(banner) / 2;
+
+  for (int i = 0; i < TTY_WIDTH; i++)
+    tty_putch('-');
+
+  for (int i = 0; i < gap_len; i++)
+    tty_putch(' ');
+
+  tty_puts(banner);
+
+  for (int i = 0; i < gap_len; i++)
+    tty_putch(' ');
+
+  for (int i = 0; i < TTY_WIDTH; i++)
+    tty_putch('-');
+}
 
 void init(uint32_t magic, multiboot_t *multiboot)
 {
+  /* initialise tty driver */
   tty_init();
-  tty_puts("Hello, World!\n");
 
+  /* print banner */
+  print_banner();
+  
+  /* check the multiboot magic number */
+  if (magic != MULTIBOOT_MAGIC)
+  {
+    tty_printf("ERROR: invalid multiboot magic (expected 0x%x, got 0x%x)\n",
+      MULTIBOOT_MAGIC, magic);
+    return;
+  }
+
+  /* convert physical 32-bit multiboot address to virtual address */
   multiboot = phy32_to_virt(multiboot);
+  if (!(multiboot->flags & MULTIBOOT_FLAGS_MMAP))
+  {
+    tty_printf("ERROR: no memory map passed by boot loader\n");
+    return;
+  }
 }
 
