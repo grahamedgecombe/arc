@@ -14,8 +14,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _ARC_LOCK_SPINLOCK
-#define _ARC_LOCK_SPINLOCK
+#ifndef ARC_LOCK_SPINLOCK_H
+#define ARC_LOCK_SPINLOCK_H
 
 #include <stdbool.h>
 #include <stdint.h>

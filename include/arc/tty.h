@@ -14,8 +14,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _ARC_TTY
-#define _ARC_TTY
+#ifndef ARC_TTY_H
+#define ARC_TTY_H
 
 #include <stdarg.h>
 

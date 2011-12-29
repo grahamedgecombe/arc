@@ -14,8 +14,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _ARC_MM_MAP
-#define _ARC_MM_MAP
+#ifndef ARC_MM_MAP_H
+#define ARC_MM_MAP_H
 
 #include <stdint.h>
 #include <arc/multiboot.h>

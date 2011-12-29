@@ -14,8 +14,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _ARC_CPU_PORT
-#define _ARC_CPU_PORT
+#ifndef ARC_CPU_PORT_H
+#define ARC_CPU_PORT_H
 
 #include <stdint.h>
 

@@ -14,8 +14,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _ARC_MULTIBOOT
-#define _ARC_MULTIBOOT
+#ifndef ARC_MULTIBOOT_H
+#define ARC_MULTIBOOT_H
 
 #include <arc/pack.h>
 #include <stdint.h>

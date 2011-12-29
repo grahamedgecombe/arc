@@ -14,8 +14,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _ARC_PACK
-#define _ARC_PACK
+#ifndef ARC_PACK_H
+#define ARC_PACK_H
 
 #if defined(__GNUC__) || defined(__clang__)
   #define PACK(x) x __attribute__((__packed__))

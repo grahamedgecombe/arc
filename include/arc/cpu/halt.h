@@ -14,8 +14,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _ARC_CPU_HALT
-#define _ARC_CPU_HALT
+#ifndef ARC_CPU_HALT_H
+#define ARC_CPU_HALT_H
 
 void halt_forever(void);
 

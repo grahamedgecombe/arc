@@ -14,8 +14,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _STRING
-#define _STRING
+#ifndef STRING_H
+#define STRING_H
 
 #include <stddef.h>
 

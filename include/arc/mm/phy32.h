@@ -14,8 +14,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _ARC_MM_PHY32
-#define _ARC_MM_PHY32
+#ifndef ARC_MM_PHY32_H
+#define ARC_MM_PHY32_H
 
 #include <stdint.h>
 

@@ -14,8 +14,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _ARC_INIT
-#define _ARC_INIT
+#ifndef ARC_INIT_H
+#define ARC_INIT_H
 
 #include <arc/multiboot.h>
 #include <stdint.h>

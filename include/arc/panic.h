@@ -14,8 +14,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _ARC_PANIC
-#define _ARC_PANIC
+#ifndef ARC_PANIC_H
+#define ARC_PANIC_H
 
 /*
  * this should be used to halt the BSP before any APs are started if an error
