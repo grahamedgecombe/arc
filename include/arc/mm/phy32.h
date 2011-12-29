@@ -17,9 +17,9 @@
 #ifndef _ARC_MM_PHY32
 #define _ARC_MM_PHY32
 
-#define PHY32_BASE 0xFFFFFF7F00000000
-
 #include <stdint.h>
+
+#define PHY32_BASE 0xFFFFFF7F00000000
 
 void *phy32_to_virt(void *ptr);
 uintptr_t aphy32_to_virt(uintptr_t addr);
