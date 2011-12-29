@@ -140,7 +140,7 @@ static int skip_atoi(const char **str)
 {
   int i = 0;
   while (is_ascii_digit(**str))
-    i = i * 10 + *(*str++) - '0';
+    i = i * 10 + *((*str)++) - '0';
   return i;
 }
 
