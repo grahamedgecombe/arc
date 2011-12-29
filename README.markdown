@@ -91,7 +91,8 @@ License
 -------
 
 Arc is available under the terms of the [ISC license][isc], which is a
-similar to the 2-clause BSD license.
+similar to the 2-clause BSD license. See the `LICENSE` file for the copyright
+information and licensing terms.
 
 [clang]: http://clang.llvm.org/
 [gcc]: http://gcc.gnu.org/
