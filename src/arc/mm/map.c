@@ -16,6 +16,7 @@
 
 #include <arc/mm/map.h>
 #include <arc/mm/phy32.h>
+#include <arc/panic.h>
 #include <arc/tty.h>
 #include <string.h>
 #include <stdbool.h>
@@ -58,7 +59,7 @@ static void mm_map_add(int type, uintptr_t addr_start, uintptr_t addr_end)
 
   if (entry_count == MM_MAP_MAX_ENTRIES)
   {
-    /* TODO: the memory map is full - abort boot and display error message */
+    boot_panic("memory map is full (max entries = %d)", MM_MAP_MAX_ENTRIES);
   }
 
   mm_map_entry_t *entry = &entries[entry_count++];
