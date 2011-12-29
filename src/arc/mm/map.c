@@ -197,7 +197,7 @@ void mm_map_init(multiboot_t *multiboot)
   for (int id = 0; id < multiboot->mods_count; id++)
   {
     multiboot_mod_t *mod = (multiboot_mod_t *) aphy32_to_virt(mod_addr);
-    mm_map_add(MULTIBOOT_MMAP_RESERVED, mod->start, mod->end);
+    mm_map_add(MULTIBOOT_MMAP_RESERVED, mod->start, mod->end - 1);
     mod_addr += sizeof(*mod);
   }
 
