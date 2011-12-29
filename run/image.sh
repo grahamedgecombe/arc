@@ -1,5 +1,9 @@
 #!/bin/sh -e
 if [ ! -f disk.img ]; then
+  if [ ! -f disk.img.lzma ]; then
+    echo "No disk image template. See README.markdown for more information." >&2
+    exit 1
+  fi
   lzcat disk.img.lzma > disk.img
 fi
 mkdir -p mnt
