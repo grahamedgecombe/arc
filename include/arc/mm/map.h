@@ -33,12 +33,9 @@
 typedef struct
 {
   int type;
-  uintptr_t addr;
-  uintptr_t len;
+  uintptr_t addr_start;
+  uintptr_t addr_end;
 } mm_map_entry_t;
-
-static int mm_map_count = 0;
-static mm_map_entry_t mm_map_entries[MM_MAP_MAX_ENTRIES];
 
 void mm_map_init(multiboot_t *multiboot);
 
