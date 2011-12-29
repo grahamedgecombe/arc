@@ -5,7 +5,7 @@ Introduction
 ------------
 
 Arc is a simple hobby operating system for modern PCs with amd64
-processors. It is written mostly in C99, with small amounts of Intel-style
+processors. It is written mostly in C11, with small amounts of Intel-style
 assembly where required.
 
 Building
