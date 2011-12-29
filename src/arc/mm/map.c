@@ -174,9 +174,9 @@ next_pass:
 void mm_map_init(multiboot_t *multiboot)
 {
   /* let's go! */
-  tty_puts("Mapping memory...\n");
+  tty_puts("Mapping physical memory...\n");
 
-  /* read entries from the e820 map */
+  /* read entries from the e820 map given to us by GRUB */
   uint32_t mmap_addr = multiboot->mmap_addr;
   while (mmap_addr < (multiboot->mmap_addr + multiboot->mmap_len))
   {
@@ -192,6 +192,15 @@ void mm_map_init(multiboot_t *multiboot)
   uintptr_t end_addr   = (uintptr_t) &_end   - VM_OFFSET - 1;
   mm_map_add(MULTIBOOT_MMAP_RESERVED, start_addr, end_addr);
 
+  /* reserve module(s) memory */
+  uint32_t mod_addr = multiboot->mods_addr;
+  for (int id = 0; id < multiboot->mods_count; id++)
+  {
+    multiboot_mod_t *mod = (multiboot_mod_t *) aphy32_to_virt(mod_addr);
+    mm_map_add(MULTIBOOT_MMAP_RESERVED, mod->start, mod->end);
+    mod_addr += sizeof(*mod);
+  }
+
   /* fix memory map */
   mm_map_sanitize();
 
@@ -204,7 +213,5 @@ void mm_map_init(multiboot_t *multiboot)
     if (type != MULTIBOOT_MMAP_UNUSED)
       tty_printf(" => 0x%016x -> 0x%016x (%s)\n", start, end, mm_map_type_desc(type));
   }
-
-  for (;;); /*busyloop so qemu refreshes the screen*/
 }
 

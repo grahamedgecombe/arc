@@ -107,8 +107,8 @@ typedef PACK(struct
 typedef PACK(struct
 {
   /* memory goes from mod_start to mod_end-1 inclusive */
-  uint32_t mod_start;
-  uint32_t mod_end;
+  uint32_t start;
+  uint32_t end;
 
   /* the command line */
   uint32_t cmdline;
