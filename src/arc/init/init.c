@@ -16,6 +16,7 @@
 
 #include <arc/init.h>
 #include <arc/tty.h>
+#include <arc/mm/map.h>
 #include <arc/mm/phy32.h>
 #include <string.h>
 
@@ -62,5 +63,8 @@ void init(uint32_t magic, multiboot_t *multiboot)
     tty_printf("ERROR: no memory map passed by boot loader\n");
     return;
   }
+
+  /* map physical memory */
+  mm_map_init(multiboot);
 }
 

@@ -1,0 +1,46 @@
+/*
+ * Copyright (c) 2011 Graham Edgecombe <graham@grahamedgecombe.com>
+ *
+ * Permission to use, copy, modify, and/or distribute this software for any
+ * purpose with or without fee is hereby granted, provided that the above
+ * copyright notice and this permission notice appear in all copies.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ */
+
+#ifndef _ARC_MM_MAP
+#define _ARC_MM_MAP
+
+#include <stdint.h>
+#include <arc/multiboot.h>
+
+/* 
+ * Doing the memory map allocation dynamically is actually quite difficult,
+ * especially with the way the Multiboot 1 structures are layed out. For
+ * simplicity it is allocated statically with this maximum size instead.
+ *
+ * You may need to adjust this if the e820 table created by your BIOS is
+ * unusually large.
+ */
+#define MM_MAP_MAX_ENTRIES 16
+
+typedef struct
+{
+  int type;
+  uintptr_t addr;
+  uintptr_t len;
+} mm_map_entry_t;
+
+static int mm_map_count = 0;
+static mm_map_entry_t mm_map_entries[MM_MAP_MAX_ENTRIES];
+
+void mm_map_init(multiboot_t *multiboot);
+
+#endif
+
