@@ -55,12 +55,16 @@ static uint16_t vga_port_base;
 
 /* a pointer to the video buffer */
 static volatile uint16_t *video_buf;
+static volatile uint16_t shadow_video_buf[TTY_WIDTH * TTY_HEIGHT];
 
 /* cursor row and column */
 static uint8_t row, col;
 
 /* cursor attributes */
 static uint8_t attrib;
+
+/* flags which indicate what is dirty */
+static bool dirty_cursor, dirty_text;
 
 /* forward declarations for some internal functions */
 static void _tty_putch(char ch);
@@ -163,6 +167,16 @@ static void crtc_sync(void)
   outb_p(crtc_data, (uint8_t) ((index >> 8) & 0xFF));
 }
 
+/* copys the shadow buffer to the real buffer */
+static void tty_sync(void)
+{
+  if (dirty_text)
+    memcpy((uint16_t *) video_buf, (uint16_t *) shadow_video_buf, sizeof(shadow_video_buf));
+
+  if (dirty_cursor)
+    crtc_sync();
+}
+
 /* initializes the terminal */
 void tty_init(void)
 {
@@ -181,10 +195,12 @@ void tty_init(void)
 
   /* clear the screen */
   for (int i = 0; i < (TTY_WIDTH * TTY_HEIGHT); i++)
-    video_buf[i] = (attrib << 8);
+    shadow_video_buf[i] = (attrib << 8);
 
-  /* update the cursor */
-  crtc_sync();
+  /* set flags and sync */
+  dirty_text = true;
+  dirty_cursor = true;
+  tty_sync();
 }
 
 /* atomically writes a string */
@@ -192,6 +208,7 @@ void tty_puts(const char *str)
 {
   spin_lock(&tty_lock);
   _tty_puts(str);
+  tty_sync();
   spin_unlock(&tty_lock);
 }
 
@@ -200,6 +217,7 @@ void tty_putch(char ch)
 {
   spin_lock(&tty_lock);
   _tty_putch(ch);
+  tty_sync();
   spin_unlock(&tty_lock);
 }
 
@@ -230,44 +248,59 @@ static void _tty_putch(char c)
     /* fall through */
   case '\r':
     col = 0;
+    dirty_cursor = true;
     break;
   case '\t':
     tmp = col % TAB_WIDTH;
     if (tmp != 0)
+    {
       col += (TAB_WIDTH - tmp);
+      dirty_cursor = true;
+    }
     break;
   case '\b':
     if (col > 0)
+    {
       col--;
-    video_buf[TTY_POS(row, col)] = (attrib << 8);
+      dirty_cursor = true;
+    }
+    shadow_video_buf[TTY_POS(row, col)] = (attrib << 8);
+    dirty_text = true;
     break;
   default:
-    video_buf[TTY_POS(row, col++)] = (attrib << 8) | c;
+    shadow_video_buf[TTY_POS(row, col++)] = (attrib << 8) | c;
+    dirty_text = true;
+    dirty_cursor = true;
     break;
   }
 
-  /* perform scrolling if we need to */
+  /* perform wrapping */
   if (col >= TTY_WIDTH)
   {
     col = 0;
     row++;
+
+    dirty_cursor = true;
   }
 
+  /* perform scrolling */
   if (row >= TTY_HEIGHT)
   {
-    /* TODO: use memmove() or memcpy() when they are fixed */
-    for (int y = 0; y < TTY_HEIGHT - 1; y++)
-      for (int x = 0; x < TTY_WIDTH; x++)
-        video_buf[TTY_POS(y, x)] = video_buf[TTY_POS(y + 1, x)];
+    /* shift all lines up */
+    size_t size = (TTY_HEIGHT - 1) * TTY_WIDTH * sizeof(*shadow_video_buf);
+    memmove((uint16_t *) shadow_video_buf, (uint16_t *) shadow_video_buf + TTY_WIDTH, size);
 
+    /* clear the last line */
     for (int i = 0; i < TTY_WIDTH; i++)
-      video_buf[TTY_POS(TTY_HEIGHT - 1, i)] = (attrib << 8);
+      shadow_video_buf[TTY_POS(TTY_HEIGHT - 1, i)] = (attrib << 8);
 
+    /* update the cursor position */
     row--;
-  }
 
-  /* update the position of the cursor */
-  crtc_sync();
+    /* the text and cursor must be refreshed */
+    dirty_text = true;
+    dirty_cursor = true;
+  }
 }
 
 /* print a formatted string to the terminal */
@@ -444,6 +477,8 @@ void tty_vprintf(const char *fmt, va_list args)
       }
     }
   }
+
+  tty_sync();
   spin_unlock(&tty_lock);
 }
 
