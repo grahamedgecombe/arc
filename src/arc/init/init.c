@@ -18,6 +18,7 @@
 #include <arc/tty.h>
 #include <arc/mm/map.h>
 #include <arc/mm/phy32.h>
+#include <arc/intr/idt.h>
 #include <string.h>
 
 static void print_banner(void)
@@ -66,5 +67,8 @@ void init(uint32_t magic, multiboot_t *multiboot)
 
   /* map physical memory */
   mm_map_init(multiboot);
+
+  /* set up the IDT */
+  idt_init();
 }
 
