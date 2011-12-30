@@ -58,9 +58,7 @@ static void mm_map_add(int type, uintptr_t addr_start, uintptr_t addr_end)
   }
 
   if (entry_count == MM_MAP_MAX_ENTRIES)
-  {
     boot_panic("memory map is full (max entries = %d)", MM_MAP_MAX_ENTRIES);
-  }
 
   mm_map_entry_t *entry = &entries[entry_count++];
   entry->type = type;
@@ -187,13 +185,19 @@ void mm_map_init(multiboot_t *multiboot)
     mmap_addr += mmap->size + sizeof(mmap->size);
   }
 
+  /*
+   * reserve the IVT and BIOS data area - we can't allocate a page from this
+   * anyway as it conflicts with the null pointer value
+   */
+  mm_map_add(MULTIBOOT_MMAP_RESERVED, 0x000000, 0x0004FF);
+
   /* reserve kernel memory */
   extern int _start, _end;
   uintptr_t start_addr = (uintptr_t) &_start - VM_OFFSET;
   uintptr_t end_addr   = (uintptr_t) &_end   - VM_OFFSET - 1;
   mm_map_add(MULTIBOOT_MMAP_RESERVED, start_addr, end_addr);
 
-  /* reserve module(s) memory */
+  /* reserve multiboot module(s) memory */
   uint32_t mod_addr = multiboot->mods_addr;
   for (int id = 0; id < multiboot->mods_count; id++)
   {
