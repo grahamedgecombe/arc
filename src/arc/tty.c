@@ -54,8 +54,8 @@ static spinlock_t tty_lock = 0;
 static uint16_t vga_port_base;
 
 /* a pointer to the video buffer */
-static volatile uint16_t *video_buf;
-static volatile uint16_t shadow_video_buf[TTY_WIDTH * TTY_HEIGHT];
+static uint16_t *video_buf;
+static uint16_t shadow_video_buf[TTY_WIDTH * TTY_HEIGHT];
 
 /* cursor row and column */
 static uint8_t row, col;
@@ -171,7 +171,7 @@ static void crtc_sync(void)
 static void tty_sync(void)
 {
   if (dirty_text)
-    memcpy((uint16_t *) video_buf, (uint16_t *) shadow_video_buf, sizeof(shadow_video_buf));
+    memcpy(video_buf, shadow_video_buf, sizeof(shadow_video_buf));
 
   if (dirty_cursor)
     crtc_sync();
@@ -288,7 +288,7 @@ static void _tty_putch(char c)
   {
     /* shift all lines up */
     size_t size = (TTY_HEIGHT - 1) * TTY_WIDTH * sizeof(*shadow_video_buf);
-    memmove((uint16_t *) shadow_video_buf, (uint16_t *) shadow_video_buf + TTY_WIDTH, size);
+    memmove(shadow_video_buf, shadow_video_buf + TTY_WIDTH, size);
 
     /* clear the last line */
     for (int i = 0; i < TTY_WIDTH; i++)
