@@ -19,6 +19,7 @@
 #include <arc/mm/map.h>
 #include <arc/mm/phy32.h>
 #include <arc/intr/idt.h>
+#include <arc/panic.h>
 #include <string.h>
 
 static void print_banner(void)
@@ -51,22 +52,17 @@ void init(uint32_t magic, multiboot_t *multiboot)
   
   /* check the multiboot magic number */
   if (magic != MULTIBOOT_MAGIC)
-  {
-    tty_printf("ERROR: invalid multiboot magic (expected 0x%x, got 0x%x)\n",
+    boot_panic("invalid multiboot magic (expected 0x%x, got 0x%x)",
       MULTIBOOT_MAGIC, magic);
-    return;
-  }
 
   /* convert physical 32-bit multiboot address to virtual address */
   multiboot = phy32_to_virt(multiboot);
-  if (!(multiboot->flags & MULTIBOOT_FLAGS_MMAP))
-  {
-    tty_printf("ERROR: no memory map passed by boot loader\n");
-    return;
-  }
+  multiboot_tag_t *tag_mmap = multiboot_get(multiboot, MULTIBOOT_TAG_MMAP);
+  if (!tag_mmap)
+    boot_panic("no multiboot mmap tag");
 
   /* map physical memory */
-  mm_map_init(multiboot);
+  mm_map_init(tag_mmap);
 
   /* set up the IDT */
   idt_init();

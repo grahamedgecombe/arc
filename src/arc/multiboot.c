@@ -14,30 +14,36 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef ARC_MM_MAP_H
-#define ARC_MM_MAP_H
-
-#include <stdint.h>
 #include <arc/multiboot.h>
 
-/* 
- * Doing the memory map allocation dynamically is actually quite difficult,
- * especially with the way the Multiboot 1 structures are layed out. For
- * simplicity it is allocated statically with this maximum size instead.
- *
- * You may need to adjust this if the e820 table created by your BIOS is
- * unusually large.
- */
-#define MM_MAP_MAX_ENTRIES 16
-
-typedef struct
+multiboot_tag_t *multiboot_get(multiboot_t *multiboot, uint32_t type)
 {
-  int type;
-  uintptr_t addr_start;
-  uintptr_t addr_end;
-} mm_map_entry_t;
+  /* find the address of the first tag */
+  uintptr_t tag_addr = (uintptr_t) multiboot + sizeof(multiboot->total_size)
+    + sizeof(multiboot->reserved);
 
-void mm_map_init(multiboot_tag_t *mmap_tag);
+  /* calculate where the end of the structure is */
+  uintptr_t tag_limit = tag_addr + multiboot->total_size;
 
-#endif
+  /* loop through the tags */
+  while (tag_addr < tag_limit)
+  {
+    /* check for the terminator */
+    multiboot_tag_t *tag = (multiboot_tag_t *) tag_addr;
+    if (tag->type == MULTIBOOT_TAG_TERMINATOR)
+      return 0;
+
+    /* check if this is the tag we are looking for */
+    if (tag->type == type)
+      return tag;
+
+    /* now look at the next tag */
+    uintptr_t size = tag->size;
+    while (size % 8 != 0)
+      size++;
+    tag_addr += size;
+  }
+
+  return 0;
+}
 

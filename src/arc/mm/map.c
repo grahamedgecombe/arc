@@ -38,6 +38,12 @@ static const char *mm_map_type_desc(int type)
       return "available";
     case MULTIBOOT_MMAP_RESERVED:
       return "reserved";
+    case MULTIBOOT_MMAP_ACPI_RECLAIM:
+      return "ACPI reclaimable";
+    case MULTIBOOT_MMAP_ACPI_NVS:
+      return "ACPI NVS";
+    case MULTIBOOT_MMAP_BAD:
+      return "bad";
     default:
       return "unknown";
   }
@@ -176,19 +182,25 @@ next_pass:
   }
 }
 
-void mm_map_init(multiboot_t *multiboot)
+void mm_map_init(multiboot_tag_t *mmap_tag)
 {
   /* let's go! */
   tty_puts("Mapping physical memory...\n");
 
   /* read entries from the e820 map given to us by GRUB */
-  uint32_t mmap_addr = multiboot->mmap_addr;
-  while (mmap_addr < (multiboot->mmap_addr + multiboot->mmap_len))
+  uintptr_t entry_addr = (uintptr_t) mmap_tag + sizeof(mmap_tag->type)
+    + sizeof(mmap_tag->size) + sizeof(mmap_tag->mmap.entry_size)
+    + sizeof(mmap_tag->mmap.entry_version);
+
+  uintptr_t entry_limit = (uintptr_t) mmap_tag + mmap_tag->size;
+
+  while (entry_addr < entry_limit)
   {
-    multiboot_mmap_t *mmap = (multiboot_mmap_t *) aphy32_to_virt(mmap_addr);
-    if (mmap->len > 0)
-      mm_map_add(mmap->type, mmap->addr, mmap->addr + mmap->len - 1);
-    mmap_addr += mmap->size + sizeof(mmap->size);
+    multiboot_mmap_entry_t *entry = (multiboot_mmap_entry_t *) entry_addr;
+    if (entry->length > 0)
+      mm_map_add(entry->type, entry->base_addr,
+        entry->base_addr + entry->length - 1);
+    entry_addr += mmap_tag->mmap.entry_size;
   }
 
   /*
@@ -211,13 +223,13 @@ void mm_map_init(multiboot_t *multiboot)
   mm_map_add(MULTIBOOT_MMAP_RESERVED, start_addr, end_addr);
 
   /* reserve multiboot module(s) memory */
-  uint32_t mod_addr = multiboot->mods_addr;
+/*uint32_t mod_addr = multiboot->mods_addr;
   for (int id = 0; id < multiboot->mods_count; id++)
   {
     multiboot_mod_t *mod = (multiboot_mod_t *) aphy32_to_virt(mod_addr);
     mm_map_add(MULTIBOOT_MMAP_RESERVED, mod->start, mod->end - 1);
     mod_addr += sizeof(*mod);
-  }
+  }*/
 
   /* fix memory map */
   mm_map_sanitize();
