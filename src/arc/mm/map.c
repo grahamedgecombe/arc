@@ -73,12 +73,18 @@ static void mm_map_sanitize(void)
 next_pass:
   for (int id = 0; id < entry_count; id++)
   {
-   for (int inner_id = 0; inner_id < entry_count; inner_id++)
+    /* get entry, skip if it is unused */
+    mm_map_entry_t entry = entries[id];
+    if (entry.type == MULTIBOOT_MMAP_UNUSED)
+      continue;
+
+    for (int inner_id = 0; inner_id < entry_count; inner_id++)
     {
-      mm_map_entry_t entry = entries[id];
-      if (entry.type == MULTIBOOT_MMAP_UNUSED)
+      /* don't compare an entry with itself */
+      if (id == inner_id)
         continue;
 
+      /* get inner entry, skip if it is unused */
       mm_map_entry_t inner_entry = entries[inner_id];
       if (inner_entry.type == MULTIBOOT_MMAP_UNUSED)
         continue;
@@ -92,7 +98,7 @@ next_pass:
       }
 
       /* deal with overlapping entries - higher type ids take precedence */
-      if (inner_entry.type > entry.type)
+      if (inner_entry.type >= entry.type)
       {
         /* inner encloses */
         if (entry.addr_start >= inner_entry.addr_start && entry.addr_end <= inner_entry.addr_end)
@@ -128,7 +134,7 @@ next_pass:
     }
   }
 
-  /* delete unused entries by re-adding them all */
+  /* delete unused entries by making a copy then re-adding them all */
   mm_map_entry_t tmp_entries[MM_MAP_MAX_ENTRIES];
   memcpy(tmp_entries, entries, sizeof(entries));
 
@@ -190,6 +196,13 @@ void mm_map_init(multiboot_t *multiboot)
    * anyway as it conflicts with the null pointer value
    */
   mm_map_add(MULTIBOOT_MMAP_RESERVED, 0x000000, 0x0004FF);
+
+  /*
+   * reserve the video RAM and ROM area, QEMU and Bochs don't seem to include
+   * this but it allows us to coalesce it with the adjacent entries (which
+   * cover the EBDA and kernel)
+   */
+  mm_map_add(MULTIBOOT_MMAP_RESERVED, 0x0A0000, 0x0FFFFF);
 
   /* reserve kernel memory */
   extern int _start, _end;
