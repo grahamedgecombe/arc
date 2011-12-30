@@ -3,6 +3,6 @@
 *.o
 *.d
 /arc
-!/.git*
-!/.mailmap
+!.git*
+!.mailmap
 

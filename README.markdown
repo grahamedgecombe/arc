@@ -87,6 +87,40 @@ Arc distribution. The `run/qemu.sh` and `run/bochs.sh` scripts should now work
 assuming you have the correct software installed and Arc was compiled
 correctly.
 
+### GRUB Patch
+
+Some versions of GRUB have a bug, and try to load parts of a 64-bit ELF file as
+if it were a 32-bit ELF file. If booting with your distribution's GRUB package
+doesn't work, or if you downloaded GRUB from source, you will need to change it
+slightly to fix this problem.
+
+In `grub-core/loader/multiboot_elfxx.c` you should add the following:
+
+    # define Elf_Shdr Elf32_Shdr
+
+After:
+
+    # define Elf_Phdr Elf32_Phdr
+
+Likewise add:
+
+    # define Elf_Shdr Elf64_Shdr
+
+After:
+
+    # define Elf_Phdr Elf64_Phdr
+
+Finally add:
+
+    #undef Elf_Shdr
+
+After:
+
+    #undef Elf_Phdr
+
+Thomas Haller, who submitted this fix to the GRUB mailing list, also provided a
+[diff and some more information][grub-fix].
+
 License
 -------
 
@@ -104,4 +138,5 @@ information and licensing terms.
 [bochs]: http://bochs.sourceforge.net/
 [isc]: http://isc.org/software/license/
 [grub]: http://gnu.org/software/grub/
+[grub-fix]: http://lists.gnu.org/archive/html/bug-grub/2011-09/msg00026.html
 
