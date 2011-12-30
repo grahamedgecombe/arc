@@ -228,7 +228,7 @@ void mm_map_init(multiboot_t *multiboot)
     uintptr_t start = entries[id].addr_start;
     uintptr_t end = entries[id].addr_end;
     int type = entries[id].type;
-    tty_printf(" => 0x%016x -> 0x%016x (%s)\n", start, end, mm_map_type_desc(type));
+    tty_printf(" => %0#18x -> %0#18x (%s)\n", start, end, mm_map_type_desc(type));
   }
 }
 
