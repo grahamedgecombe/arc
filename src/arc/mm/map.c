@@ -211,8 +211,7 @@ void mm_map_init(multiboot_t *multiboot)
     uintptr_t start = entries[id].addr_start;
     uintptr_t end = entries[id].addr_end;
     int type = entries[id].type;
-    if (type != MULTIBOOT_MMAP_UNUSED)
-      tty_printf(" => 0x%016x -> 0x%016x (%s)\n", start, end, mm_map_type_desc(type));
+    tty_printf(" => 0x%016x -> 0x%016x (%s)\n", start, end, mm_map_type_desc(type));
   }
 }
 
