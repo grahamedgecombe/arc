@@ -60,17 +60,45 @@ MB_FLAGS_VIDEO equ 0x4
 MB_FLAGS_AOUT  equ 0x8000
 
 ; multiboot constants
-MB_ALIGN    equ 8
-MB_MAGIC    equ 0x1BADB002
-MB_FLAGS    equ (MB_FLAGS_ALIGN | MB_FLAGS_MMAP)
-MB_CHECKSUM equ -(MB_MAGIC + MB_FLAGS)
+MB_ALIGN          equ 8
+MB_MAGIC          equ 0xE85250D6
+MB_ARCH_I386      equ 0
+MB_TAG_TERMINATOR equ 0
+MB_TAG_INFO       equ 1
+MB_TAG_ALIGN      equ 6
+MB_INFO_MODULES   equ 3
+MB_INFO_MMAP      equ 6
 
 ; includes initialization code and lower-half data
 [section .init.lower align=MB_ALIGN]
 ; the multiboot header
-dd MB_MAGIC
-dd MB_FLAGS
-dd MB_CHECKSUM
+mb_hdr_start:
+  dd MB_MAGIC
+  dd MB_ARCH_I386
+  dd (mb_hdr_end - mb_hdr_start)
+  dd (0 - MB_MAGIC - MB_ARCH_I386 - (mb_hdr_end - mb_hdr_start)) & 0xFFFFFFFF
+
+  mb_tag_info_start:
+    dw MB_TAG_INFO
+    dw 0
+    dd (mb_tag_info_end - mb_tag_info_start)
+    dd MB_INFO_MODULES
+    dd MB_INFO_MMAP
+  mb_tag_info_end:
+
+  mb_tag_align_start:
+    dw MB_TAG_ALIGN
+    dw 0
+    dd (mb_tag_align_end - mb_tag_align_start)
+  mb_tag_align_end:
+
+  mb_tag_terminator_start:
+    dw MB_TAG_TERMINATOR
+    dw 0
+    dd (mb_tag_terminator_end - mb_tag_terminator_start)
+  mb_tag_terminator_end:
+
+mb_hdr_end:
 
 ; paging structures
 align PAGE_SIZE
