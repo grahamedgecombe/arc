@@ -51,7 +51,8 @@ Then run fdisk:
 
 At the fdisk prompt, first type "o" to create a new partition table. Then type
 "n" to create a new partition. Type "p" to set it as the primary partition and
-then type "1" to make it the first. Leave all the other settings as the default
+then type "1" to make it the first. The first sector should be set to 63, this
+is probably already the default. Leave all the other settings as the default
 by simply hitting the return key. Finally use "w" to save the changes.
 
 Now set up a loop device for the partition:
