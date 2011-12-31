@@ -184,9 +184,6 @@ next_pass:
 
 void mm_map_init(multiboot_t *multiboot)
 {
-  /* let's go! */
-  tty_puts("Mapping physical memory...\n");
-
   /* find the mmap multiboot tag */
   multiboot_tag_t *mmap_tag = multiboot_get(multiboot, MULTIBOOT_TAG_MMAP);
   if (!mmap_tag)

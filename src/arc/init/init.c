@@ -18,7 +18,9 @@
 #include <arc/tty.h>
 #include <arc/mm/map.h>
 #include <arc/mm/phy32.h>
+#include <arc/cpu/intr.h>
 #include <arc/intr/idt.h>
+#include <arc/intr/pic.h>
 #include <arc/panic.h>
 #include <string.h>
 
@@ -59,9 +61,19 @@ void init(uint32_t magic, multiboot_t *multiboot)
   multiboot = phy32_to_virt(multiboot);
 
   /* map physical memory */
+  tty_printf("Mapping physical memory...\n");
   mm_map_init(multiboot);
 
   /* set up the IDT */
+  tty_printf("Installing interrupt descriptor table...\n");
   idt_init();
+
+  /* set up the PIC */
+  tty_printf("Setting up the PIC and masking all IRQs...\n");
+  pic_init();
+
+  /* enable interrupts */
+  tty_printf("Enabling interrupts...\n");
+  intr_enable();
 }
 
