@@ -14,7 +14,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <arc/intr/idt.h>
+#include <arc/cpu/idt.h>
 #include <arc/intr/common.h>
 #include <arc/intr/stub.h>
 #include <string.h>

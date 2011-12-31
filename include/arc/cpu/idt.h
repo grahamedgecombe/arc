@@ -14,8 +14,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef ARC_INTR_IDT_H
-#define ARC_INTR_IDT_H
+#ifndef ARC_CPU_IDT_H
+#define ARC_CPU_IDT_H
 
 #include <arc/pack.h>
 #include <stdint.h>
