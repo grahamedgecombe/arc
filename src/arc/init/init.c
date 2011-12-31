@@ -57,12 +57,9 @@ void init(uint32_t magic, multiboot_t *multiboot)
 
   /* convert physical 32-bit multiboot address to virtual address */
   multiboot = phy32_to_virt(multiboot);
-  multiboot_tag_t *tag_mmap = multiboot_get(multiboot, MULTIBOOT_TAG_MMAP);
-  if (!tag_mmap)
-    boot_panic("no multiboot mmap tag");
 
   /* map physical memory */
-  mm_map_init(tag_mmap);
+  mm_map_init(multiboot);
 
   /* set up the IDT */
   idt_init();

@@ -22,13 +22,13 @@
 
 /* 
  * Doing the memory map allocation dynamically is actually quite difficult,
- * especially with the way the Multiboot 1 structures are layed out. For
+ * especially with the way the Multiboot structures are layed out. For
  * simplicity it is allocated statically with this maximum size instead.
  *
  * You may need to adjust this if the e820 table created by your BIOS is
  * unusually large.
  */
-#define MM_MAP_MAX_ENTRIES 16
+#define MM_MAP_MAX_ENTRIES 32
 
 typedef struct
 {
@@ -37,7 +37,7 @@ typedef struct
   uintptr_t addr_end;
 } mm_map_entry_t;
 
-void mm_map_init(multiboot_tag_t *mmap_tag);
+void mm_map_init(multiboot_t *multiboot);
 
 #endif
 

@@ -19,7 +19,7 @@
 
 #include <stdint.h>
 
-#define PHY32_BASE 0xFFFFFF7F00000000
+#define PHY32_OFFSET 0xFFFFFF7F00000000
 
 void *phy32_to_virt(void *ptr);
 uintptr_t aphy32_to_virt(uintptr_t addr);

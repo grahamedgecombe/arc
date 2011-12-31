@@ -182,10 +182,15 @@ next_pass:
   }
 }
 
-void mm_map_init(multiboot_tag_t *mmap_tag)
+void mm_map_init(multiboot_t *multiboot)
 {
   /* let's go! */
   tty_puts("Mapping physical memory...\n");
+
+  /* find the mmap multiboot tag */
+  multiboot_tag_t *mmap_tag = multiboot_get(multiboot, MULTIBOOT_TAG_MMAP);
+  if (!mmap_tag)
+    boot_panic("no multiboot mmap tag");
 
   /* read entries from the e820 map given to us by GRUB */
   uintptr_t entry_addr = (uintptr_t) mmap_tag + sizeof(mmap_tag->type)
@@ -222,14 +227,18 @@ void mm_map_init(multiboot_tag_t *mmap_tag)
   uintptr_t end_addr   = (uintptr_t) &_end   - VM_OFFSET - 1;
   mm_map_add(MULTIBOOT_MMAP_RESERVED, start_addr, end_addr);
 
+  /* reserve multiboot information structure memory */
+  start_addr = (uintptr_t) multiboot - PHY32_OFFSET;
+  end_addr   = start_addr + multiboot->total_size;
+  mm_map_add(MULTIBOOT_MMAP_RESERVED, start_addr, end_addr);
+
   /* reserve multiboot module(s) memory */
-/*uint32_t mod_addr = multiboot->mods_addr;
-  for (int id = 0; id < multiboot->mods_count; id++)
+  multiboot_tag_t *mod_tag = multiboot_get(multiboot, MULTIBOOT_TAG_MODULE);
+  while (mod_tag)
   {
-    multiboot_mod_t *mod = (multiboot_mod_t *) aphy32_to_virt(mod_addr);
-    mm_map_add(MULTIBOOT_MMAP_RESERVED, mod->start, mod->end - 1);
-    mod_addr += sizeof(*mod);
-  }*/
+    mm_map_add(MULTIBOOT_MMAP_RESERVED, mod_tag->module.mod_start, mod_tag->module.mod_end - 1);
+    mod_tag = multiboot_get_after(multiboot, mod_tag, MULTIBOOT_TAG_MODULE);
+  }
 
   /* fix memory map */
   mm_map_sanitize();

@@ -18,9 +18,28 @@
 
 multiboot_tag_t *multiboot_get(multiboot_t *multiboot, uint32_t type)
 {
-  /* find the address of the first tag */
-  uintptr_t tag_addr = (uintptr_t) multiboot + sizeof(multiboot->total_size)
+  return multiboot_get_after(multiboot, 0, type);
+}
+
+multiboot_tag_t *multiboot_get_after(multiboot_t *multiboot, multiboot_tag_t *start, uint32_t type)
+{
+  /* find the base tag */
+  uintptr_t tag_base = (uintptr_t) multiboot + sizeof(multiboot->total_size)
     + sizeof(multiboot->reserved);
+
+  /* find the address of the tag to start searching at */
+  uintptr_t tag_addr;
+  if (start)
+  {
+    uintptr_t size = start->size;
+    while (size % 8 != 0)
+      size++;
+    tag_addr = (uintptr_t) start + size;
+  }
+  else
+  {
+    tag_addr = tag_base;
+  }
 
   /* calculate where the end of the structure is */
   uintptr_t tag_limit = tag_addr + multiboot->total_size;
