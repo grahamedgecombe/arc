@@ -14,22 +14,10 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <arc/intr/idt.h>
-#include <arc/intr/common.h>
-#include <arc/tty.h>
-#include <string.h>
+#ifndef ARC_INTR_COMMON_H
+#define ARC_INTR_COMMON_H
 
-static idt_gate_t idt_gates[INTERRUPTS];
-static idtr_t idtr;
+#define INTERRUPTS 256
 
-void idt_init(void)
-{
-  tty_puts("Installing interrupt descriptor table...\n");
-
-  memset(idt_gates, 0, sizeof(idt_gates));
-
-  idtr.addr = (uint64_t) idt_gates;
-  idtr.len = sizeof(idt_gates) - 1;
-  idtr_install(&idtr);
-}
+#endif
 
