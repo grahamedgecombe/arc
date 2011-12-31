@@ -90,10 +90,10 @@ correctly.
 
 ### GRUB Patch
 
-Some versions of GRUB have a bug, and try to load parts of a 64-bit ELF file as
+GRUB up to version 1.99 has a bug where it load parts of a 64-bit ELF file as
 if it were a 32-bit ELF file. If booting with your distribution's GRUB package
-doesn't work, or if you downloaded GRUB from source, you will need to change it
-slightly to fix this problem.
+doesn't work, or if you downloaded GRUB 1.99 from source, you will need to
+patch it to fix this problem.
 
 In `grub-core/loader/multiboot_elfxx.c` you should add the following:
 
@@ -120,7 +120,9 @@ After:
     #undef Elf_Phdr
 
 Thomas Haller, who submitted this fix to the GRUB mailing list, also provided a
-[diff and some more information][grub-fix].
+[diff and some more information][grub-fix]. It is also in the
+[Bazaar repository][grub-fix-bzr] and therefore this step won't be necessary
+with future versions of GRUB.
 
 License
 -------
@@ -140,4 +142,5 @@ information and licensing terms.
 [isc]: http://isc.org/software/license/
 [grub]: http://gnu.org/software/grub/
 [grub-fix]: http://lists.gnu.org/archive/html/bug-grub/2011-09/msg00026.html
+[grub-fix-bzr]: http://bzr.savannah.gnu.org/lh/grub/trunk/grub/revision/3427
 
