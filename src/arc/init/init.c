@@ -18,6 +18,7 @@
 #include <arc/tty.h>
 #include <arc/mm/map.h>
 #include <arc/mm/phy32.h>
+#include <arc/cpu/gdt.h>
 #include <arc/cpu/intr.h>
 #include <arc/cpu/idt.h>
 #include <arc/intr/pic.h>
@@ -63,6 +64,10 @@ void init(uint32_t magic, multiboot_t *multiboot)
   /* map physical memory */
   tty_printf("Mapping physical memory...\n");
   mm_map_init(multiboot);
+
+  /* set up the GDT */
+  tty_printf("Installing GDT...\n");
+  gdt_init();
 
   /* set up the IDT */
   tty_printf("Installing IDT...\n");
