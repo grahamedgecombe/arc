@@ -20,6 +20,8 @@
 #include <arc/pack.h>
 #include <stdint.h>
 
+#define GDT_GATES 5
+
 #define SLTR_NULL        0x0000
 #define SLTR_KERNEL_CODE 0x0008
 #define SLTR_KERNEL_DATA 0x0010

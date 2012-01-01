@@ -17,8 +17,6 @@
 #include <arc/cpu/gdt.h>
 #include <string.h>
 
-#define GDT_GATES 5
-
 static gdt_gate_t gdt_gates[GDT_GATES];
 static gdtr_t gdtr;
 
