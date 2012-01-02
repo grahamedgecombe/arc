@@ -6,14 +6,15 @@ Introduction
 
 Arc is a simple hobby operating system for modern PCs with amd64
 processors. It is written mostly in C11, with small amounts of Intel-style
-assembly where required.
+assembly where required. It can be loaded by any
+[Multiboot 2][multiboot]-complaint boot loader, such as [GNU GRUB][grub].
 
 Building
 --------
 
 The following software is required to build Arc:
 
-  * [Clang][clang] or [GCC][gcc].
+  * [GCC][gcc] or [Clang][clang].
   * [GNU Binutils][binutils].
   * [NASM][nasm] or [YASM][yasm].
   * [GNU Make][make].
@@ -131,6 +132,7 @@ Arc is available under the terms of the [ISC license][isc], which is a
 similar to the 2-clause BSD license. See the `LICENSE` file for the copyright
 information and licensing terms.
 
+[multiboot]: http://download.savannah.gnu.org/releases/grub/phcoder/multiboot.pdf
 [clang]: http://clang.llvm.org/
 [gcc]: http://gcc.gnu.org/
 [binutils]: http://gnu.org/software/binutils/
