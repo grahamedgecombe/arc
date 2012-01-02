@@ -14,36 +14,12 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef ARC_MM_MAP_H
-#define ARC_MM_MAP_H
+#ifndef ARC_MM_PMM_H
+#define ARC_MM_PMM_H
 
-#include <stdint.h>
-#include <arc/multiboot.h>
+#include <arc/mm/map.h>
 
-/* 
- * Doing the memory map allocation dynamically is actually quite difficult,
- * especially with the way the Multiboot structures are layed out. For
- * simplicity it is allocated statically with this maximum size instead.
- *
- * You may need to adjust this if the e820 table created by your BIOS is
- * unusually large.
- */
-#define MM_MAP_MAX_ENTRIES 32
-
-typedef struct
-{
-  int type;
-  uintptr_t addr_start;
-  uintptr_t addr_end;
-} mm_map_entry_t;
-
-typedef struct
-{
-  int count;
-  mm_map_entry_t entries[MM_MAP_MAX_ENTRIES];
-} mm_map_t;
-
-mm_map_t *mm_map_init(multiboot_t *multiboot);
+void pmm_init(mm_map_t *map);
 
 #endif
 

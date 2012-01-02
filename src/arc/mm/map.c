@@ -27,8 +27,9 @@
 /* unused type id (prefixed to fit in with other #defines from multiboot.h) */
 #define MULTIBOOT_MMAP_UNUSED 0
 
-static int entry_count = 0;
-static mm_map_entry_t entries[MM_MAP_MAX_ENTRIES];
+/*static int entry_count = 0;
+static mm_map_entry_t entries[MM_MAP_MAX_ENTRIES];*/
+static mm_map_t map;
 
 static const char *mm_map_type_desc(int type)
 {
@@ -51,9 +52,9 @@ static const char *mm_map_type_desc(int type)
 
 static void mm_map_add(int type, uintptr_t addr_start, uintptr_t addr_end)
 {
-  for (int id = 0; id < entry_count; id++)
+  for (int id = 0; id < map.count; id++)
   {
-    mm_map_entry_t *entry = &entries[id];
+    mm_map_entry_t *entry = &map.entries[id];
     if (entry->type == MULTIBOOT_MMAP_UNUSED)
     {
       entry->type = type;
@@ -63,10 +64,10 @@ static void mm_map_add(int type, uintptr_t addr_start, uintptr_t addr_end)
     }
   }
 
-  if (entry_count == MM_MAP_MAX_ENTRIES)
+  if (map.count == MM_MAP_MAX_ENTRIES)
     boot_panic("memory map is full (max entries = %d)", MM_MAP_MAX_ENTRIES);
 
-  mm_map_entry_t *entry = &entries[entry_count++];
+  mm_map_entry_t *entry = &map.entries[map.count++];
   entry->type = type;
   entry->addr_start = addr_start;
   entry->addr_end = addr_end;
@@ -77,29 +78,29 @@ static void mm_map_sanitize(void)
 {
   /* do as many passes as required to fully simplify the map */
 next_pass:
-  for (int id = 0; id < entry_count; id++)
+  for (int id = 0; id < map.count; id++)
   {
     /* get entry, skip if it is unused */
-    mm_map_entry_t entry = entries[id];
+    mm_map_entry_t entry = map.entries[id];
     if (entry.type == MULTIBOOT_MMAP_UNUSED)
       continue;
 
-    for (int inner_id = 0; inner_id < entry_count; inner_id++)
+    for (int inner_id = 0; inner_id < map.count; inner_id++)
     {
       /* don't compare an entry with itself */
       if (id == inner_id)
         continue;
 
       /* get inner entry, skip if it is unused */
-      mm_map_entry_t inner_entry = entries[inner_id];
+      mm_map_entry_t inner_entry = map.entries[inner_id];
       if (inner_entry.type == MULTIBOOT_MMAP_UNUSED)
         continue;
 
       /* try to coalesce adjacent entries of the same type */
       if (entry.type == inner_entry.type && (entry.addr_end + 1) == inner_entry.addr_start)
       {
-        entries[id].addr_end = inner_entry.addr_end;
-        entries[inner_id].type = MULTIBOOT_MMAP_UNUSED;
+        map.entries[id].addr_end = inner_entry.addr_end;
+        map.entries[inner_id].type = MULTIBOOT_MMAP_UNUSED;
         goto next_pass;
       }
 
@@ -109,7 +110,7 @@ next_pass:
         /* inner encloses */
         if (entry.addr_start >= inner_entry.addr_start && entry.addr_end <= inner_entry.addr_end)
         {
-          entries[id].type = MULTIBOOT_MMAP_UNUSED;
+          map.entries[id].type = MULTIBOOT_MMAP_UNUSED;
           goto next_pass;
         }
         /* inner enclosed */
@@ -121,19 +122,19 @@ next_pass:
           if (entry.addr_end != inner_entry.addr_end)
             mm_map_add(entry.type, inner_entry.addr_end + 1, entry.addr_end);
 
-          entries[id].type = MULTIBOOT_MMAP_UNUSED;
+          map.entries[id].type = MULTIBOOT_MMAP_UNUSED;
           goto next_pass;
         }
         /* inner overlaps left side check */
         else if (entry.addr_start >= inner_entry.addr_start && entry.addr_start <= inner_entry.addr_end)
         {
-          entries[id].addr_start = inner_entry.addr_end + 1;
+          map.entries[id].addr_start = inner_entry.addr_end + 1;
           goto next_pass;
         }
         /* inner overlaps right side check */
         else if (entry.addr_end >= inner_entry.addr_start && entry.addr_end <= inner_entry.addr_end)
         {
-          entries[id].addr_end = inner_entry.addr_start - 1;
+          map.entries[id].addr_end = inner_entry.addr_start - 1;
           goto next_pass;
         }
       }
@@ -141,21 +142,20 @@ next_pass:
   }
 
   /* delete unused entries by making a copy then re-adding them all */
-  mm_map_entry_t tmp_entries[MM_MAP_MAX_ENTRIES];
-  memcpy(tmp_entries, entries, sizeof(entries));
+  mm_map_t tmp_map;
+  memcpy(&tmp_map, &map, sizeof(map));
 
-  int tmp_entry_count = entry_count;
-  entry_count = 0;
+  map.count = 0;
 
-  for (int id = 0; id < tmp_entry_count; id++)
+  for (int id = 0; id < tmp_map.count; id++)
   {
-    mm_map_entry_t *entry = &tmp_entries[id];
+    mm_map_entry_t *entry = &tmp_map.entries[id];
     if (entry->type != MULTIBOOT_MMAP_UNUSED)
       mm_map_add(entry->type, entry->addr_start, entry->addr_end);
   }
 
   /* bail out right now if a sort isn't required */
-  if (entry_count <= 1)
+  if (map.count <= 1)
     return;
 
   /* sort the entries */
@@ -165,13 +165,13 @@ next_pass:
     bool swap = false;
 
     /* iterate through the list swapping adjacent pairs if required */
-    for (int id = 0; id < entry_count - 1; id++)
+    for (int id = 0; id < map.count - 1; id++)
     {
-      if (entries[id].addr_start > entries[id + 1].addr_start)
+      if (map.entries[id].addr_start > map.entries[id + 1].addr_start)
       {
-        mm_map_entry_t tmp = entries[id];
-        entries[id] = entries[id + 1];
-        entries[id + 1] = tmp;
+        mm_map_entry_t tmp = map.entries[id];
+        map.entries[id] = map.entries[id + 1];
+        map.entries[id + 1] = tmp;
         swap = true;
       }
     }
@@ -182,7 +182,7 @@ next_pass:
   }
 }
 
-void mm_map_init(multiboot_t *multiboot)
+mm_map_t *mm_map_init(multiboot_t *multiboot)
 {
   /* find the mmap multiboot tag */
   multiboot_tag_t *mmap_tag = multiboot_get(multiboot, MULTIBOOT_TAG_MMAP);
@@ -241,12 +241,15 @@ void mm_map_init(multiboot_t *multiboot)
   mm_map_sanitize();
 
   /* print the final map */
-  for (int id = 0; id < entry_count; id++)
+  for (int id = 0; id < map.count; id++)
   {
-    uintptr_t start = entries[id].addr_start;
-    uintptr_t end = entries[id].addr_end;
-    int type = entries[id].type;
+    uintptr_t start = map.entries[id].addr_start;
+    uintptr_t end = map.entries[id].addr_end;
+    int type = map.entries[id].type;
     tty_printf(" => %0#18x -> %0#18x (%s)\n", start, end, mm_map_type_desc(type));
   }
+
+  /* and return a pointer to it */
+  return &map;
 }
 
