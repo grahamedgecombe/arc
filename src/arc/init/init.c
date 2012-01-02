@@ -31,19 +31,17 @@ static void print_banner(void)
   const char *banner = "Arc Operating System";
   int gap_len = TTY_WIDTH / 2 - strlen(banner) / 2;
 
-  for (int i = 0; i < TTY_WIDTH; i++)
-    tty_putch('-');
-
-  for (int i = 0; i < gap_len; i++)
-    tty_putch(' ');
-
-  tty_puts(banner);
-
-  for (int i = 0; i < gap_len; i++)
-    tty_putch(' ');
+  char dashes[TTY_WIDTH + 1], gap[gap_len + 1];
 
   for (int i = 0; i < TTY_WIDTH; i++)
-    tty_putch('-');
+    dashes[i] = '-';
+  dashes[TTY_WIDTH] = 0;
+
+  for (int i = 0; i < gap_len; i++)
+    gap[i] = ' ';
+  gap[gap_len] = 0;
+
+  tty_printf("%s%s%s%s%s", dashes, gap, banner, gap, dashes);
 }
 
 void init(uint32_t magic, multiboot_t *multiboot)
