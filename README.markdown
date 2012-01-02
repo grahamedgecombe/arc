@@ -27,9 +27,9 @@ the operating system.
 Testing
 -------
 
-The easiest way to test Arc is with the [QEMU][qemu] or [Bochs][bochs]
-emulators. Simply type `./run/qemu.sh` or `./run/bochs.sh` to launch QEMU or
-Bochs respectively.
+The easiest way to test Arc is with the [QEMU][qemu], [Bochs][bochs] or
+[VirtualBox][vbox] emulators. Simply type `./run/qemu.sh`, `./run/bochs.sh` or
+`./run/virtualbox.sh` to launch QEMU, Bochs or VirtualBox respectively.
 
 To use these scripts you must create a [GNU GRUB][grub] disk image. Due to the
 licenses used by Arc and GRUB, this image cannot be distributed with the Arc
@@ -145,4 +145,5 @@ information and licensing terms.
 [grub]: http://gnu.org/software/grub/
 [grub-fix]: http://lists.gnu.org/archive/html/bug-grub/2011-09/msg00026.html
 [grub-fix-bzr]: http://bzr.savannah.gnu.org/lh/grub/trunk/grub/revision/3427
+[vbox]: http://virtualbox.org/
 
