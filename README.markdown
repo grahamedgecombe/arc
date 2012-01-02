@@ -14,10 +14,10 @@ Building
 
 The following software is required to build Arc:
 
-  * [GCC][gcc] or [Clang][clang].
-  * [GNU Binutils][binutils].
-  * [NASM][nasm] or [YASM][yasm].
-  * [GNU Make][make].
+  * [GCC][gcc] or [Clang][clang]
+  * [GNU Binutils][binutils]
+  * [NASM][nasm] or [YASM][yasm]
+  * [GNU Make][make]
 
 GCC and Binutils must be cross-compiled for the `x86_64-pc-elf` target.
 
@@ -89,7 +89,7 @@ Arc distribution. The `run/qemu.sh` and `run/bochs.sh` scripts should now work
 assuming you have the correct software installed and Arc was compiled
 correctly.
 
-### GRUB Patch
+### Patching GRUB
 
 GRUB up to version 1.99 has a bug where it load parts of a 64-bit ELF file as
 if it were a 32-bit ELF file. If booting with your distribution's GRUB package
