@@ -19,8 +19,10 @@
 
 #if defined(__GNUC__) || defined(__clang__)
   #define PACK(x) x __attribute__((__packed__))
+  #define ALIGN(x,y) x __attribute__((__aligned__(y)))
 #elif defined(_MSC_VER)
   #define PACK(x) _Pragma("pack(push,1)") x _Pragma("pack(pop)")
+  #define ALIGN(x,y) __declspec(align(y)) x
 #else
   #error unsupported compiler
 #endif

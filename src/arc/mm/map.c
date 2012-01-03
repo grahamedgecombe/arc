@@ -15,20 +15,16 @@
  */
 
 #include <arc/mm/map.h>
+#include <arc/mm/common.h>
 #include <arc/mm/phy32.h>
 #include <arc/panic.h>
 #include <arc/tty.h>
 #include <string.h>
 #include <stdbool.h>
 
-/* virtual memory offset for transforming _start/_end to physical addresses */
-#define VM_OFFSET 0xFFFF800000000000
-
 /* unused type id (prefixed to fit in with other #defines from multiboot.h) */
 #define MULTIBOOT_MMAP_UNUSED 0
 
-/*static int entry_count = 0;
-static mm_map_entry_t entries[MM_MAP_MAX_ENTRIES];*/
 static mm_map_t map;
 
 static const char *mm_map_type_desc(int type)

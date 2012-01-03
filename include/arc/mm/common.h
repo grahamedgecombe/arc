@@ -14,26 +14,27 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef ARC_MM_PMM_H
-#define ARC_MM_PMM_H
+#ifndef ARC_MM_COMMON_H
+#define ARC_MM_COMMON_H
 
-#include <arc/mm/map.h>
-#include <arc/pack.h>
+/*
+ * virtual memory offset for transforming virtual addresses between
+ * _start/_end to physical addresses
+ */
+#define VM_OFFSET 0xFFFF800000000000
 
-/* the number of entries in a PMM stack page */
-#define PMM_STACK_SIZE 510
+/* page sizes */
+#define FRAME_SIZE     4096
+#define FRAME_SIZE_2M (512 * FRAME_SIZE)
+#define FRAME_SIZE_1G (512 * FRAME_SIZE_2M)
 
-/* the structure of a PMM stack page */
-typedef PACK(struct pmm_stack
-{
-  uint64_t next_stack;
-  uint64_t count;
-  uint64_t stack[PMM_STACK_SIZE];
-}) pmm_stack_t;
-
-void pmm_init(mm_map_t *map);
-void *pmm_alloc(void);
-void pmm_free(void *ptr);
+/* page table flags */
+#define PG_PRESENT   0x1
+#define PG_WRITABLE  0x2
+#define PG_USER      0x4
+#define PG_BIG       0x80
+#define PG_NO_EXEC   0x8000000000000000
+#define PG_ADDR_MASK 0xFFFFFFFFFF000
 
 #endif
 

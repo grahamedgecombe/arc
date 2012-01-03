@@ -119,11 +119,19 @@ boot_pml2:
   times (TABLE_SIZE - 1) dq 0
 
 identity_pml3:
-  times (TABLE_SIZE - 4) dq 0
+  times (TABLE_SIZE - 5) dq 0
+  dq (pmm_stack_pml2 + PG_PRESENT + PG_WRITABLE)
   dq (identity_pml2a + PG_PRESENT + PG_WRITABLE)
   dq (identity_pml2b + PG_PRESENT + PG_WRITABLE)
   dq (identity_pml2c + PG_PRESENT + PG_WRITABLE)
   dq (identity_pml2d + PG_PRESENT + PG_WRITABLE)
+
+pmm_stack_pml2:
+  times (TABLE_SIZE - 1) dq 0
+  dq (pmm_stack_pml1 + PG_PRESENT + PG_WRITABLE)
+
+pmm_stack_pml1:
+  times TABLE_SIZE dq 0
 
 identity_pml2a:
   %assign pg 0

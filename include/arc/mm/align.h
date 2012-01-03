@@ -14,26 +14,11 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef ARC_MM_PMM_H
-#define ARC_MM_PMM_H
+#ifndef ARC_MM_ALIGN_H
+#define ARC_MM_ALIGN_H
 
-#include <arc/mm/map.h>
-#include <arc/pack.h>
-
-/* the number of entries in a PMM stack page */
-#define PMM_STACK_SIZE 510
-
-/* the structure of a PMM stack page */
-typedef PACK(struct pmm_stack
-{
-  uint64_t next_stack;
-  uint64_t count;
-  uint64_t stack[PMM_STACK_SIZE];
-}) pmm_stack_t;
-
-void pmm_init(mm_map_t *map);
-void *pmm_alloc(void);
-void pmm_free(void *ptr);
+#define PAGE_ALIGN(x) (((x) + 0xFFF) & 0xFFFFFFFFFFFFF000)
+#define PAGE_ALIGN_REVERSE(x) ((x) & 0xFFFFFFFFFFFFF000)
 
 #endif
 
