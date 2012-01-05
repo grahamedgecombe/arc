@@ -24,6 +24,7 @@
 #include <arc/cpu/idt.h>
 #include <arc/intr/pic.h>
 #include <arc/panic.h>
+#include <arc/smp/init.h>
 #include <string.h>
 
 static void print_banner(void)
@@ -71,6 +72,10 @@ void init(uint32_t magic, multiboot_t *multiboot)
   /* set up the GDT */
   tty_printf("Installing GDT...\n");
   gdt_init();
+
+  /* set up symmetric multi-processing */
+  tty_printf("Setting up SMP...\n");
+  smp_init();
 
   /* set up the IDT */
   tty_printf("Installing IDT...\n");
