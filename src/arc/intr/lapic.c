@@ -29,8 +29,13 @@ static void lapic_write(int reg, uint32_t val)
   lapic[reg] = val;
 }
 
-void lapic_init(uint32_t mmio_addr)
+void lapic_mmio_init(uint32_t mmio_addr)
 {
   lapic = (volatile uint32_t *) aphy32_to_virt(mmio_addr);
+}
+
+void lapic_init(void)
+{
+
 }
 

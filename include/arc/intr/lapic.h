@@ -17,7 +17,6 @@
 #ifndef ARC_INTR_LAPIC_H
 #define ARC_INTR_LAPIC_H
 
-#include <arc/pack.h>
 #include <stdint.h>
 
 #define LAPIC_ID           0x08
@@ -66,7 +65,8 @@
 #define LAPIC_TIMER_CCR    0xE4
 #define LAPIC_TIMER_DCR    0xF8
 
-void lapic_init(uint32_t mmio_addr);
+void lapic_mmio_init(uint32_t mmio_addr);
+void lapic_init(void);
 
 #endif
 

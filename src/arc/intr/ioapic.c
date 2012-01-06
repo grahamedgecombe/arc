@@ -33,3 +33,8 @@ static void ioapic_write(uint32_t mmio_addr, uint32_t reg, uint32_t val)
   *val_ptr = val;
 }
 
+void ioapic_init(uint32_t mmio_addr)
+{
+
+}
+
