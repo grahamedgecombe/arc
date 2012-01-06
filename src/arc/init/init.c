@@ -52,7 +52,7 @@ void init(uint32_t magic, multiboot_t *multiboot)
 
   /* print banner */
   print_banner();
-  
+
   /* check the multiboot magic number */
   if (magic != MULTIBOOT_MAGIC)
     boot_panic("invalid multiboot magic (expected 0x%x, got 0x%x)",
