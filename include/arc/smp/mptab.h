@@ -22,7 +22,14 @@
 #include <stdint.h>
 
 #define MP_PARAGRAPH 16
-#define MP_SIGNATURE 0x5F504D5F
+#define MPFP_SIGNATURE 0x5F504D5F
+#define MPCT_SIGNATURE 0x504D4350
+
+#define MPCT_TYPE_PROC       0
+#define MPCT_TYPE_BUS        1
+#define MPCT_TYPE_IO_APIC    2
+#define MPCT_TYPE_IO_INTR    3
+#define MPCT_TYPE_LOCAL_INTR 4
 
 typedef PACK(struct
 {
@@ -34,7 +41,76 @@ typedef PACK(struct
   uint8_t features[5];
 }) mpfp_t;
 
+typedef PACK(struct
+{
+  uint32_t signature;
+  uint16_t len;
+  uint8_t spec_rev;
+  uint8_t checksum;
+  uint8_t oem_str[8];
+  uint8_t product_str[12];
+  uint32_t oem_table_phy_addr;
+  uint16_t oem_table_size;
+  uint16_t entry_count;
+  uint32_t lapic_phy_addr;
+  uint16_t ext_len;
+  uint8_t ext_checksum;
+  uint8_t reserved;
+}) mpct_header_t;
+
+typedef PACK(struct
+{
+  uint8_t type;
+  union
+  {
+    PACK(struct
+    {
+      uint8_t id;
+      uint8_t local_apic_ver;
+      uint8_t cpu_flags;
+      uint32_t cpu_signature;
+      uint32_t feature_flags;
+      uint64_t reserved;
+    }) proc;
+
+    PACK(struct
+    {
+      uint8_t id;
+      uint8_t type[6];
+    }) bus;
+
+    PACK(struct
+    {
+      uint8_t id;
+      uint8_t ver;
+      uint8_t flags;
+      uint32_t phy_addr;
+    }) io_apic;
+
+    PACK(struct
+    {
+      uint8_t intr_type;
+      uint16_t intr_flags;
+      uint8_t source_bus;
+      uint8_t source_irq;
+      uint8_t dest_io_apic;
+      uint8_t dest_intr;
+    }) io_intr;
+
+    PACK(struct
+    {
+      uint8_t intr_type;
+      uint16_t intr_flags;
+      uint8_t source_bus;
+      uint8_t source_irq;
+      uint8_t dest_local_apic;
+      uint8_t dest_intr;
+    }) local_intr;
+  };
+}) mpct_entry_t;
+
 mpfp_t *mpfp_search(void);
+bool mpct_header_valid(mpct_header_t *mpct);
 
 #endif
 

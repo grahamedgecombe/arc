@@ -21,12 +21,27 @@
 
 static bool mpfp_valid(mpfp_t *mpfp)
 {
-  if (mpfp->signature != MP_SIGNATURE)
+  if (mpfp->signature != MPFP_SIGNATURE)
     return false;
 
   uint8_t sum = 0;
   uint8_t *ptr_start = (uint8_t *) mpfp;
   uint8_t *ptr_end = ptr_start + mpfp->len * MP_PARAGRAPH;
+
+  for (uint8_t *ptr = ptr_start; ptr < ptr_end; ptr++)
+    sum += *ptr;
+
+  return sum == 0;
+}
+
+bool mpct_header_valid(mpct_header_t *mpct_header)
+{
+  if (mpct_header->signature != MPCT_SIGNATURE)
+    return false;
+
+  uint8_t sum = 0;
+  uint8_t *ptr_start = (uint8_t *) mpct_header;
+  uint8_t *ptr_end = ptr_start + mpct_header->len;
 
   for (uint8_t *ptr = ptr_start; ptr < ptr_end; ptr++)
     sum += *ptr;
@@ -42,6 +57,7 @@ static mpfp_t *mpfp_search_range(uintptr_t start, uintptr_t end)
   for (uintptr_t ptr = start; ptr < end; ptr += MP_PARAGRAPH)
     if (mpfp_valid((mpfp_t *) ptr))
       return (mpfp_t *) ptr;
+
   return 0;
 }
  
