@@ -67,6 +67,7 @@
 
 void lapic_mmio_init(uint32_t mmio_addr);
 void lapic_init(void);
+void lapic_ack(void);
 
 #endif
 

@@ -39,3 +39,8 @@ void lapic_init(void)
 
 }
 
+void lapic_ack(void)
+{
+  lapic_write(LAPIC_EOI, 0);
+}
+
