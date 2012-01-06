@@ -1,4 +1,4 @@
-#!/bin/sh -e
+#!/bin/sh
 BASEDIR=`dirname $0`
 cd $BASEDIR
 ./image.sh

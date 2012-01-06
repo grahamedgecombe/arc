@@ -1,4 +1,4 @@
-#!/bin/sh -e
+#!/bin/sh
 if [ ! -f disk.img ]; then
   if [ ! -f disk.img.lzma ]; then
     echo "No disk image template. See README.markdown for more information." >&2
