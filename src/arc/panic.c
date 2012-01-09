@@ -27,7 +27,7 @@ void boot_panic(const char *message, ...)
   tty_puts("PANIC: ");
   tty_vprintf(message, args);
   va_end(args);
-  tty_puts(".\n");
+  tty_puts("\n");
 
   /* halt this CPU forever */
   halt_forever();
