@@ -19,6 +19,7 @@
 #include <arc/mm/map.h>
 #include <arc/mm/phy32.h>
 #include <arc/mm/pmm.h>
+#include <arc/mm/vmm.h>
 #include <arc/cpu/gdt.h>
 #include <arc/cpu/intr.h>
 #include <arc/cpu/idt.h>
@@ -69,17 +70,21 @@ void init(uint32_t magic, multiboot_t *multiboot)
   tty_printf("Setting up the physical memory allocator...\n");
   pmm_init(map);
 
+  /* set up the virtual memory allocator */
+  tty_printf("Setting up the virtual memory allocator...\n");
+  vmm_init();
+
   /* set up the GDT */
   tty_printf("Installing GDT...\n");
   gdt_init();
 
-  /* set up symmetric multi-processing */
-  tty_printf("Setting up SMP...\n");
-  smp_init();
-
   /* set up the IDT */
   tty_printf("Installing IDT...\n");
   idt_init();
+
+  /* set up symmetric multi-processing */
+  tty_printf("Setting up SMP...\n");
+  smp_init();
 
   /* set up the PIC */
   tty_printf("Setting up the PIC and masking all IRQs...\n");

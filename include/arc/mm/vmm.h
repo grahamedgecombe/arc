@@ -14,34 +14,22 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef ARC_MM_COMMON_H
-#define ARC_MM_COMMON_H
+#ifndef ARC_MM_VMM_H
+#define ARC_MM_VMM_H
 
-/*
- * virtual memory offset for transforming virtual addresses between
- * _start/_end to physical addresses
- */
-#define VM_OFFSET 0xFFFF800000000000
+#include <arc/mm/common.h>
+#include <stdbool.h>
+#include <stdint.h>
 
-/* actual page sizes */
-#define FRAME_SIZE       4096
-#define FRAME_SIZE_2M   (512 * FRAME_SIZE)
-#define FRAME_SIZE_1G   (512 * FRAME_SIZE_2M)
-/* 512G pages don't exist (yet) but this is useful for the vmm anyway */
-#define FRAME_SIZE_512G (512 * FRAME_SIZE_1G)
+void vmm_init(void);
 
-/* page size types */
-#define SIZE_4K 0
-#define SIZE_2M 1
-#define SIZE_1G 2
+void vmm_touch(uintptr_t virt, int size);
 
-/* page table flags */
-#define PG_PRESENT   0x1
-#define PG_WRITABLE  0x2
-#define PG_USER      0x4
-#define PG_BIG       0x80
-#define PG_NO_EXEC   0x8000000000000000
-#define PG_ADDR_MASK 0xFFFFFFFFFF000
+bool vmm_map(uintptr_t virt, uintptr_t phy, uint64_t flags);
+bool vmm_maps(uintptr_t virt, uintptr_t phy, uint64_t flags, int size);
+
+void vmm_unmap(uintptr_t virt);
+void vmm_unmaps(uintptr_t virt, int size);
 
 #endif
 
