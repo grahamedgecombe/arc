@@ -35,7 +35,7 @@ void vmm_init(void)
    * 32-bit physical address space into virtual memory and for the physical
    * free page stacks, 512 is used for the recursive page directory
    */
-  for (int pml4_index = 256; pml4_index < 510; pml4_index++)
+  for (int pml4_index = 256; pml4_index <= 510; pml4_index++)
     if (!vmm_touch(VM_OFFSET + pml4_index * FRAME_SIZE_512G, SIZE_1G))
       boot_panic("failed to touch pml4 entry %d", pml4_index);
 }
