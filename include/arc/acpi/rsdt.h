@@ -26,7 +26,7 @@
 typedef PACK(struct
 {
   acpi_header_t header;
-  uint32_t entries[0];
+  uint32_t entries[1];
 }) rsdt_t;
 
 #endif

@@ -14,33 +14,18 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef ARC_ACPI_RSDP_H
-#define ARC_ACPI_RSDP_H
+#ifndef ARC_BDA_H
+#define ARC_BDA_H
 
+#include <arc/mm/phy32.h>
 #include <stdint.h>
-#include <arc/pack.h>
-#include <arc/acpi/common.h>
 
-#define RSDP_SIGNATURE 0x2052545020445352 /* 'RSD PTR ' */
-#define RSDP_ALIGN     16
+#define BDA_VGA_MODE 0x449
+#define BDA_VGA_PORT 0x463
+#define BDA_EBDA     0x40E
 
-typedef PACK(struct
-{
-  /* original rsdp structure */
-  uint64_t signature;
-  uint8_t  checksum;
-  char     oem_id[OEM_ID_LEN];
-  uint8_t  revision;
-  uint32_t rsdt_addr;
-
-  /* extended fields - present if revision >= 2 */
-  uint32_t len;
-  uint64_t xsdt_addr;
-  uint8_t  ext_checksum;
-  uint8_t  reserved[3];
-}) rsdp_t;
-
-rsdp_t *rsdp_scan(void);
+#define bda_read(x)  (*((uint8_t *)  aphy32_to_virt((x))))
+#define bda_reads(x) (*((uint16_t *) aphy32_to_virt((x))))
 
 #endif
 

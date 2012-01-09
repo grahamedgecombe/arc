@@ -24,7 +24,7 @@ void smp_init(void)
 {
   /* find MP floating pointer */
   tty_puts(" => Searching for Intel MP structures...\n");
-  mpfp_t *mpfp = mpfp_search();
+  mpfp_t *mpfp = mpfp_scan();
   if (!mpfp)
   {
     tty_printf(" => No MPFP structure found, SMP disabled\n");
@@ -40,8 +40,8 @@ void smp_init(void)
   }
 
   /* check for validity of the MP config table header */
-  mpct_header_t *mpct = (mpct_header_t *) aphy32_to_virt(mpfp->phy_addr);
-  if (!mpct_header_valid(mpct))
+  mpct_t *mpct = (mpct_t *) aphy32_to_virt(mpfp->phy_addr);
+  if (!mpct_valid(mpct))
   {
     tty_printf(" => MPCT structure corrupt, SMP disabled\n");
     return;
@@ -49,7 +49,7 @@ void smp_init(void)
   tty_printf(" => Found MPCT structure at %0#10x\n", (uintptr_t) mpct & 0xFFFFFFFF);
 
   /* go through the MP config table entries */
-  uintptr_t entry_addr = (uintptr_t) mpct + sizeof(mpct_header_t); 
+  uintptr_t entry_addr = (uintptr_t) mpct + sizeof(mpct_t); 
   for (int i = 0; i < mpct->entry_count; i++)
   {
     mpct_entry_t *entry = (mpct_entry_t *) entry_addr;

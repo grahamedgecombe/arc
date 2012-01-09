@@ -15,6 +15,7 @@
  */
 
 #include <arc/tty.h>
+#include <arc/bda.h>
 #include <arc/cpu/port.h>
 #include <arc/lock/spinlock.h>
 #include <arc/mm/phy32.h>
@@ -25,10 +26,6 @@
 /* the physical addresses of the video buffers */
 #define VIDEO_BUFFER_MGA 0xB0000
 #define VIDEO_BUFFER_CGA 0xB8000
-
-/* the physical addresses of useful fields in the BIOS data area */
-#define BDA_VGA_MODE 0x449
-#define BDA_VGA_PORT 0x463
 
 /* CRTC addresses */
 #define CRTC_CURSOR_LOW  0x0F
@@ -181,8 +178,8 @@ static void tty_sync(void)
 void tty_init(void)
 {
   /* grab the VGA mode and port base from the BIOS data area */
-  uint8_t vga_mode      = *((uint8_t *)  aphy32_to_virt(BDA_VGA_MODE));
-          vga_port_base = *((uint16_t *) aphy32_to_virt(BDA_VGA_PORT));
+  uint8_t vga_mode = bda_read(BDA_VGA_MODE);
+  vga_port_base = bda_reads(BDA_VGA_PORT);
 
   /* grab the appropriate pointer to the video buffer */
   bool mga = (vga_mode & 0x30) == 0x30;

@@ -14,33 +14,40 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef ARC_ACPI_RSDP_H
-#define ARC_ACPI_RSDP_H
+#include <arc/acpi/rsdp.h>
+#include <arc/mm/phy32.h>
+#include <arc/bda.h>
 
-#include <stdint.h>
-#include <arc/pack.h>
-#include <arc/acpi/common.h>
-
-#define RSDP_SIGNATURE 0x2052545020445352 /* 'RSD PTR ' */
-#define RSDP_ALIGN     16
-
-typedef PACK(struct
+static rsdp_t *rsdp_scan_range(uintptr_t start, uintptr_t end)
 {
-  /* original rsdp structure */
-  uint64_t signature;
-  uint8_t  checksum;
-  char     oem_id[OEM_ID_LEN];
-  uint8_t  revision;
-  uint32_t rsdt_addr;
+  start = aphy32_to_virt(start);
+  end = aphy32_to_virt(end);
 
-  /* extended fields - present if revision >= 2 */
-  uint32_t len;
-  uint64_t xsdt_addr;
-  uint8_t  ext_checksum;
-  uint8_t  reserved[3];
-}) rsdp_t;
+  for (uintptr_t ptr = start; ptr < end; ptr += RSDP_ALIGN)
+  {
+    rsdp_t *rsdp = (rsdp_t *) ptr;
+    if (rsdp->signature == RSDP_SIGNATURE && acpi_table_valid((acpi_header_t *) rsdp))
+      return rsdp;
+  }
 
-rsdp_t *rsdp_scan(void);
+  return 0;
+}
 
-#endif
+rsdp_t *rsdp_scan(void)
+{
+  /* find the address of the EBDA */
+  uintptr_t ebda = bda_reads(BDA_EBDA) << 4;
+
+  /* search the first kilobyte of the EBDA */
+  rsdp_t *rsdp = rsdp_scan_range(ebda, ebda + 1024);
+  if (rsdp)
+    return rsdp;
+
+  /* search the shadow BIOS ROM */
+  rsdp = rsdp_scan_range(0xE0000, 0x100000);
+  if (rsdp)
+    return rsdp;
+
+  return 0;
+}
 

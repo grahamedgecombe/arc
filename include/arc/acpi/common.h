@@ -17,6 +17,7 @@
 #ifndef ARC_ACPI_COMMON_H
 #define ARC_ACPI_COMMON_H
 
+#include <stdbool.h>
 #include <stdint.h>
 #include <arc/pack.h>
 
@@ -34,6 +35,8 @@ typedef PACK(struct
   uint32_t creator_id;
   uint32_t creator_revision;
 }) acpi_header_t;
+
+bool acpi_table_valid(acpi_header_t *table);
 
 #endif
 
