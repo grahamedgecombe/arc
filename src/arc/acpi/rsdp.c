@@ -17,6 +17,34 @@
 #include <arc/acpi/rsdp.h>
 #include <arc/mm/phy32.h>
 #include <arc/bda.h>
+#include <stdbool.h>
+
+static bool rsdp_valid(rsdp_t *rsdp)
+{
+  if (rsdp->signature != RSDP_SIGNATURE)
+    return false;
+
+  uint8_t sum = 0;
+  uint8_t *ptr_start = (uint8_t *) rsdp;
+  uint8_t *ptr_end = ptr_start + 20;
+
+  for (uint8_t *ptr = ptr_start; ptr < ptr_end; ptr++)
+    sum += *ptr;
+
+  if (sum != 0)
+    return false;
+
+  if (rsdp->revision < 2)
+    return true;
+
+  sum = 0;
+  ptr_end = ptr_start + rsdp->len;
+
+  for (uint8_t *ptr = ptr_start; ptr < ptr_end; ptr++)
+    sum += *ptr;
+
+  return sum == 0;
+}
 
 static rsdp_t *rsdp_scan_range(uintptr_t start, uintptr_t end)
 {
@@ -26,7 +54,7 @@ static rsdp_t *rsdp_scan_range(uintptr_t start, uintptr_t end)
   for (uintptr_t ptr = start; ptr < end; ptr += RSDP_ALIGN)
   {
     rsdp_t *rsdp = (rsdp_t *) ptr;
-    if (rsdp->signature == RSDP_SIGNATURE && acpi_table_valid((acpi_header_t *) rsdp))
+    if (rsdp_valid(rsdp))
       return rsdp;
   }
 
