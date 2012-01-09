@@ -23,7 +23,7 @@
 
 void vmm_init(void);
 
-void vmm_touch(uintptr_t virt, int size);
+bool vmm_touch(uintptr_t virt, int size);
 
 bool vmm_map(uintptr_t virt, uintptr_t phy, uint64_t flags);
 bool vmm_maps(uintptr_t virt, uintptr_t phy, uint64_t flags, int size);

@@ -16,6 +16,7 @@
 
 #include <arc/mm/vmm.h>
 #include <arc/mm/pmm.h>
+#include <arc/panic.h>
 
 #define PML1_OFFSET 0xFFFFFF8000000000
 #define PML2_OFFSET 0xFFFFFFFFC0000000
@@ -35,12 +36,13 @@ void vmm_init(void)
    * free page stacks, 512 is used for the recursive page directory
    */
   for (int pml4_index = 256; pml4_index < 510; pml4_index++)
-    vmm_touch(VM_OFFSET + pml4_index * FRAME_SIZE_512G, SIZE_1G);
+    if (!vmm_touch(VM_OFFSET + pml4_index * FRAME_SIZE_512G, SIZE_1G))
+      boot_panic("failed to touch pml4 entry %d", pml4_index);
 }
 
-void vmm_touch(uintptr_t virt, int size)
+bool vmm_touch(uintptr_t virt, int size)
 {
-
+  return false;
 }
 
 bool vmm_map(uintptr_t virt, uintptr_t phy, uint64_t flags)

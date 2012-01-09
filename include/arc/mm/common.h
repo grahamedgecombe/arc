@@ -24,11 +24,11 @@
 #define VM_OFFSET 0xFFFF800000000000
 
 /* actual page sizes */
-#define FRAME_SIZE       4096
-#define FRAME_SIZE_2M   (512 * FRAME_SIZE)
-#define FRAME_SIZE_1G   (512 * FRAME_SIZE_2M)
+#define FRAME_SIZE     4096
+#define FRAME_SIZE_2M (512 * FRAME_SIZE)
+#define FRAME_SIZE_1G (512 * FRAME_SIZE_2M)
 /* 512G pages don't exist (yet) but this is useful for the vmm anyway */
-#define FRAME_SIZE_512G (512 * FRAME_SIZE_1G)
+#define FRAME_SIZE_512G (512L * FRAME_SIZE_1G)
 
 /* page size types */
 #define SIZE_4K 0
