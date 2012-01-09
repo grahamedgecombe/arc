@@ -207,13 +207,6 @@ mm_map_t *mm_map_init(multiboot_t *multiboot)
    */
   mm_map_add(MULTIBOOT_MMAP_RESERVED, 0x000000, 0x0004FF);
 
-  /*
-   * reserve the video RAM and ROM area, QEMU and Bochs don't seem to include
-   * this but it allows us to coalesce it with the adjacent entries (which
-   * cover the EBDA and kernel)
-   */
-  mm_map_add(MULTIBOOT_MMAP_RESERVED, 0x0A0000, 0x0FFFFF);
-
   /* reserve kernel memory */
   extern int _start, _end;
   uintptr_t start_addr = (uintptr_t) &_start - VM_OFFSET;
