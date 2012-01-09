@@ -14,7 +14,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <arc/smp/mptab.h>
+#include <arc/mp.h>
 #include <arc/mm/phy32.h>
 #include <arc/bda.h>
 

@@ -15,7 +15,7 @@
  */
 
 #include <arc/smp/init.h>
-#include <arc/smp/mptab.h>
+#include <arc/mp.h>
 #include <arc/tty.h>
 #include <arc/mm/phy32.h>
 #include <string.h>

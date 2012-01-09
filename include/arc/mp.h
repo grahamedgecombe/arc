@@ -14,8 +14,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef ARC_SMP_MPTAB_H
-#define ARC_SMP_MPTAB_H
+#ifndef ARC_MP_H
+#define ARC_MP_H
 
 #include <arc/pack.h>
 #include <stdbool.h>
