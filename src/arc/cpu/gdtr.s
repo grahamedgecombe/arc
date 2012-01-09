@@ -25,7 +25,7 @@ gdtr_install:
   mov fs, ax
   mov gs, ax
   mov ss, ax
-  mov rax, .trampoline
+  mov rax, qword .trampoline
   push rsi
   push rax
   o64 retf

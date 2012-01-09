@@ -76,7 +76,7 @@ void irq21(void);
 void irq22(void);
 void irq23(void);
 
-void syscall(void);
+void sys_call(void);
 
 #endif
 

@@ -43,8 +43,8 @@ irq%1:
 %endmacro
 
 ; syscall entry code
-[global syscall]
-syscall:
+[global sys_call]
+sys_call:
   push 0
   push 0xFF
   jmp intr_stub
