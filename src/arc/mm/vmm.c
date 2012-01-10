@@ -17,6 +17,7 @@
 #include <arc/mm/vmm.h>
 #include <arc/mm/pmm.h>
 #include <arc/panic.h>
+#include <stddef.h>
 
 #define PML1_OFFSET 0xFFFFFF8000000000
 #define PML2_OFFSET 0xFFFFFFFFC0000000
@@ -25,36 +26,46 @@
 
 typedef struct
 {
-  int pml4;
-  int pml3;
-  int pml2;
-  int pml1;
+  uint64_t *pml4, *pml3, *pml2, *pml1;
+  size_t pml4e, pml3e, pml2e, pml1e;
 } page_index_t;
 
 static void addr_to_index(page_index_t *index, uintptr_t addr)
 {
+  /* calculate pml4 pointer */
+  index->pml4 = (uint64_t *) PML4_OFFSET;
+
   /* calculate pml4 index */
   if (addr >= VM_OFFSET)
   {
     addr -= VM_OFFSET;
-    index->pml4 = 256 + addr / FRAME_SIZE_512G;
+    index->pml4e = 256 + addr / FRAME_SIZE_512G;
   }
   else
   {
-    index->pml4 = addr / FRAME_SIZE_512G;
+    index->pml4e = addr / FRAME_SIZE_512G;
   }
   addr %= FRAME_SIZE_512G;
 
+  /* calculate pml3 pointer */
+  index->pml3 = (uint64_t *) (PML3_OFFSET + index->pml4e * FRAME_SIZE);
+
   /* calculate pml3 index */
-  index->pml3 = addr / FRAME_SIZE_1G;
+  index->pml3e = addr / FRAME_SIZE_1G;
   addr %= FRAME_SIZE_1G;
 
+  /* calculate pml2 pointer */
+  index->pml2 = (uint64_t *) (PML2_OFFSET + index->pml4e * FRAME_SIZE_2M + index->pml3e * FRAME_SIZE);
+
   /* calculate pml2 index */
-  index->pml2 = addr / FRAME_SIZE_2M;
+  index->pml2e = addr / FRAME_SIZE_2M;
   addr %= FRAME_SIZE_2M;
 
+  /* calculate pml1 pointer */
+  index->pml1 = (uint64_t *) (PML1_OFFSET + index->pml4e * FRAME_SIZE_1G + index->pml3e * FRAME_SIZE_2M + index->pml2e * FRAME_SIZE);
+
   /* calculate pml1 index */
-  index->pml1 = addr / FRAME_SIZE;
+  index->pml1e = addr / FRAME_SIZE;
 }
 
 void vmm_init(void)
