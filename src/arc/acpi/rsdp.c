@@ -18,6 +18,7 @@
 #include <arc/mm/phy32.h>
 #include <arc/bda.h>
 #include <stdbool.h>
+#include <stddef.h>
 
 static bool rsdp_valid(rsdp_t *rsdp)
 {
@@ -26,7 +27,7 @@ static bool rsdp_valid(rsdp_t *rsdp)
 
   uint8_t sum = 0;
   uint8_t *ptr_start = (uint8_t *) rsdp;
-  uint8_t *ptr_end = ptr_start + 20;
+  uint8_t *ptr_end = ptr_start + offsetof(rsdp_t, len);
 
   for (uint8_t *ptr = ptr_start; ptr < ptr_end; ptr++)
     sum += *ptr;
