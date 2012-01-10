@@ -43,6 +43,9 @@
 #define MULTIBOOT_MMAP_ACPI_NVS     4
 #define MULTIBOOT_MMAP_BAD          5
 
+/* align the given address up to the next 8 byte boundary */
+#define MULTIBOOT_ALIGN(x) (((x) + 7) & 0xFFFFFFFFFFFFFFF8)
+
 /* multiboot information structure */
 typedef PACK(struct
 {

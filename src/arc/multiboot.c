@@ -31,9 +31,7 @@ multiboot_tag_t *multiboot_get_after(multiboot_t *multiboot, multiboot_tag_t *st
   uintptr_t tag_addr;
   if (start)
   {
-    uintptr_t size = start->size;
-    while (size % 8 != 0)
-      size++;
+    uintptr_t size = MULTIBOOT_ALIGN(start->size);
     tag_addr = (uintptr_t) start + size;
   }
   else
@@ -57,9 +55,7 @@ multiboot_tag_t *multiboot_get_after(multiboot_t *multiboot, multiboot_tag_t *st
       return tag;
 
     /* now look at the next tag */
-    uintptr_t size = tag->size;
-    while (size % 8 != 0)
-      size++;
+    uintptr_t size = MULTIBOOT_ALIGN(tag->size);
     tag_addr += size;
   }
 
