@@ -31,6 +31,11 @@
 #define MPCT_TYPE_IO_INTR    3
 #define MPCT_TYPE_LOCAL_INTR 4
 
+/* extended types */
+#define MPCT_TYPE_ADDR_MAPPING     128
+#define MPCT_TYPE_BUS_HIERARCHY    129
+#define MPCT_TYPE_BUS_ADDR_MAPPING 130
+
 typedef PACK(struct
 {
   uint32_t signature;
@@ -91,6 +96,37 @@ typedef PACK(struct
     }) local_intr;
   };
 }) mpct_entry_t;
+
+typedef PACK(struct
+{
+  uint8_t type;
+  uint8_t length;
+  union
+  {
+    PACK(struct
+    {
+      uint8_t busd;
+      uint8_t type;
+      uint64_t base;
+      uint64_t len;
+    }) addr_mapping;
+
+    PACK(struct
+    {
+      uint8_t bus;
+      uint8_t info;
+      uint8_t parent_bus;
+      uint8_t reserved[3];
+    }) bus_hierarchy;
+
+    PACK(struct
+    {
+      uint8_t bus;
+      uint8_t mod;
+      uint32_t range;
+    }) bus_addr_mapping;
+  };
+}) mpct_ext_entry_t;
 
 typedef PACK(struct
 {
