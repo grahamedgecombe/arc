@@ -17,7 +17,9 @@
 #include <arc/mm/vmm.h>
 #include <arc/mm/pmm.h>
 #include <arc/panic.h>
+#include <arc/cpu/tlb.h>
 #include <stddef.h>
+#include <string.h>
 
 #define PML1_OFFSET 0xFFFFFF8000000000
 #define PML2_OFFSET 0xFFFFFFFFC0000000
@@ -88,6 +90,73 @@ bool vmm_touch(uintptr_t virt, int size)
   page_index_t index;
   addr_to_index(&index, virt);  
 
+  uint64_t pml4 = index.pml4[index.pml4e];
+  void *frame3 = 0;
+  if (!(pml4 & PG_PRESENT))
+  {
+    frame3 = pmm_alloc();
+    if (!frame3)
+      return false;
+
+    pml4 = (uint64_t) frame3 | PG_WRITABLE | PG_PRESENT;
+    index.pml4[index.pml4e] = pml4;
+    tlb_invlpg((uintptr_t) index.pml3);
+    memset(index.pml3, 0, FRAME_SIZE);
+  }
+
+  if (size == SIZE_1G)
+    return true;
+
+  uint64_t pml3 = index.pml3[index.pml3e];
+  void *frame2 = 0;
+  if (pml3 & PG_BIG)
+    goto rollback_pml4;
+  if (!(pml3 & PG_PRESENT))
+  {
+    frame2 = pmm_alloc();
+    if (!frame2)
+      goto rollback_pml4;
+
+    pml3 = (uint64_t) frame2 | PG_WRITABLE | PG_PRESENT;
+    index.pml3[index.pml3e] = pml3;
+    tlb_invlpg((uintptr_t) index.pml2);
+    memset(index.pml2, 0, FRAME_SIZE);
+  }
+
+  if (size == SIZE_2M)
+    return true;
+
+  uint64_t pml2 = index.pml2[index.pml2e];
+  if (pml2 & PG_BIG)
+    goto rollback_pml3;
+  if (!(pml2 & PG_PRESENT))
+  {
+    void *frame1 = pmm_alloc();
+    if (!frame1)
+      goto rollback_pml3;
+
+    pml2 = (uint64_t) frame1 | PG_WRITABLE | PG_PRESENT;
+    index.pml2[index.pml2e] = pml2;
+    tlb_invlpg((uintptr_t) index.pml1);
+    memset(index.pml1, 0, FRAME_SIZE);
+  }
+
+  return true;
+
+rollback_pml3:
+  if (frame2)
+  {
+    index.pml3[index.pml3e] = 0;
+    tlb_invlpg((uintptr_t) index.pml2);
+    pmm_free(frame2);
+  }
+rollback_pml4:
+  if (frame3)
+  {
+    index.pml4[index.pml4e] = 0;
+    tlb_invlpg((uintptr_t) index.pml3);
+    pmm_free(frame3);
+  }
   return false;
 }
 
