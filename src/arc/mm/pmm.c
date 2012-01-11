@@ -24,9 +24,6 @@
 #include <arc/pack.h>
 #include <string.h>
 
-/* where the stacks start in virtual memory */
-#define VM_STACK_OFFSET 0xFFFFFF7EFFFFF000
-
 /* where the page table containing the stack pages is in virtual memory */
 #define PAGE_TABLE_OFFSET 0xFFFFFFFFBF7FF000
 

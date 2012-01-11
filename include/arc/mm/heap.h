@@ -14,14 +14,10 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef ARC_MM_ALIGN_H
-#define ARC_MM_ALIGN_H
+#ifndef ARC_MM_HEAP_H
+#define ARC_MM_HEAP_H
 
-#define PAGE_ALIGN(x) (((x) + 0xFFF) & 0xFFFFFFFFFFFFF000)
-#define PAGE_ALIGN_REVERSE(x) ((x) & 0xFFFFFFFFFFFFF000)
-
-#define PAGE_ALIGN_2M(x) (((x) + 0x1FFFFF) & 0xFFFFFFFFFFE00000)
-#define PAGE_ALIGN_REVERSE_2M(x) ((x) & 0xFFFFFFFFFFE00000)
+void heap_init(void);
 
 #endif
 

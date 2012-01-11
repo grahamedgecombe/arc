@@ -20,6 +20,7 @@
 #include <arc/mm/phy32.h>
 #include <arc/mm/pmm.h>
 #include <arc/mm/vmm.h>
+#include <arc/mm/heap.h>
 #include <arc/cpu/gdt.h>
 #include <arc/cpu/intr.h>
 #include <arc/cpu/idt.h>
@@ -66,13 +67,17 @@ void init(uint32_t magic, multiboot_t *multiboot)
   tty_printf("Mapping physical memory...\n");
   mm_map_t *map = mm_map_init(multiboot);
 
-  /* set up the physical memory allocator */
-  tty_printf("Setting up the physical memory allocator...\n");
+  /* set up the physical memory manager */
+  tty_printf("Setting up the physical memory manager...\n");
   pmm_init(map);
 
-  /* set up the virtual memory allocator */
-  tty_printf("Setting up the virtual memory allocator...\n");
+  /* set up the virtual memory manager */
+  tty_printf("Setting up the virtual memory manager...\n");
   vmm_init();
+
+  /* set up the heap */
+  tty_printf("Setting up the heap...\n");
+  heap_init();
 
   /* set up the GDT */
   tty_printf("Installing GDT...\n");

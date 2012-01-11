@@ -20,6 +20,9 @@
 #include <arc/mm/map.h>
 #include <arc/pack.h>
 
+/* where the stacks start in virtual memory */
+#define VM_STACK_OFFSET 0xFFFFFF7EFFFFF000
+
 /* the number of entries in a PMM stack page */
 #define PMM_STACK_SIZE 510
 

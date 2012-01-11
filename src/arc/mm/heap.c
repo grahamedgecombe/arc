@@ -14,14 +14,18 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef ARC_MM_ALIGN_H
-#define ARC_MM_ALIGN_H
+#include <arc/mm/heap.h>
+#include <arc/mm/pmm.h>
+#include <arc/mm/align.h>
+#include <stdint.h>
 
-#define PAGE_ALIGN(x) (((x) + 0xFFF) & 0xFFFFFFFFFFFFF000)
-#define PAGE_ALIGN_REVERSE(x) ((x) & 0xFFFFFFFFFFFFF000)
+void heap_init(void)
+{
+  /* find where the kernel image ends and the heap starts (inclusive) */
+  extern int _end;
+  uintptr_t heap_start = PAGE_ALIGN_2M((uintptr_t) &_end);
 
-#define PAGE_ALIGN_2M(x) (((x) + 0x1FFFFF) & 0xFFFFFFFFFFE00000)
-#define PAGE_ALIGN_REVERSE_2M(x) ((x) & 0xFFFFFFFFFFE00000)
-
-#endif
+  /* hard coded end of the heap (exclusive) */
+  uintptr_t heap_end = VM_STACK_OFFSET;
+}
 
