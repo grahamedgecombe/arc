@@ -1,0 +1,6 @@
+* Add locking to the virtual memory manager:
+   - global lock for the higher half
+   - per address-space lock for the lower half
+
+* Delete unused pml3, pml2 and pml1 tables after unmapping pages
+
