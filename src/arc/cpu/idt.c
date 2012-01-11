@@ -24,6 +24,17 @@
 #define GATE_INTERRUPT 0x0E
 #define GATE_TRAP      0x0F
 
+typedef PACK(struct
+{
+  uint16_t addr_low;
+  uint16_t cs_sel;
+  uint8_t  ist;
+  uint8_t  flags;
+  uint16_t addr_mid;
+  uint32_t addr_high;
+  uint32_t reserved2;
+}) idt_gate_t;
+
 static idt_gate_t idt_gates[INTERRUPTS];
 static idtr_t idtr;
 

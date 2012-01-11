@@ -34,16 +34,6 @@ typedef PACK(struct
   uint64_t addr;
 }) gdtr_t;
 
-typedef PACK(struct
-{
-  uint16_t limit_low;
-  uint16_t base_low;
-  uint8_t  base_mid;
-  uint8_t  flags;
-  uint8_t  granularity; /* and high limit */
-  uint8_t  base_high;
-}) gdt_gate_t;
-
 void gdt_init(void);
 void gdtr_install(gdtr_t *gdtr, uint16_t cs, uint16_t ds);
 

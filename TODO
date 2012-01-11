@@ -4,6 +4,3 @@
 
 * Delete unused pml3, pml2 and pml1 tables after unmapping pages
 
-* Move as much as possible out of .h files (e.g. structs) for better
-  abstraction
-

@@ -26,17 +26,6 @@ typedef PACK(struct
   uint64_t addr;
 }) idtr_t;
 
-typedef PACK(struct
-{
-  uint16_t addr_low;
-  uint16_t cs_sel;
-  uint8_t  ist;
-  uint8_t  flags;
-  uint16_t addr_mid;
-  uint32_t addr_high;
-  uint32_t reserved2;
-}) idt_gate_t;
-
 void idt_init(void);
 void idtr_install(idtr_t *idtr);
 

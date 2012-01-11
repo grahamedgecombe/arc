@@ -17,6 +17,16 @@
 #include <arc/cpu/gdt.h>
 #include <string.h>
 
+typedef PACK(struct
+{
+  uint16_t limit_low;
+  uint16_t base_low;
+  uint8_t  base_mid;
+  uint8_t  flags;
+  uint8_t  granularity; /* and high limit */
+  uint8_t  base_high;
+}) gdt_gate_t;
+
 static gdt_gate_t gdt_gates[GDT_GATES];
 static gdtr_t gdtr;
 

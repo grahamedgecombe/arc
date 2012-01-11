@@ -27,6 +27,17 @@
 /* where the page table containing the stack pages is in virtual memory */
 #define PAGE_TABLE_OFFSET 0xFFFFFFFFBF7FF000
 
+/* the number of entries in a PMM stack page */
+#define PMM_STACK_SIZE 510
+
+/* the structure of a PMM stack page */
+typedef PACK(struct pmm_stack
+{
+  uint64_t next_stack;
+  uint64_t count;
+  uint64_t stack[PMM_STACK_SIZE];
+}) pmm_stack_t;
+
 /* the 'guard stack' which is at the end of the stack of stacks */
 static ALIGN(pmm_stack_t guard_stack, FRAME_SIZE);
 
