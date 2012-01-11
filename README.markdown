@@ -132,6 +132,11 @@ Arc is available under the terms of the [ISC license][isc], which is a
 similar to the 2-clause BSD license. See the `LICENSE` file for the copyright
 information and licensing terms.
 
+Arc uses [Doug Lea][dl]'s [memory allocator][dlmalloc] which has been released
+into the public domain using the CC0 license. See the `LICENSE.dlmalloc` file
+for the CC0 text. The CC0 licensing terms only apply to the
+`include/dlmalloc.h` and `src/dlmalloc.c` files.
+
 [multiboot]: http://download.savannah.gnu.org/releases/grub/phcoder/multiboot.pdf
 [clang]: http://clang.llvm.org/
 [gcc]: http://gcc.gnu.org/
@@ -146,4 +151,6 @@ information and licensing terms.
 [grub-fix]: http://lists.gnu.org/archive/html/bug-grub/2011-09/msg00026.html
 [grub-fix-bzr]: http://bzr.savannah.gnu.org/lh/grub/trunk/grub/revision/3427
 [vbox]: http://virtualbox.org/
+[dl]: http://g.oswego.edu/
+[dlmalloc]: http://g.oswego.edu/dl/html/malloc.html
 
