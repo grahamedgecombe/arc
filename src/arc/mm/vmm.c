@@ -167,7 +167,29 @@ bool vmm_map(uintptr_t virt, uintptr_t phy, uint64_t flags)
 
 bool vmm_maps(uintptr_t virt, uintptr_t phy, uint64_t flags, int size)
 {
-  return false;
+  if (!vmm_touch(virt, size))
+    return false;
+
+  page_index_t index;
+  addr_to_index(&index, virt);
+
+  switch (size)
+  {
+    case SIZE_4K:
+      index.pml1[index.pml1e] = phy | PG_PRESENT | flags;
+      break;
+
+    case SIZE_2M:
+      index.pml2[index.pml2e] = phy | PG_PRESENT | PG_BIG | flags;
+      break;
+
+    case SIZE_1G:
+      index.pml3[index.pml3e] = phy | PG_PRESENT | PG_BIG | flags;
+      break;
+  }
+
+  tlb_invlpg(virt);
+  return true;
 }
 
 void vmm_unmap(uintptr_t virt)
@@ -177,6 +199,24 @@ void vmm_unmap(uintptr_t virt)
 
 void vmm_unmaps(uintptr_t virt, int size)
 {
+  page_index_t index;
+  addr_to_index(&index, virt);
 
+  switch (size)
+  {
+    case SIZE_4K:
+      index.pml1[index.pml1e] = 0;
+      break;
+
+    case SIZE_2M:
+      index.pml2[index.pml2e] = 0;
+      break;
+
+    case SIZE_1G:
+      index.pml3[index.pml3e] = 0;
+      break;
+  }
+
+  tlb_invlpg(virt);
 }
 
