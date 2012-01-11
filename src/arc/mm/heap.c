@@ -154,6 +154,9 @@ static void _heap_free(void *ptr)
 
     /* update the address range */
     node->end = next->end;
+
+    /* unmap and free the physical frame behind the next node */
+    pmm_free((void *) vmm_unmap((uintptr_t) next));
   }
 
   /* try to coalesce with the previous node */
@@ -167,6 +170,9 @@ static void _heap_free(void *ptr)
 
     /* update the address range */
     prev->end = node->end;
+
+    /* unmap and free the physical frame behind the next node */
+    pmm_free((void *) vmm_unmap((uintptr_t) next));
   }
 }
 
