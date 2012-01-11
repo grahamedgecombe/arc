@@ -28,8 +28,8 @@ bool vmm_touch(uintptr_t virt, int size);
 bool vmm_map(uintptr_t virt, uintptr_t phy, uint64_t flags);
 bool vmm_maps(uintptr_t virt, uintptr_t phy, uint64_t flags, int size);
 
-void vmm_unmap(uintptr_t virt);
-void vmm_unmaps(uintptr_t virt, int size);
+uintptr_t vmm_unmap(uintptr_t virt);
+uintptr_t vmm_unmaps(uintptr_t virt, int size);
 
 #endif
 

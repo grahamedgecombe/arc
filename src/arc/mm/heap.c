@@ -71,14 +71,138 @@ void heap_init(void)
   heap_root->end = heap_end;
 }
 
-static void *_heap_alloc(size_t size, bool phy_alloc)
+static heap_node_t *find_node(size_t size)
 {
+  /* look for the first node that will fit the requested size */
+  for (heap_node_t *node = heap_root; node; node = node->next)
+  {
+    /* skip free nodes */
+    if (node->state != HEAP_NODE_FREE)
+      continue;
+
+    /* skip nodes that are too small */
+    size_t node_size = node->end - node->start;
+    if (node_size < size)
+      continue;
+
+    /* check if splitting the node would actually leave some space */
+    size_t extra_size = node_size - size;
+    if (extra_size >= (FRAME_SIZE * 2))
+    {
+      /* only split the node if we can allocate a physical page */
+      void *phy = pmm_alloc();
+      if (phy)
+      {
+        /* map the new heap_node_t into virtual memory */
+        heap_node_t *next = (heap_node_t *) ((uintptr_t) node + size + FRAME_SIZE);
+        vmm_map((uintptr_t) next, (uintptr_t) phy, PG_WRITABLE | PG_NO_EXEC);
+
+        /* fill in the new heap_node_t */
+        next->start = (uintptr_t) node + size + FRAME_SIZE * 2;
+        next->end = node->end;
+        next->state = HEAP_NODE_FREE;
+        next->prev = node;
+        next->next = node->next;
+
+        /* update the node that was split */
+        node->end = (uintptr_t) next;
+
+        /* update the surrounding nodes */
+        node->next = next;
+        if (next->next)
+          next->next->prev = next;
+      }
+    }
+
+    /* update the state of the allocated node */
+    node->state = HEAP_NODE_RESERVED;
+    return node;
+  }
+
   return 0;
 }
 
 static void _heap_free(void *ptr)
 {
+  /* find where the node is */
+  heap_node_t *node = (heap_node_t *) ((uintptr_t) ptr - FRAME_SIZE);
 
+  /* free the physical frames if heap_alloc allocated them */
+  if (node->state == HEAP_NODE_ALLOCATED)
+  {
+    for (uintptr_t page = node->start; page < node->end; page += FRAME_SIZE)
+    {
+      void *phy = (void *) vmm_unmap(page);
+      if (phy)
+        pmm_free(phy);
+    }
+  }
+
+  /* set the node's state to free */
+  node->state = HEAP_NODE_FREE;
+
+  /* try to coalesce with the next node */
+  heap_node_t *next = node->next;
+  if (next && next->state == HEAP_NODE_FREE)
+  {
+    /* update the pointers */
+    node->next = next->next;
+    if (next->next)
+      next->next->prev = node;
+
+    /* update the address range */
+    node->end = next->end;
+  }
+
+  /* try to coalesce with the previous node */
+  heap_node_t *prev = node->prev;
+  if (prev && prev->state == HEAP_NODE_FREE)
+  {
+    /* update the pointers */
+    prev->next = node->next;
+    if (node->next)
+      node->next->prev = prev;
+
+    /* update the address range */
+    prev->end = node->end;
+  }
+}
+
+static void *_heap_alloc(size_t size, bool phy_alloc)
+{
+  /* round up the size such that it is a multiple of the page size */
+  size = PAGE_ALIGN(size);
+
+  /* find a node that can satisfy the size */
+  heap_node_t *node = find_node(size);
+  if (!node)
+    return node;
+
+  if (phy_alloc)
+  {
+    /* change the state to allocated so heap_free releases the frames */
+    node->state = HEAP_NODE_ALLOCATED;
+
+    /* allocate physical frames and map them into memory */
+    uintptr_t end = node->start + size;
+    for (uintptr_t page = node->start; page < end; page += FRAME_SIZE)
+    {
+      /* allocate a physical frame */
+      void *phy = pmm_alloc();
+
+      /* if the physical allocation fails, roll back our changes */
+      if (!phy)
+      {
+        _heap_free(node);
+        return 0;
+      }
+
+      /* otherwise map the physical frame into the virtual address space */
+      vmm_map(page, (uintptr_t) phy, PG_WRITABLE | PG_NO_EXEC);
+    }
+  }
+
+  return (void *) ((uintptr_t) node + FRAME_SIZE);
 }
 
 void *heap_reserve(size_t size)
