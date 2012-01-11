@@ -61,7 +61,8 @@ void heap_init(void)
 
   /* the root node will take the first virtual address */
   heap_root = (heap_node_t *) heap_start;
-  vmm_map(heap_start, (uintptr_t) root_phy, PG_WRITABLE | PG_NO_EXEC);
+  if (!vmm_map(heap_start, (uintptr_t) root_phy, PG_WRITABLE | PG_NO_EXEC))
+    boot_panic("couldn't map heap root node into the virtual memory");
 
   /* fill out the root node */
   heap_root->next = 0;
@@ -93,24 +94,25 @@ static heap_node_t *find_node(size_t size)
       void *phy = pmm_alloc();
       if (phy)
       {
-        /* map the new heap_node_t into virtual memory */
+        /* map the new heap_node_t into virtual memory, only split if it works */
         heap_node_t *next = (heap_node_t *) ((uintptr_t) node + size + FRAME_SIZE);
-        vmm_map((uintptr_t) next, (uintptr_t) phy, PG_WRITABLE | PG_NO_EXEC);
+        if (vmm_map((uintptr_t) next, (uintptr_t) phy, PG_WRITABLE | PG_NO_EXEC))
+        {
+          /* fill in the new heap_node_t */
+          next->start = (uintptr_t) node + size + FRAME_SIZE * 2;
+          next->end = node->end;
+          next->state = HEAP_NODE_FREE;
+          next->prev = node;
+          next->next = node->next;
 
-        /* fill in the new heap_node_t */
-        next->start = (uintptr_t) node + size + FRAME_SIZE * 2;
-        next->end = node->end;
-        next->state = HEAP_NODE_FREE;
-        next->prev = node;
-        next->next = node->next;
+          /* update the node that was split */
+          node->end = (uintptr_t) next;
 
-        /* update the node that was split */
-        node->end = (uintptr_t) next;
-
-        /* update the surrounding nodes */
-        node->next = next;
-        if (next->next)
-          next->next->prev = next;
+          /* update the surrounding nodes */
+          node->next = next;
+          if (next->next)
+            next->next->prev = next;
+        }
       }
     }
 
@@ -133,7 +135,7 @@ static void _heap_free(void *ptr)
     for (uintptr_t page = node->start; page < node->end; page += FRAME_SIZE)
     {
       void *phy = (void *) vmm_unmap(page);
-      if (phy)
+      if (phy) /* frames that weren't mapped yet are NULL */
         pmm_free(phy);
     }
   }
@@ -197,8 +199,15 @@ static void *_heap_alloc(size_t size, bool phy_alloc)
         return 0;
       }
 
-      /* otherwise map the physical frame into the virtual address space */
-      vmm_map(page, (uintptr_t) phy, PG_WRITABLE | PG_NO_EXEC);
+      /*
+       * otherwise map the physical frame into the virtual address space, roll
+       * back our changes if this fails
+       */
+      if (!vmm_map(page, (uintptr_t) phy, PG_WRITABLE | PG_NO_EXEC))
+      {
+        _heap_free(node);
+        return 0;
+      }
     }
   }
 
