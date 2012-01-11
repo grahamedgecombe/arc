@@ -15,11 +15,13 @@
  */
 
 #include <arc/mm/heap.h>
+#include <arc/lock/spinlock.h>
 #include <arc/mm/pmm.h>
 #include <arc/mm/vmm.h>
 #include <arc/mm/align.h>
 #include <arc/pack.h>
 #include <arc/panic.h>
+#include <stdbool.h>
 #include <stdint.h>
 
 /* the states a heap node can be in */
@@ -30,12 +32,14 @@
 typedef PACK(struct heap_node
 {
   struct heap_node *next;
+  struct heap_node *prev;
   int state;
   uintptr_t start; /* the address of the first page, inclusive */
   uintptr_t end;   /* the address of the last page, exclusive */
 }) heap_node_t;
 
-static heap_node_t *root_node;
+static heap_node_t *heap_root;
+static spinlock_t heap_lock;
 
 void heap_init(void)
 {
@@ -56,13 +60,47 @@ void heap_init(void)
     boot_panic("no room for heap");
 
   /* the root node will take the first virtual address */
-  root_node = (heap_node_t *) heap_start;
+  heap_root = (heap_node_t *) heap_start;
   vmm_map(heap_start, (uintptr_t) root_phy, PG_WRITABLE | PG_NO_EXEC);
 
   /* fill out the root node */
-  root_node->next = 0;
-  root_node->state = HEAP_NODE_FREE;
-  root_node->start = heap_start + FRAME_SIZE;
-  root_node->end = heap_end;
+  heap_root->next = 0;
+  heap_root->prev = 0;
+  heap_root->state = HEAP_NODE_FREE;
+  heap_root->start = heap_start + FRAME_SIZE;
+  heap_root->end = heap_end;
+}
+
+static void *_heap_alloc(size_t size, bool phy_alloc)
+{
+  return 0;
+}
+
+static void _heap_free(void *ptr)
+{
+
+}
+
+void *heap_reserve(size_t size)
+{
+  spin_lock(&heap_lock);
+  void *ptr = _heap_alloc(size, false);
+  spin_unlock(&heap_lock);
+  return ptr;
+}
+
+void *heap_alloc(size_t size)
+{
+  spin_lock(&heap_lock);
+  void *ptr = _heap_alloc(size, true);
+  spin_unlock(&heap_lock);
+  return ptr;
+}
+
+void heap_free(void *ptr)
+{
+  spin_lock(&heap_lock);
+  _heap_free(ptr);
+  spin_unlock(&heap_lock);
 }
 

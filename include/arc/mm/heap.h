@@ -17,7 +17,12 @@
 #ifndef ARC_MM_HEAP_H
 #define ARC_MM_HEAP_H
 
+#include <stddef.h>
+
 void heap_init(void);
+void *heap_reserve(size_t size);
+void *heap_alloc(size_t size);
+void heap_free(void *ptr);
 
 #endif
 
