@@ -51,6 +51,10 @@ void heap_init(void)
   if (!root_phy)
     boot_panic("couldn't allocate physical frame for heap root node");
 
+  /* sanity check which probably seems completely ridiculous */
+  if (heap_start >= heap_end)
+    boot_panic("no room for heap");
+
   /* the root node will take the first virtual address */
   root_node = (heap_node_t *) heap_start;
   vmm_map(heap_start, (uintptr_t) root_phy, PG_WRITABLE | PG_NO_EXEC);
