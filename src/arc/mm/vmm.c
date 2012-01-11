@@ -41,7 +41,7 @@ static void addr_to_index(page_index_t *index, uintptr_t addr)
   if (addr >= VM_OFFSET)
   {
     addr -= VM_OFFSET;
-    index->pml4e = 256 + addr / FRAME_SIZE_512G;
+    index->pml4e = (TABLE_SIZE / 2) + addr / FRAME_SIZE_512G;
   }
   else
   {
@@ -78,9 +78,9 @@ void vmm_init(void)
    * same way by not creating all higher half pml4 entries now and never
    * changing them again
    */
-  for (int pml4_index = 256; pml4_index <= 512; pml4_index++)
+  for (int pml4_index = (TABLE_SIZE / 2); pml4_index <= TABLE_SIZE; pml4_index++)
   {
-    if (!vmm_touch(VM_OFFSET + (pml4_index - 256) * FRAME_SIZE_512G, SIZE_1G))
+    if (!vmm_touch(VM_OFFSET + (pml4_index - (TABLE_SIZE / 2)) * FRAME_SIZE_512G, SIZE_1G))
       boot_panic("failed to touch pml4 entry %d", pml4_index);
   }
 }
@@ -225,6 +225,73 @@ uintptr_t vmm_unmaps(uintptr_t virt, int size)
   }
 
   tlb_invlpg(virt);
+  vmm_untouch(virt, size);
   return frame;
+}
+
+void vmm_untouch(uintptr_t virt, int size)
+{
+  page_index_t index;
+  addr_to_index(&index, virt);
+
+  if (size == SIZE_4K)
+  {
+    bool empty = true;
+    for (size_t i = 0; i < TABLE_SIZE; i++)
+    {
+      if (index.pml1[i] & PG_PRESENT)
+      {
+        empty = false;
+        break;
+      }
+    }
+
+    if (empty)
+    {
+      pmm_free((void *) (index.pml2[index.pml2e] & PG_ADDR_MASK));
+      index.pml2[index.pml2e] = 0;
+      tlb_invlpg((uintptr_t) index.pml1);
+    }
+  }
+
+  if (size == SIZE_4K || size == SIZE_2M)
+  {
+    bool empty = true;
+    for (size_t i = 0; i < TABLE_SIZE; i++)
+    {
+      if (index.pml2[i] & PG_PRESENT)
+      {
+        empty = false;
+        break;
+      }
+    }
+
+    if (empty)
+    {
+      pmm_free((void *) (index.pml3[index.pml3e] & PG_ADDR_MASK));
+      index.pml3[index.pml3e] = 0;
+      tlb_invlpg((uintptr_t) index.pml2);
+    }
+  }
+
+  if ((size == SIZE_4K || size == SIZE_2M || size == SIZE_1G) && (index.pml4e < (TABLE_SIZE / 2)))
+  {
+    bool empty = true;
+    for (size_t i = 0; i < TABLE_SIZE; i++)
+    {
+      if (index.pml3[i] & PG_PRESENT)
+      {
+        empty = false;
+        break;
+      }
+    }
+
+    if (empty)
+    {
+      pmm_free((void *) (index.pml4[index.pml4e] & PG_ADDR_MASK));
+      index.pml4[index.pml4e] = 0;
+      tlb_invlpg((uintptr_t) index.pml3);
+    }
+  }
 }
 

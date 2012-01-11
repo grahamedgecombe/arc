@@ -31,5 +31,7 @@ bool vmm_maps(uintptr_t virt, uintptr_t phy, uint64_t flags, int size);
 uintptr_t vmm_unmap(uintptr_t virt);
 uintptr_t vmm_unmaps(uintptr_t virt, int size);
 
+void vmm_untouch(uintptr_t virt, int size);
+
 #endif
 

@@ -23,6 +23,9 @@
  */
 #define VM_OFFSET 0xFFFF800000000000
 
+/* the number of entries in a page table */
+#define TABLE_SIZE 512
+
 /* actual page sizes */
 #define FRAME_SIZE     4096
 #define FRAME_SIZE_2M (512 * FRAME_SIZE)
