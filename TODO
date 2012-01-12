@@ -20,3 +20,5 @@
 * heap_allocate() and vmm_map_range() should try to use big pages (2m and 1g)
   where possible
 
+* find the DSDT (and any other tables not listed in the RSDT/XSDT)
+
