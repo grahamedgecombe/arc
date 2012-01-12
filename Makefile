@@ -22,12 +22,23 @@ CFLAGS=-std=c1x -O3 -Wall -pedantic -ffreestanding -mno-red-zone \
        -mno-mmx
 
 AS=nasm
-ASFLAGS=-f elf64 -Ox
+ASFLAGS=-f elf64
 
 LD=$(ARCH)-ld
 LDFLAGS=-Tarc.lds -z max-page-size=0x1000
 
 AR=$(ARCH)-ar
+
+# if clang is used, we must specify the architecture on its command line rather
+# than in the name of the executable itself
+ifeq ($(CC),clang)
+  CFLAGS+=-ccc-host-triple $(ARCH)
+endif
+
+# nasm supports the -Ox command for performing multi-pass optimizations
+ifeq ($(AS),nasm)
+  ASFLAGS+=-Ox
+endif
 
 TARGET=arc
 SOURCES=$(shell find src -name "*.c" -or -name "*.s" -type f)
