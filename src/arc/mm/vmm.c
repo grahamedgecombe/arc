@@ -15,6 +15,7 @@
  */
 
 #include <arc/mm/vmm.h>
+#include <arc/mm/align.h>
 #include <arc/mm/pmm.h>
 #include <arc/panic.h>
 #include <arc/cpu/tlb.h>
@@ -293,5 +294,29 @@ void vmm_untouch(uintptr_t virt, int size)
       tlb_invlpg((uintptr_t) index.pml3);
     }
   }
+}
+
+bool vmm_map_range(uintptr_t virt, uintptr_t phy, size_t len, uint64_t flags)
+{
+  size_t off;
+  for (off = 0; off < PAGE_ALIGN(len); off += FRAME_SIZE)
+  {
+    if (!vmm_map(virt + off, phy + off, flags))
+    {
+      goto rollback;
+    }
+  }
+  return true;
+
+rollback:
+  for (size_t rb_off = 0; rb_off < off; rb_off += FRAME_SIZE)
+    vmm_unmap(rb_off);
+  return false;
+}
+
+void vmm_unmap_range(uintptr_t virt, size_t len)
+{
+  for (size_t off = 0; off < PAGE_ALIGN(len); off += FRAME_SIZE)
+    vmm_unmap(virt + off);
 }
 

@@ -19,6 +19,7 @@
 
 #include <arc/mm/common.h>
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
 
 void vmm_init(void);
@@ -32,6 +33,9 @@ uintptr_t vmm_unmap(uintptr_t virt);
 uintptr_t vmm_unmaps(uintptr_t virt, int size);
 
 void vmm_untouch(uintptr_t virt, int size);
+
+bool vmm_map_range(uintptr_t virt, uintptr_t phy, size_t len, uint64_t flags);
+void vmm_unmap_range(uintptr_t virt, size_t len);
 
 #endif
 
