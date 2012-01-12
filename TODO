@@ -5,3 +5,5 @@
 * dlmalloc ABORT should call generic panic (rather than boot_panic) function
   when it is made
 
+* use #defines in gdt.c instead of hardcoding the flags
+

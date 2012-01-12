@@ -17,9 +17,19 @@
 #ifndef ARC_SMP_PERCPU_H
 #define ARC_SMP_PERCPU_H
 
+#include <arc/cpu/gdt.h>
+
 typedef struct percpu
 {
+  /*
+   * percpu_get() relies on the fact that the first 8 bytes in the structure
+   * points to itself
+   */
   struct percpu *self;
+
+  /* this processors' gdt and gdtr */
+  gdtr_t gdtr;
+  gdt_gate_t gdt_gates[GDT_GATES];
 } percpu_t;
 
 void percpu_bsp_init(void);

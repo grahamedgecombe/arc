@@ -15,22 +15,10 @@
  */
 
 #include <arc/cpu/gdt.h>
+#include <arc/smp/percpu.h>
 #include <string.h>
 
-typedef PACK(struct
-{
-  uint16_t limit_low;
-  uint16_t base_low;
-  uint8_t  base_mid;
-  uint8_t  flags;
-  uint8_t  granularity; /* and high limit */
-  uint8_t  base_high;
-}) gdt_gate_t;
-
-static gdt_gate_t gdt_gates[GDT_GATES];
-static gdtr_t gdtr;
-
-static void gdt_set_gate(uint16_t sel, uint8_t flags, uint8_t gran)
+static void gdt_set_gate(gdt_gate_t *gdt_gates, uint16_t sel, uint8_t flags, uint8_t gran)
 {
   gdt_gate_t *gate = &gdt_gates[sel / sizeof(gdt_gate_t)];
   gate->flags = flags;
@@ -40,15 +28,19 @@ static void gdt_set_gate(uint16_t sel, uint8_t flags, uint8_t gran)
 
 void gdt_init(void)
 {
+  percpu_t *percpu = percpu_get();
+  gdtr_t *gdtr = &percpu->gdtr;
+  gdt_gate_t *gdt_gates = percpu->gdt_gates;
+
   memset(gdt_gates, 0, sizeof(gdt_gates));
 
-  gdt_set_gate(SLTR_KERNEL_CODE, 0x98, 0xA);
-  gdt_set_gate(SLTR_KERNEL_DATA, 0x92, 0xC);
-  gdt_set_gate(SLTR_USER_CODE,   0xF8, 0xA);
-  gdt_set_gate(SLTR_USER_DATA,   0xF2, 0xC);
+  gdt_set_gate(gdt_gates, SLTR_KERNEL_CODE, 0x98, 0xA);
+  gdt_set_gate(gdt_gates, SLTR_KERNEL_DATA, 0x92, 0xC);
+  gdt_set_gate(gdt_gates, SLTR_USER_CODE,   0xF8, 0xA);
+  gdt_set_gate(gdt_gates, SLTR_USER_DATA,   0xF2, 0xC);
 
-  gdtr.addr = (uint64_t) gdt_gates;
-  gdtr.len = sizeof(gdt_gates) - 1;
-  gdtr_install(&gdtr, SLTR_KERNEL_CODE, SLTR_KERNEL_DATA);
+  gdtr->addr = (uint64_t) gdt_gates;
+  gdtr->len = sizeof(*gdt_gates) * GDT_GATES - 1;
+  gdtr_install(gdtr, SLTR_KERNEL_CODE, SLTR_KERNEL_DATA);
 }
 
