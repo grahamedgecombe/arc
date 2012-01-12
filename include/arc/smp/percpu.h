@@ -18,6 +18,7 @@
 #define ARC_SMP_PERCPU_H
 
 #include <arc/cpu/gdt.h>
+#include <arc/cpu/tss.h>
 
 typedef struct percpu
 {
@@ -27,9 +28,12 @@ typedef struct percpu
    */
   struct percpu *self;
 
-  /* this processors' gdt and gdtr */
+  /* the gdt and gdtr for this processor */
   gdtr_t gdtr;
   gdt_gate_t gdt_gates[GDT_GATES];
+
+  /* the tss for this processor */
+  tss_t tss;
 } percpu_t;
 
 void percpu_bsp_init(void);

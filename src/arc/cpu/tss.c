@@ -14,49 +14,21 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef ARC_CPU_GDT_H
-#define ARC_CPU_GDT_H
+#include <arc/cpu/tss.h>
+#include <arc/smp/percpu.h>
+#include <string.h>
 
-#include <arc/pack.h>
-#include <stdint.h>
-
-#define GDT_GATES 7
-
-#define SLTR_NULL        0x0000
-#define SLTR_KERNEL_CODE 0x0008
-#define SLTR_KERNEL_DATA 0x0010
-#define SLTR_USER_CODE   0x0018
-#define SLTR_USER_DATA   0x0020
-#define SLTR_TSS         0x0028 /* occupies two GDT gates */
-
-typedef PACK(struct
+void tss_init(void)
 {
-  uint16_t len;
-  uint64_t addr;
-}) gdtr_t;
+  /* find this CPU's TSS */
+  percpu_t *percpu = percpu_get();
+  tss_t *tss = &percpu->tss;
 
-typedef PACK(struct
-{
-  uint16_t limit_low;
-  uint16_t base_low;
-  uint8_t  base_mid;
-  uint8_t  flags;
-  uint8_t  granularity; /* and high limit */
-  uint8_t  base_high;
-}) gdt_gate_t;
+  /* reset all the fields */
+  memset(tss, 0, sizeof(*tss));
+  tss->iomap_base = sizeof(*tss);
 
-typedef PACK(struct
-{
-  gdt_gate_t low;
-  PACK(struct
-  {
-    uint32_t base_xhigh;
-    uint32_t reserved;
-  }) high;
-}) gdt_xgate_t;
-
-void gdt_init(void);
-void gdtr_install(gdtr_t *gdtr, uint16_t cs, uint16_t ds);
-
-#endif
+  /* install it using the LTR instruction */
+  tss_install(SLTR_TSS);
+}
 

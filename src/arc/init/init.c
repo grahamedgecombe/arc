@@ -22,6 +22,7 @@
 #include <arc/mm/vmm.h>
 #include <arc/mm/heap.h>
 #include <arc/cpu/gdt.h>
+#include <arc/cpu/tss.h>
 #include <arc/cpu/intr.h>
 #include <arc/cpu/idt.h>
 #include <arc/intr/pic.h>
@@ -87,6 +88,10 @@ void init(uint32_t magic, multiboot_t *multiboot)
   /* set up the GDT */
   tty_printf("Installing GDT...\n");
   gdt_init();
+
+  /* set up the GDT */
+  tty_printf("Installing TSS...\n");
+  tss_init();
 
   /* set up the IDT */
   tty_printf("Installing IDT...\n");
