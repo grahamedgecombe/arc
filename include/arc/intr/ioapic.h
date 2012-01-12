@@ -74,7 +74,12 @@
 #define REDTBL_DELMOD_INIT      0x0000000000000500
 #define REDTBL_DELMOD_EXTINT    0x0000000000000700
 
-void ioapic_init(uint32_t mmio_addr);
+typedef struct
+{
+  volatile uint32_t *reg, *val;
+} ioapic_t;
+
+ioapic_t *ioapic_init(uintptr_t addr);
 
 #endif
 

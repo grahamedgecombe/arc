@@ -15,7 +15,6 @@
  */
 
 #include <arc/intr/lapic.h>
-#include <arc/mm/phy32.h>
 #include <arc/mm/vmm.h>
 #include <arc/mm/heap.h>
 

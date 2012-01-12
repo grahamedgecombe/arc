@@ -16,31 +16,49 @@
 
 #include <arc/intr/ioapic.h>
 #include <arc/intr/common.h>
-#include <arc/mm/phy32.h>
+#include <arc/mm/heap.h>
+#include <arc/mm/vmm.h>
 #include <stdbool.h>
+#include <stdlib.h>
 
-static uint32_t ioapic_read(uint32_t mmio_addr, uint32_t reg)
+static uint32_t ioapic_read(ioapic_t *apic, uint32_t reg)
 {
-  volatile uint32_t *reg_ptr = (volatile uint32_t *) aphy32_to_virt(mmio_addr);
-  volatile uint32_t *val_ptr = (volatile uint32_t *) aphy32_to_virt(mmio_addr + 0x10);
-  *reg_ptr = reg;
-  return *val_ptr;
+  *(apic->reg) = reg;
+  return *(apic->val);
 }
 
-static void ioapic_write(uint32_t mmio_addr, uint32_t reg, uint32_t val)
+static void ioapic_write(ioapic_t *apic, uint32_t reg, uint32_t val)
 {
-  volatile uint32_t *reg_ptr = (volatile uint32_t *) aphy32_to_virt(mmio_addr);
-  volatile uint32_t *val_ptr = (volatile uint32_t *) aphy32_to_virt(mmio_addr + 0x10);
-  *reg_ptr = reg;
-  *val_ptr = val;
+  *(apic->reg) = reg;
+  *(apic->val) = val;
 }
 
-void ioapic_init(uint32_t mmio_addr)
+ioapic_t *ioapic_init(uintptr_t addr)
 {
+  ioapic_t *apic = malloc(sizeof(*apic));
+  if (!apic)
+    return 0;
 
+  uintptr_t virt_addr = (uintptr_t) heap_reserve(FRAME_SIZE);
+  if (!virt_addr)
+  {
+    free(apic);
+    return 0;
+  }
+
+  if (!vmm_map(virt_addr, addr, PG_WRITABLE | PG_NO_EXEC))
+  {
+    heap_free((void *) virt_addr);
+    free(apic);
+    return 0;
+  }
+
+  apic->reg = (volatile uint32_t *) virt_addr;
+  apic->val = (volatile uint32_t *) (virt_addr + 0x10);
+  return apic;
 }
 
-void ioapic_route(uint32_t mmio_addr, intr_id_t src, intr_id_t vec, bool high, bool lt)
+void ioapic_route(ioapic_t *apic, intr_id_t src, intr_id_t vec, bool high, bool lt)
 {
   uint8_t dst = 0xFF;
   uint64_t redtbl_entry = REDTBL_DESTMOD_PHYSICAL | REDTBL_DELMOD_FIXED | (((uint64_t) (dst & 0xFF)) << 56) | (vec & 0xFF);
@@ -55,7 +73,7 @@ void ioapic_route(uint32_t mmio_addr, intr_id_t src, intr_id_t vec, bool high, b
   else
     redtbl_entry |= REDTBL_TRIGGER_EDGE;
 
-  ioapic_write(mmio_addr, IOAPIC_REDTBL0 + 2 * src, redtbl_entry & 0xFFFFFFFF);
-  ioapic_write(mmio_addr, IOAPIC_REDTBL0 + 2 * src + 1, (redtbl_entry >> 32) & 0xFFFFFFFF);
+  ioapic_write(apic, IOAPIC_REDTBL0 + 2 * src, redtbl_entry & 0xFFFFFFFF);
+  ioapic_write(apic, IOAPIC_REDTBL0 + 2 * src + 1, (redtbl_entry >> 32) & 0xFFFFFFFF);
 }
 
