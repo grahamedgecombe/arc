@@ -38,8 +38,6 @@ static void gdt_set_gate(uint16_t sel, uint8_t flags, uint8_t gran)
   gate->limit_low = 0xFFFF;
 }
 
-extern int gdt;
-
 void gdt_init(void)
 {
   memset(gdt_gates, 0, sizeof(gdt_gates));
