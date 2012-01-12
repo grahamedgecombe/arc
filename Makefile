@@ -60,8 +60,7 @@ include $(DEPENDENCIES)
 
 .c.o:
 	@ echo " CC     $<"
-	@ $(CC) $(CFLAGS) -c -o $@ $<
-	@ $(CC) $(CFLAGS) -M -MT $@ -o $(addsuffix .d,$(basename $@)) $<
+	@ $(CC) $(CFLAGS) -MD -MP -MT $@ -MF $(addsuffix .d,$(basename $@)) -c -o $@ $<
 
 .s.o:
 	@ echo " AS     $<"
