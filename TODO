@@ -1,4 +1,4 @@
-* Add locking to the virtual memory manager:
+* add locking to the virtual memory manager:
    - global lock for the higher half
    - per address-space lock for the lower half
 
@@ -13,4 +13,7 @@
 
 * look at how caching should work for memory-mapped I/O devices like the local
   APIC and I/O APIC
+
+* support allocation of different physical page sizes (4k, 2m and 1g) and from
+  different zones of memory (dma, dma32 and std)
 
