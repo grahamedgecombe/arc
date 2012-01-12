@@ -28,6 +28,7 @@
 #include <arc/intr/pic.h>
 #include <arc/panic.h>
 #include <arc/smp/percpu.h>
+#include <arc/acpi/scan.h>
 #include <arc/smp/init.h>
 #include <string.h>
 
@@ -96,6 +97,14 @@ void init(uint32_t magic, multiboot_t *multiboot)
   /* set up the IDT */
   tty_printf("Installing IDT...\n");
   idt_bsp_init();
+
+  /* search for ACPI tables */
+  tty_printf("Scanning ACPI tables...\n");
+  if (!acpi_scan())
+  {
+    /* search for MP tables if the PC doesn't support ACPI */
+    tty_printf("Scanning MP tables...\n");
+  }
 
   /* set up symmetric multi-processing */
   tty_printf("Setting up SMP...\n");
