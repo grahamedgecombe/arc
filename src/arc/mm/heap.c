@@ -229,10 +229,10 @@ static void *_heap_alloc(size_t size, int flags, bool phy_alloc)
   return (void *) ((uintptr_t) node + FRAME_SIZE);
 }
 
-void *heap_reserve(size_t size, int flags)
+void *heap_reserve(size_t size)
 {
   spin_lock(&heap_lock);
-  void *ptr = _heap_alloc(size, flags, false);
+  void *ptr = _heap_alloc(size, 0, false);
   spin_unlock(&heap_lock);
   return ptr;
 }

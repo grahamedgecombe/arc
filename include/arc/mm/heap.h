@@ -24,7 +24,7 @@
 #define HEAP_X 0x2
 
 void heap_init(void);
-void *heap_reserve(size_t size, int flags);
+void *heap_reserve(size_t size);
 void *heap_alloc(size_t size, int flags);
 void heap_free(void *ptr);
 
