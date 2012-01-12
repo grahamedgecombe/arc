@@ -16,22 +16,34 @@
 
 #include <arc/intr/lapic.h>
 #include <arc/mm/phy32.h>
+#include <arc/mm/vmm.h>
+#include <arc/mm/heap.h>
 
 static volatile uint32_t *lapic;
 
-static uint32_t lapic_read(int reg)
+static uint32_t lapic_read(size_t reg)
 {
   return lapic[reg];
 }
 
-static void lapic_write(int reg, uint32_t val)
+static void lapic_write(size_t reg, uint32_t val)
 {
   lapic[reg] = val;
 }
 
-void lapic_mmio_init(uint32_t mmio_addr)
+bool lapic_mmio_init(uintptr_t addr)
 {
-  lapic = (volatile uint32_t *) aphy32_to_virt(mmio_addr);
+  lapic = (volatile uint32_t *) heap_reserve(FRAME_SIZE);
+  if (!lapic)
+    return false;
+
+  if (!vmm_map((uintptr_t) lapic, addr, PG_WRITABLE | PG_NO_EXEC))
+  {
+    heap_free((void *) lapic);
+    return false;
+  }
+
+  return true;
 }
 
 void lapic_init(void)

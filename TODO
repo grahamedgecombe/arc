@@ -11,3 +11,6 @@
   the TLB flushing is done properly (also look into TLB shootdown when SMP is
   supported)
 
+* look at how caching should work for memory-mapped I/O devices like the local
+  APIC and I/O APIC
+
