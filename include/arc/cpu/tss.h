@@ -39,5 +39,7 @@ typedef PACK(struct
   uint16_t iomap_base;
 }) tss_t;
 
+void tss_install(uint16_t selector);
+
 #endif
 
