@@ -17,3 +17,6 @@
 * support allocation of different physical page sizes (4k, 2m and 1g) and from
   different zones of memory (dma, dma32 and std)
 
+* heap_allocate() and vmm_map_range() should try to use big pages (2m and 1g)
+  where possible
+
