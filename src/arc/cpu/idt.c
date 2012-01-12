@@ -52,7 +52,7 @@ static void idt_encode_gate(intr_id_t id, void (*handler)(void), uint8_t flags)
   gate->flags = flags;
 }
 
-void idt_init(void)
+void idt_bsp_init(void)
 {
   memset(idt_gates, 0, sizeof(idt_gates));
 
@@ -116,6 +116,11 @@ void idt_init(void)
 
   idtr.addr = (uint64_t) idt_gates;
   idtr.len = sizeof(idt_gates) - 1;
+  idtr_install(&idtr);
+}
+
+void idt_ap_init(void)
+{
   idtr_install(&idtr);
 }
 

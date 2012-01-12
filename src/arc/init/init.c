@@ -95,7 +95,7 @@ void init(uint32_t magic, multiboot_t *multiboot)
 
   /* set up the IDT */
   tty_printf("Installing IDT...\n");
-  idt_init();
+  idt_bsp_init();
 
   /* set up symmetric multi-processing */
   tty_printf("Setting up SMP...\n");

@@ -26,7 +26,8 @@ typedef PACK(struct
   uint64_t addr;
 }) idtr_t;
 
-void idt_init(void);
+void idt_bsp_init(void);
+void idt_ap_init(void);
 void idtr_install(idtr_t *idtr);
 
 #endif
