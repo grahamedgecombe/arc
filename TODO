@@ -25,3 +25,5 @@
 
 * fill out the FADT structure
 
+* turn acpi_reserve_and_map() and acpi_unreserve() into general functions
+
