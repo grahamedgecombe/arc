@@ -55,7 +55,7 @@ void gdt_init(void)
   uint64_t tss_limit = sizeof(*tss);
 
   /* reset the GDT */
-  memset(gdt_gates, 0, sizeof(gdt_gates));
+  memset(gdt_gates, 0, sizeof(*gdt_gates) * GDT_GATES);
 
   /* fill in the entries we need */
   gdt_set_gate( gdt_gates, SLTR_KERNEL_CODE, 0x98, 0xA);
