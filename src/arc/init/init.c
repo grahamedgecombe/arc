@@ -96,8 +96,8 @@ void init(uint32_t magic, multiboot_t *multiboot)
   tty_printf("Setting up SMP...\n");
   smp_init();
 
-  /* set up the PIC */
-  tty_printf("Setting up the PIC and masking all IRQs...\n");
+  /* set up the PICs */
+  tty_printf("Setting up the PICs and masking all IRQs...\n");
   pic_init();
 
   /* enable interrupts */
