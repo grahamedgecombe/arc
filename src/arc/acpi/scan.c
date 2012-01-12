@@ -18,6 +18,7 @@
 #include <arc/acpi/rsdp.h>
 #include <arc/acpi/rsdt.h>
 #include <arc/acpi/xsdt.h>
+#include <arc/acpi/fadt.h>
 #include <arc/mm/align.h>
 #include <arc/mm/heap.h>
 #include <arc/mm/vmm.h>
@@ -63,7 +64,7 @@ static acpi_header_t *acpi_map(uintptr_t addr)
   return acpi_reserve_and_map(addr, len);
 }
 
-static void acpi_print(acpi_header_t *table)
+static void acpi_print(acpi_header_t *table, uintptr_t addr)
 {
   /* convert the signature to a null-terminated string */
   char sig[5];
@@ -73,14 +74,8 @@ static void acpi_print(acpi_header_t *table)
   sig[3] = (table->signature >> 24) & 0xFF;
   sig[4] = 0;
 
-  /* convert the OEM id to a null-terminated string */
-  char oem[OEM_ID_LEN + 1];
-  oem[OEM_ID_LEN] = 0;
-  for (size_t i = 0; i < OEM_ID_LEN; i++)
-    oem[i] = table->oem_id[i];
-
   /* print some information about the structure */
-  tty_printf(" => %s (revision=%d, oem=%s)\n", sig, table->revision, oem);
+  tty_printf(" => Found %s (at %0#18x) \n", sig, addr);
 }
 
 static void acpi_scan_table(uintptr_t addr)
@@ -90,7 +85,18 @@ static void acpi_scan_table(uintptr_t addr)
     boot_panic("couldn't map table");
 
   /* print some information about the structure */
-  acpi_print(table);
+  acpi_print(table, addr);
+
+  /* look up the FACS and DSDT if this table is the FADT */
+  if (table->signature == FADT_SIGNATURE)
+  {
+    fadt_t *fadt = (fadt_t *) table;
+
+    if (fadt->facs_addr)
+      acpi_scan_table(fadt->facs_addr);
+
+    acpi_scan_table(fadt->dsdt_addr);
+  }
 }
 
 bool acpi_scan(void)
@@ -99,18 +105,9 @@ bool acpi_scan(void)
   rsdp_t *rsdp = rsdp_scan();
   if (!rsdp)
   {
-    tty_puts(" => ACPI disabled - couldn't find RSDP\n");
+    tty_puts(" => ACPI not supported\n");
     return false;
   }
-
-  /* convert the OEM id to a null-terminated string */
-  char oem[OEM_ID_LEN + 1];
-  oem[OEM_ID_LEN] = 0;
-  for (size_t i = 0; i < OEM_ID_LEN; i++)
-    oem[i] = rsdp->oem_id[i];
-
-  /* print some information about the RSDP structure */
-  tty_printf(" => RSDP (revision=%d, oem=%s)\n", rsdp->revision, oem);
 
   /* check the ACPI revision */
   if (rsdp->revision >= 2)
@@ -121,7 +118,7 @@ bool acpi_scan(void)
       boot_panic("couldn't map XSDT");
 
     /* print some info about the XSDT */
-    acpi_print((acpi_header_t *) xsdt);
+    acpi_print((acpi_header_t *) xsdt, rsdp->xsdt_addr);
 
     /* calculate the number of entries */
     size_t len = (xsdt->header.len - sizeof(xsdt->header)) / sizeof(xsdt->entries[0]);
@@ -138,7 +135,7 @@ bool acpi_scan(void)
       boot_panic("couldn't map RSDT");
 
     /* print some info about the RSDT */
-    acpi_print((acpi_header_t *) rsdt);
+    acpi_print((acpi_header_t *) rsdt, rsdp->rsdt_addr);
 
     /* calculate the number of entries */
     size_t len = (rsdt->header.len - sizeof(rsdt->header)) / sizeof(rsdt->entries[0]);
