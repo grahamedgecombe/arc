@@ -19,9 +19,13 @@
 
 #include <stddef.h>
 
+#define HEAP_R 0x0
+#define HEAP_W 0x1
+#define HEAP_X 0x2
+
 void heap_init(void);
-void *heap_reserve(size_t size);
-void *heap_alloc(size_t size);
+void *heap_reserve(size_t size, int flags);
+void *heap_alloc(size_t size, int flags);
 void heap_free(void *ptr);
 
 #endif

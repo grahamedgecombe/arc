@@ -176,7 +176,7 @@ static void _heap_free(void *ptr)
   }
 }
 
-static void *_heap_alloc(size_t size, bool phy_alloc)
+static void *_heap_alloc(size_t size, int flags, bool phy_alloc)
 {
   /* round up the size such that it is a multiple of the page size */
   size = PAGE_ALIGN(size);
@@ -190,6 +190,15 @@ static void *_heap_alloc(size_t size, bool phy_alloc)
   {
     /* change the state to allocated so heap_free releases the frames */
     node->state = HEAP_NODE_ALLOCATED;
+
+    /* translate HEAP_W and HEAP_X flags to PG_WRITABLE and PG_NO_EXEC flags */
+    uint64_t map_flags = 0;
+
+    if (flags & HEAP_W)
+      map_flags |= PG_WRITABLE;
+
+    if (!(flags & HEAP_X))
+      map_flags |= PG_NO_EXEC;
 
     /* allocate physical frames and map them into memory */
     uintptr_t end = node->start + size;
@@ -209,7 +218,7 @@ static void *_heap_alloc(size_t size, bool phy_alloc)
        * otherwise map the physical frame into the virtual address space, roll
        * back our changes if this fails
        */
-      if (!vmm_map(page, (uintptr_t) phy, PG_WRITABLE | PG_NO_EXEC))
+      if (!vmm_map(page, (uintptr_t) phy, map_flags))
       {
         _heap_free(node);
         return 0;
@@ -220,18 +229,18 @@ static void *_heap_alloc(size_t size, bool phy_alloc)
   return (void *) ((uintptr_t) node + FRAME_SIZE);
 }
 
-void *heap_reserve(size_t size)
+void *heap_reserve(size_t size, int flags)
 {
   spin_lock(&heap_lock);
-  void *ptr = _heap_alloc(size, false);
+  void *ptr = _heap_alloc(size, flags, false);
   spin_unlock(&heap_lock);
   return ptr;
 }
 
-void *heap_alloc(size_t size)
+void *heap_alloc(size_t size, int flags)
 {
   spin_lock(&heap_lock);
-  void *ptr = _heap_alloc(size, true);
+  void *ptr = _heap_alloc(size, flags, true);
   spin_unlock(&heap_lock);
   return ptr;
 }

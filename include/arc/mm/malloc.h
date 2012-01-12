@@ -19,7 +19,6 @@
 
 #include <arc/panic.h>
 #include <arc/mm/common.h>
-#include <arc/mm/heap.h>
 #include <stddef.h>
 
 /* make it so when dlmalloc aborts a kernel panic is triggered */

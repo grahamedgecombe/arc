@@ -15,6 +15,7 @@
  */
 
 #include <arc/mm/malloc.h>
+#include <arc/mm/heap.h>
 
 /*
  * note: these are only functions required for dlmalloc to work, for the bulk
@@ -23,7 +24,7 @@
 
 void *mmap(void *addr, size_t len, int prot, int flags, int fd, off_t off)
 {
-  return heap_alloc(len);
+  return heap_alloc(len, HEAP_R | HEAP_W);
 }
 
 int munmap(void *addr, size_t len)

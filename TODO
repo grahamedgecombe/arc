@@ -7,8 +7,6 @@
 
 * use #defines in gdt.c instead of hardcoding the flags
 
-* heap_alloc() and heap_reserve() should allow setting of r/w/x flags
-
 * use PG_GLOBAL flag for anything in the kernel addresss space and check all
   the TLB flushing is done properly (also look into TLB shootdown when SMP is
   supported)
