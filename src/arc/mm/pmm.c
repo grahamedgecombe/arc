@@ -84,16 +84,16 @@ void pmm_init(mm_map_t *map)
 
     /* add these pages to the stacks */
     for (uintptr_t addr = start; addr < end; addr += FRAME_SIZE, count++)
-      pmm_free((void *) addr);
+      pmm_free(addr);
   }
 
   /* print a diagnostic message */
   tty_printf(" => %d physical memory frames available\n", count);
 }
 
-void *pmm_alloc(void)
+uintptr_t pmm_alloc(void)
 {
-  void *ptr;
+  uintptr_t addr;
   spin_lock(&lock);
 
   /* switch to the next stack if the current one is empty */
@@ -101,21 +101,21 @@ void *pmm_alloc(void)
   {
     /* check if we've reached the end of the guard stack */
     if (!stack->next_stack)
-      ptr = 0;
+      addr = 0;
     else
-      ptr = (void *) stack_set_phy(stack->next_stack);
+      addr = stack_set_phy(stack->next_stack);
   }
   else
   {
     /* pop from this stack */
-    ptr = (void *) stack->stack[--stack->count];
+    addr = stack->stack[--stack->count];
   }
 
   spin_unlock(&lock);
-  return ptr;
+  return addr;
 }
 
-void pmm_free(void *ptr)
+void pmm_free(uintptr_t addr)
 {
   spin_lock(&lock);
 
@@ -123,14 +123,14 @@ void pmm_free(void *ptr)
   if (stack->count == PMM_STACK_SIZE)
   {
     /* use the page being freed as a new stack */
-    uintptr_t cur_stack = stack_set_phy((uintptr_t) ptr);
+    uintptr_t cur_stack = stack_set_phy(addr);
     stack->next_stack = cur_stack;
     stack->count = 0;
   }
   else
   {
     /* push to this stack */
-    stack->stack[stack->count++] = (uintptr_t) ptr;
+    stack->stack[stack->count++] = addr;
   }
 
   spin_unlock(&lock);

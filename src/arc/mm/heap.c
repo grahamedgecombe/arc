@@ -51,7 +51,7 @@ void heap_init(void)
   uintptr_t heap_end = VM_STACK_OFFSET;
 
   /* allocate some space for the root node */
-  void *root_phy = pmm_alloc();
+  uintptr_t root_phy = pmm_alloc();
   if (!root_phy)
     boot_panic("couldn't allocate physical frame for heap root node");
 
@@ -61,7 +61,7 @@ void heap_init(void)
 
   /* the root node will take the first virtual address */
   heap_root = (heap_node_t *) heap_start;
-  if (!vmm_map(heap_start, (uintptr_t) root_phy, PG_WRITABLE | PG_NO_EXEC))
+  if (!vmm_map(heap_start, root_phy, PG_WRITABLE | PG_NO_EXEC))
     boot_panic("couldn't map heap root node into the virtual memory");
 
   /* fill out the root node */
@@ -91,12 +91,12 @@ static heap_node_t *find_node(size_t size)
     if (extra_size >= (FRAME_SIZE * 2))
     {
       /* only split the node if we can allocate a physical page */
-      void *phy = pmm_alloc();
+      uintptr_t phy = pmm_alloc();
       if (phy)
       {
         /* map the new heap_node_t into virtual memory, only split if it works */
         heap_node_t *next = (heap_node_t *) ((uintptr_t) node + size + FRAME_SIZE);
-        if (vmm_map((uintptr_t) next, (uintptr_t) phy, PG_WRITABLE | PG_NO_EXEC))
+        if (vmm_map((uintptr_t) next, phy, PG_WRITABLE | PG_NO_EXEC))
         {
           /* fill in the new heap_node_t */
           next->start = (uintptr_t) node + size + FRAME_SIZE * 2;
@@ -134,7 +134,7 @@ static void _heap_free(void *ptr)
   {
     for (uintptr_t page = node->start; page < node->end; page += FRAME_SIZE)
     {
-      void *phy = (void *) vmm_unmap(page);
+      uintptr_t phy = vmm_unmap(page);
       if (phy) /* frames that weren't mapped yet are NULL */
         pmm_free(phy);
     }
@@ -156,7 +156,7 @@ static void _heap_free(void *ptr)
     node->end = next->end;
 
     /* unmap and free the physical frame behind the next node */
-    pmm_free((void *) vmm_unmap((uintptr_t) next));
+    pmm_free(vmm_unmap((uintptr_t) next));
   }
 
   /* try to coalesce with the previous node */
@@ -172,7 +172,7 @@ static void _heap_free(void *ptr)
     prev->end = node->end;
 
     /* unmap and free the physical frame behind the next node */
-    pmm_free((void *) vmm_unmap((uintptr_t) next));
+    pmm_free(vmm_unmap((uintptr_t) next));
   }
 }
 
@@ -205,7 +205,7 @@ static void *_heap_alloc(size_t size, int flags, bool phy_alloc)
     for (uintptr_t page = node->start; page < end; page += FRAME_SIZE)
     {
       /* allocate a physical frame */
-      void *phy = pmm_alloc();
+      uintptr_t phy = pmm_alloc();
 
       /* if the physical allocation fails, roll back our changes */
       if (!phy)
@@ -218,7 +218,7 @@ static void *_heap_alloc(size_t size, int flags, bool phy_alloc)
        * otherwise map the physical frame into the virtual address space, roll
        * back our changes if this fails
        */
-      if (!vmm_map(page, (uintptr_t) phy, map_flags))
+      if (!vmm_map(page, phy, map_flags))
       {
         _heap_free(node);
         return 0;

@@ -19,13 +19,14 @@
 
 #include <arc/mm/map.h>
 #include <arc/pack.h>
+#include <stdint.h>
 
 /* where the stacks start in virtual memory */
 #define VM_STACK_OFFSET 0xFFFFFF7EFFFFF000
 
 void pmm_init(mm_map_t *map);
-void *pmm_alloc(void);
-void pmm_free(void *ptr);
+uintptr_t pmm_alloc(void);
+void pmm_free(uintptr_t addr);
 
 #endif
 
