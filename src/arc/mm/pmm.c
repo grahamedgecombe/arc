@@ -28,7 +28,7 @@
 #define PAGE_TABLE_OFFSET 0xFFFFFFFFBF7FF000
 
 /* the number of entries in a PMM stack page */
-#define PMM_STACK_SIZE 510
+#define PMM_STACK_SIZE (TABLE_SIZE - 2)
 
 /* the structure of a PMM stack page */
 typedef PACK(struct pmm_stack
@@ -51,9 +51,9 @@ static spinlock_t lock;
 static uintptr_t stack_set_phy(uintptr_t addr)
 {
   uintptr_t *table = (uintptr_t *) PAGE_TABLE_OFFSET;
-  uintptr_t old_addr = table[511] & PG_ADDR_MASK;
+  uintptr_t old_addr = table[TABLE_SIZE - 1] & PG_ADDR_MASK;
 
-  table[511] = addr | PG_PRESENT | PG_WRITABLE | PG_NO_EXEC;
+  table[TABLE_SIZE - 1] = addr | PG_PRESENT | PG_WRITABLE | PG_NO_EXEC;
   tlb_invlpg(VM_STACK_OFFSET);
 
   return old_addr;
