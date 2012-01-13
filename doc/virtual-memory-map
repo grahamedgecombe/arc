@@ -5,8 +5,8 @@ Arc Virtual Memory Map
 +--------------------+--------------------+-------------------------------+
 | 0x0000000000000000 | 0x00007FFFFFFFFFFF | user-space                    |
 | 0xFFFF800000000000 | (varies)           | kernel image                  |
-| (varies)           | 0xFFFFFF7EFFFFEFFF | kernel heap                   |
-| 0xFFFFFF7EFFFFF000 | 0xFFFFFF7EFFFFFFFF | physical memory manager stack |
+| (varies)           | 0xFFFFFF7EFFFF6FFF | kernel heap                   |
+| 0xFFFFFF7EFFFF7000 | 0xFFFFFF7EFFFFFFFF | physical memory manager stack |
 | 0xFFFFFF7F00000000 | 0xFFFFFF7FFFFFFFFF | 32-bit physical address space |
 | 0xFFFFFF8000000000 | 0xFFFFFFFFFFFFFFFF | recursive page tables         |
 +--------------------+--------------------+-------------------------------+

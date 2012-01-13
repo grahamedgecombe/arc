@@ -34,9 +34,10 @@
 #define FRAME_SIZE_512G (512L * FRAME_SIZE_1G)
 
 /* page size types */
-#define SIZE_4K 0
-#define SIZE_2M 1
-#define SIZE_1G 2
+#define SIZE_4K    0
+#define SIZE_2M    1
+#define SIZE_1G    2
+#define SIZE_COUNT 3
 
 /* page table flags */
 #define PG_PRESENT   0x1

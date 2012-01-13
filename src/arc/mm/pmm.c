@@ -15,124 +15,110 @@
  */
 
 #include <arc/mm/pmm.h>
-#include <arc/mm/align.h>
-#include <arc/lock/spinlock.h>
-#include <arc/cpu/tlb.h>
 #include <arc/mm/common.h>
-#include <arc/multiboot.h>
-#include <arc/tty.h>
+#include <arc/cpu/tlb.h>
+#include <arc/lock/spinlock.h>
 #include <arc/pack.h>
-#include <string.h>
 
-/* where the page table containing the stack pages is in virtual memory */
 #define PAGE_TABLE_OFFSET 0xFFFFFFFFBF7FF000
-
-/* the number of entries in a PMM stack page */
+#define STACKS (ZONE_COUNT * SIZE_COUNT)
 #define PMM_STACK_SIZE (TABLE_SIZE - 2)
+#define SZ_TO_IDX(s,z) ((s) * ZONE_COUNT + (z))
 
-/* the structure of a PMM stack page */
-typedef PACK(struct pmm_stack
+static uint64_t *pmm_page_table = (uint64_t *) PAGE_TABLE_OFFSET;
+static spinlock_t pmm_lock;
+
+typedef PACK(struct
 {
-  uint64_t next_stack;
+  uint64_t next;
   uint64_t count;
-  uint64_t stack[PMM_STACK_SIZE];
+  uint64_t frames[PMM_STACK_SIZE];
 }) pmm_stack_t;
 
-/* the 'guard stack' which is at the end of the stack of stacks */
-static ALIGN(pmm_stack_t guard_stack, FRAME_SIZE);
-
-/* pointers to where the current stack in virtual memory */
-static pmm_stack_t *stack = (pmm_stack_t *) VM_STACK_OFFSET;
-
-/* the spinlock */
-static spinlock_t lock;
-
-/* sets the physical address to the current stack and returns the old one */
-static uintptr_t stack_set_phy(uintptr_t addr)
+static int zone(int size, uintptr_t addr)
 {
-  uintptr_t *table = (uintptr_t *) PAGE_TABLE_OFFSET;
-  uintptr_t old_addr = table[TABLE_SIZE - 1] & PG_ADDR_MASK;
+  switch (size)
+  {
+    case SIZE_4K:
+      addr += FRAME_SIZE - 1;
+      break;
 
-  table[TABLE_SIZE - 1] = addr | PG_PRESENT | PG_WRITABLE | PG_NO_EXEC;
-  tlb_invlpg(VM_STACK_OFFSET);
+    case SIZE_2M:
+      addr += FRAME_SIZE_2M - 1;
+      break;
+
+    case SIZE_1G:
+      addr += FRAME_SIZE_1G - 1;
+      break;
+  }
+
+  if (addr <= ZONE_LIMIT_DMA)
+    return ZONE_DMA;
+  else if (addr <= ZONE_LIMIT_DMA32)
+    return ZONE_DMA32;
+  else
+    return ZONE_STD;
+}
+
+static uintptr_t stack_switch(int size, int zone, uintptr_t addr)
+{
+  int idx = SZ_TO_IDX(size, zone);
+  int table_idx = TABLE_SIZE - STACKS + idx;
+
+  uintptr_t old_addr = pmm_page_table[table_idx] & PG_ADDR_MASK;
+  pmm_page_table[table_idx] = addr | PG_PRESENT | PG_WRITABLE | PG_NO_EXEC;
+  tlb_invlpg(VM_STACK_OFFSET + idx * FRAME_SIZE);
 
   return old_addr;
 }
 
-/* initialises the physical memory manager */
+static uintptr_t _pmm_alloc(int size, int zone)
+{
+  return 0;
+}
+
+static void _pmm_free(int size, int zone, uintptr_t addr)
+{
+
+}
+
 void pmm_init(mm_map_t *map)
 {
-  /* reset the guard stack */
-  memset(&guard_stack, 0, sizeof(guard_stack));
 
-  /* set the physical address to the current stack */
-  stack_set_phy(((uintptr_t) &guard_stack) - VM_OFFSET);
-
-  /* a counter of the pages for diagnostics */
-  uint64_t count = 0;
-
-  /* look through the available memory regions */
-  for (int i = 0; i < map->count; i++)
-  {
-    mm_map_entry_t *entry = &map->entries[i];
-    if (entry->type != MULTIBOOT_MMAP_AVAILABLE)
-      continue;
-
-    /* align the start and end addresses */
-    uintptr_t start = PAGE_ALIGN(entry->addr_start);
-    uintptr_t end = PAGE_ALIGN_REVERSE(entry->addr_end + 1);
-
-    /* add these pages to the stacks */
-    for (uintptr_t addr = start; addr < end; addr += FRAME_SIZE, count++)
-      pmm_free(addr);
-  }
-
-  /* print a diagnostic message */
-  tty_printf(" => %d physical memory frames available\n", count);
 }
 
 uintptr_t pmm_alloc(void)
 {
-  uintptr_t addr;
-  spin_lock(&lock);
+  return pmm_allocsz(SIZE_4K, ZONE_STD);
+}
 
-  /* switch to the next stack if the current one is empty */
-  if (stack->count == 0)
-  {
-    /* check if we've reached the end of the guard stack */
-    if (!stack->next_stack)
-      addr = 0;
-    else
-      addr = stack_set_phy(stack->next_stack);
-  }
-  else
-  {
-    /* pop from this stack */
-    addr = stack->stack[--stack->count];
-  }
+uintptr_t pmm_allocs(int size)
+{
+  return pmm_allocsz(size, ZONE_STD);
+}
 
-  spin_unlock(&lock);
+uintptr_t pmm_allocz(int zone)
+{
+  return pmm_allocsz(SIZE_4K, zone);
+}
+
+uintptr_t pmm_allocsz(int size, int zone)
+{
+  spin_lock(&pmm_lock);
+  uintptr_t addr = _pmm_alloc(size, zone);
+  spin_unlock(&pmm_lock);
   return addr;
 }
 
 void pmm_free(uintptr_t addr)
 {
-  spin_lock(&lock);
+  pmm_frees(SIZE_4K, addr);
+}
 
-  /* check if this stack is full */
-  if (stack->count == PMM_STACK_SIZE)
-  {
-    /* use the page being freed as a new stack */
-    uintptr_t cur_stack = stack_set_phy(addr);
-    stack->next_stack = cur_stack;
-    stack->count = 0;
-  }
-  else
-  {
-    /* push to this stack */
-    stack->stack[stack->count++] = addr;
-  }
-
-  spin_unlock(&lock);
+void pmm_frees(int size, uintptr_t addr)
+{
+  spin_lock(&pmm_lock);
+  _pmm_free(size, zone(size, addr), addr);
+  spin_unlock(&pmm_lock);
 }
 
