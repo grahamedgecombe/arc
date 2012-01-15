@@ -224,7 +224,7 @@ static void _pmm_free(int size, int zone, uintptr_t addr)
 
 static void pmm_push_range(uintptr_t start, uintptr_t end, int size)
 {
-  uintptr_t inc;
+  uintptr_t inc = 0;
   switch (size)
   {
     case SIZE_4K:
