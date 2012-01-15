@@ -19,7 +19,7 @@
 #include <arc/mm/heap.h>
 #include <arc/mm/vmm.h>
 
-void *mmio_map(uintptr_t phy, size_t len)
+void *mmio_map(uintptr_t phy, size_t len, int flags)
 {
   uintptr_t aligned_phy = PAGE_ALIGN_REVERSE(phy);
   size_t off = phy - aligned_phy;
@@ -29,7 +29,13 @@ void *mmio_map(uintptr_t phy, size_t len)
   if (!aligned_virt)
     return 0;
 
-  if (!vmm_map_range(aligned_virt, aligned_phy, len, PG_NO_EXEC))
+  uint64_t map_flags = 0;
+  if (flags & MMIO_W)
+    map_flags |= PG_WRITABLE;
+  if (!(flags & MMIO_X))
+    map_flags |= PG_NO_EXEC;
+
+  if (!vmm_map_range(aligned_virt, aligned_phy, len, map_flags))
   {
     heap_free((void *) aligned_virt);
     return 0;

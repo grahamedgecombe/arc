@@ -38,7 +38,7 @@ ioapic_t *ioapic_init(uintptr_t addr)
   if (!apic)
     return 0;
 
-  uintptr_t virt_addr = (uintptr_t) mmio_map(addr, 32);
+  uintptr_t virt_addr = (uintptr_t) mmio_map(addr, 32, MMIO_R | MMIO_W);
   if (!virt_addr)
   {
     free(apic);

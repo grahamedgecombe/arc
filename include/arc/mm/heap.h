@@ -19,9 +19,9 @@
 
 #include <stddef.h>
 
-#define HEAP_R 0x0
-#define HEAP_W 0x1
-#define HEAP_X 0x2
+#define HEAP_R 0x1
+#define HEAP_W 0x2
+#define HEAP_X 0x4
 
 void heap_init(void);
 void *heap_reserve(size_t size);

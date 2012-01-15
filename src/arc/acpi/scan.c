@@ -26,13 +26,13 @@
 
 static acpi_header_t *acpi_map(uintptr_t addr)
 {
-  acpi_header_t *table = mmio_map(addr, sizeof(*table));
+  acpi_header_t *table = mmio_map(addr, sizeof(*table), MMIO_R);
   if (!table)
     return 0;
 
   uint32_t len = table->len;
   mmio_unmap(table, sizeof(*table));
-  return mmio_map(addr, len);
+  return mmio_map(addr, len, MMIO_R);
 }
 
 static void acpi_print(acpi_header_t *table, uintptr_t addr)

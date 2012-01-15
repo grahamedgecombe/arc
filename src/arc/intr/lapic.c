@@ -32,7 +32,7 @@ static void lapic_write(size_t reg, uint32_t val)
 
 bool lapic_mmio_init(uintptr_t addr)
 {
-  lapic = (volatile uint32_t *) mmio_map(addr, FRAME_SIZE);
+  lapic = (volatile uint32_t *) mmio_map(addr, FRAME_SIZE, MMIO_R | MMIO_W);
   if (!lapic)
     return false;
 

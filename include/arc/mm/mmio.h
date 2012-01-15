@@ -20,7 +20,11 @@
 #include <stddef.h>
 #include <stdint.h>
 
-void *mmio_map(uintptr_t phy, size_t len);
+#define MMIO_R 0x1
+#define MMIO_W 0x2
+#define MMIO_X 0x4
+
+void *mmio_map(uintptr_t phy, size_t len, int flags);
 void mmio_unmap(void *virt, size_t len);
 
 #endif
