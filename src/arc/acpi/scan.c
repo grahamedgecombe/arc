@@ -19,49 +19,20 @@
 #include <arc/acpi/rsdt.h>
 #include <arc/acpi/xsdt.h>
 #include <arc/acpi/fadt.h>
-#include <arc/mm/align.h>
-#include <arc/mm/heap.h>
-#include <arc/mm/vmm.h>
+#include <arc/mm/mmio.h>
 #include <arc/panic.h>
 #include <arc/tty.h>
 #include <stddef.h>
 
-static acpi_header_t *acpi_reserve_and_map(uintptr_t addr, size_t len)
-{
-  uintptr_t aligned_addr = PAGE_ALIGN_REVERSE(addr);
-  size_t off = addr - aligned_addr;
-  len += off;
-
-  uintptr_t aligned_virt = (uintptr_t) heap_reserve(len);
-  if (!aligned_virt)
-    return 0;
-
-  if (!vmm_map_range(aligned_virt, aligned_addr, len, PG_NO_EXEC))
-  {
-    heap_free((void *) aligned_virt);
-    return 0;
-  }
-
-  return (acpi_header_t *) (aligned_virt + off);
-}
-
-static void acpi_unreserve(acpi_header_t *table, size_t len)
-{
-  uintptr_t aligned_virt = PAGE_ALIGN_REVERSE((uintptr_t) table);
-  size_t off = (uintptr_t) table - aligned_virt;
-  len += off;
-
-  vmm_unmap_range(aligned_virt, len);
-  heap_free((void *) aligned_virt);
-}
-
 static acpi_header_t *acpi_map(uintptr_t addr)
 {
-  acpi_header_t *table = acpi_reserve_and_map(addr, sizeof(*table));
-  uint32_t len = table->len;
-  acpi_unreserve(table, sizeof(*table));
+  acpi_header_t *table = mmio_map(addr, sizeof(*table));
+  if (!table)
+    return 0;
 
-  return acpi_reserve_and_map(addr, len);
+  uint32_t len = table->len;
+  mmio_unmap(table, sizeof(*table));
+  return mmio_map(addr, len);
 }
 
 static void acpi_print(acpi_header_t *table, uintptr_t addr)

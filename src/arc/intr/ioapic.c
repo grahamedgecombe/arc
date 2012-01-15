@@ -16,8 +16,7 @@
 
 #include <arc/intr/ioapic.h>
 #include <arc/intr/common.h>
-#include <arc/mm/heap.h>
-#include <arc/mm/vmm.h>
+#include <arc/mm/mmio.h>
 #include <stdbool.h>
 #include <stdlib.h>
 
@@ -39,22 +38,15 @@ ioapic_t *ioapic_init(uintptr_t addr)
   if (!apic)
     return 0;
 
-  uintptr_t virt_addr = (uintptr_t) heap_reserve(FRAME_SIZE);
+  uintptr_t virt_addr = (uintptr_t) mmio_map(addr, 32);
   if (!virt_addr)
   {
     free(apic);
     return 0;
   }
 
-  if (!vmm_map(virt_addr, addr, PG_WRITABLE | PG_NO_EXEC))
-  {
-    heap_free((void *) virt_addr);
-    free(apic);
-    return 0;
-  }
-
   apic->reg = (volatile uint32_t *) virt_addr;
-  apic->val = (volatile uint32_t *) (virt_addr + 0x10);
+  apic->val = (volatile uint32_t *) (virt_addr + 16);
   return apic;
 }
 

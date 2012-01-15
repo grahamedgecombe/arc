@@ -24,8 +24,6 @@
 
 * fill out the FADT structure
 
-* turn acpi_reserve_and_map() and acpi_unreserve() into general functions
-
 * check if in*_p() and out*_p() are still required
 
 * consider how locking should work with port 0x61 (NMI status & control)

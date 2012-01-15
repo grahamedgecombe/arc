@@ -14,38 +14,14 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <arc/intr/lapic.h>
-#include <arc/mm/common.h>
-#include <arc/mm/mmio.h>
+#ifndef ARC_MM_MMIO_H
+#define ARC_MM_MMIO_H
 
-static volatile uint32_t *lapic;
+#include <stddef.h>
+#include <stdint.h>
 
-static uint32_t lapic_read(size_t reg)
-{
-  return lapic[reg];
-}
+void *mmio_map(uintptr_t phy, size_t len);
+void mmio_unmap(void *virt, size_t len);
 
-static void lapic_write(size_t reg, uint32_t val)
-{
-  lapic[reg] = val;
-}
-
-bool lapic_mmio_init(uintptr_t addr)
-{
-  lapic = (volatile uint32_t *) mmio_map(addr, FRAME_SIZE);
-  if (!lapic)
-    return false;
-
-  return true;
-}
-
-void lapic_init(void)
-{
-
-}
-
-void lapic_ack(void)
-{
-  lapic_write(LAPIC_EOI, 0);
-}
+#endif
 
