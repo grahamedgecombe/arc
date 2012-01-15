@@ -17,6 +17,7 @@
 #ifndef ARC_CPU_HALT_H
 #define ARC_CPU_HALT_H
 
+void halt_once(void);
 void halt_forever(void);
 
 #endif
