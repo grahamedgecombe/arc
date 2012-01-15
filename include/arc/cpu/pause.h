@@ -17,7 +17,7 @@
 #ifndef ARC_CPU_PAUSE_H
 #define ARC_CPU_PAUSE_H
 
-void pause(void);
+void pause_once(void);
 
 #endif
 

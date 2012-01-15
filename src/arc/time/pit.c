@@ -78,7 +78,7 @@ static void _pit_mdelay(int ms)
 
   /* busy-wait for the countdown to reach zero */
   while ((inb_p(PORT_CTRL) & CTRL_OUT) == 0)
-    pause();
+    pause_once();
 }
 
 void pit_mdelay(int ms)

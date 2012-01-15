@@ -14,8 +14,8 @@
 ;  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ;
 
-[global pause]
-pause:
+[global pause_once]
+pause_once:
   push rbp
   mov rbp, rsp
   pause
