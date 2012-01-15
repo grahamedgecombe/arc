@@ -17,6 +17,7 @@
 #ifndef ARC_MM_MAP_H
 #define ARC_MM_MAP_H
 
+#include <stddef.h>
 #include <stdint.h>
 #include <arc/multiboot.h>
 
@@ -39,7 +40,7 @@ typedef struct
 
 typedef struct
 {
-  int count;
+  size_t count;
   mm_map_entry_t entries[MM_MAP_MAX_ENTRIES];
 } mm_map_t;
 
