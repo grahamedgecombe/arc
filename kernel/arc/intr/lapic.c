@@ -49,3 +49,14 @@ void lapic_ack(void)
   lapic_write(LAPIC_EOI, 0);
 }
 
+void lapic_ipi(uint8_t dest, uint8_t mode, uint8_t vector)
+{
+  /* format the ICR high and low dwords */
+  uint32_t icrh = dest << 24;
+  uint32_t icrl = vector | (mode << 8);
+
+  /* write the high (must be first!) and low parts of the ICR */
+  lapic_write(LAPIC_ICR1, icrh);
+  lapic_write(LAPIC_ICR0, icrl);
+}
+

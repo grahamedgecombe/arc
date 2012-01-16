@@ -18,6 +18,7 @@
 #define ARC_SMP_INIT_H
 
 void smp_init(void);
+void smp_ap_init(void);
 
 #endif
 

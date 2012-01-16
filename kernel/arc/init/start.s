@@ -102,6 +102,7 @@ mb_hdr_end:
 
 ; paging structures
 align PAGE_SIZE
+[global boot_pml4]
 boot_pml4:
   dq (boot_pml3 + PG_PRESENT + PG_WRITABLE)
   times (TABLE_SIZE / 2 - 1) dq 0
@@ -160,20 +161,16 @@ identity_pml2d:
 
 ; the global descriptor table
 gdt:
-  .null:
+  ; null selector
     dq 0
-  .code:
-    dw 0xFFFF
-    dw 0
-    dw 0x9800
-    dw 0x00AF
-  .data:
-    dw 0xFFFF
-    dw 0
-    dw 0x9200
-    dw 0x00CF
+  ; cs selector
+    dq 0x00AF98000000FFFF
+  ; ds selector
+    dq 0x00CF92000000FFFF
+gdt_end:
+  dq 0 ; some extra padding so the gdtr is 16-byte aligned
 gdtr:
-  dw gdtr - gdt - 1
+  dw gdt_end - gdt - 1
   dq gdt
 
 ; the entry point of the kernel executable

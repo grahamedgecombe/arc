@@ -213,6 +213,11 @@ mm_map_t *mm_map_init(multiboot_t *multiboot)
   uintptr_t end_addr   = (uintptr_t) &_end   - VM_OFFSET - 1;
   mm_map_add(MULTIBOOT_MMAP_RESERVED, start_addr, end_addr);
 
+  /* reserve SMP trampoline area */
+  extern int trampoline_start, trampoline_end;
+  size_t trampoline_len = (uintptr_t) &trampoline_end - (uintptr_t) &trampoline_start;
+  mm_map_add(MULTIBOOT_MMAP_RESERVED, 0x001000, 0x001000 + trampoline_len - 1);
+
   /* reserve multiboot information structure memory */
   start_addr = (uintptr_t) multiboot - PHY32_OFFSET;
   end_addr   = start_addr + multiboot->total_size;

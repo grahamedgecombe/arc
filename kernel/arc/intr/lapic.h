@@ -68,6 +68,7 @@
 
 bool lapic_mmio_init(uintptr_t addr);
 void lapic_init(void);
+void lapic_ipi(uint8_t dest, uint8_t mode, uint8_t vector);
 void lapic_ack(void);
 
 #endif

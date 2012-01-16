@@ -15,12 +15,65 @@
  */
 
 #include <arc/smp/init.h>
+#include <arc/intr/lapic.h>
+#include <arc/mm/vmm.h>
+#include <arc/time/pit.h>
 #include <arc/mp.h>
 #include <arc/tty.h>
-#include <arc/mm/phy32.h>
+#include <arc/panic.h>
+#include <stdlib.h>
 #include <string.h>
+
+#define TRAMPOLINE_BASE 0x1000
+#define AP_STACK_SIZE  8192
+#define AP_STACK_ALIGN 16
+
+static volatile bool ack_sipi = false;
 
 void smp_init(void)
 {
+  lapic_mmio_init(0xFEE00000);
+  lapic_init();
+
+  extern int trampoline_start, trampoline_end, trampoline_stack;
+  size_t trampoline_len = (uintptr_t) &trampoline_end - (uintptr_t) &trampoline_start;
+
+  if (!vmm_map_range(TRAMPOLINE_BASE, TRAMPOLINE_BASE, trampoline_len, PG_WRITABLE))
+    boot_panic("couldn't map SMP trampoline code");
+
+  void *ap_stack = memalign(AP_STACK_ALIGN, AP_STACK_SIZE);
+  if (!ap_stack)
+    boot_panic("couldn't allocate AP stack");
+
+  uint64_t *rsp = (uint64_t *) (&trampoline_stack - &trampoline_start + TRAMPOLINE_BASE);
+  *rsp = (uint64_t) ap_stack + AP_STACK_SIZE;
+
+  memcpy((void *) TRAMPOLINE_BASE, &trampoline_start, trampoline_len);
+
+  /* send INIT IPI */
+  lapic_ipi(0x01, 0x05, 0x00);
+  pit_mdelay(10);
+
+  /* send STARTUP IPI */
+  uint8_t vector = TRAMPOLINE_BASE / FRAME_SIZE;
+  lapic_ipi(0x01, 0x06, vector);
+  pit_mdelay(1);
+
+  /* send STARTUP IPI again */
+  if (!ack_sipi)
+  {
+    lapic_ipi(0x01, 0x06, vector);
+    pit_mdelay(1);
+  }
+}
+
+void smp_ap_init(void)
+{
+  /* acknowledge the STARTUP IPI */
+  ack_sipi = true;
+
+  static int ct = 0;
+  tty_printf("AP %d booted!!!\n", ++ct);
+  for (;;);
 }
 
