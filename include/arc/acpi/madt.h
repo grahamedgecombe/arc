@@ -21,7 +21,7 @@
 #include <arc/pack.h>
 #include <arc/acpi/common.h>
 
-#define MADT_SIGNATURE 0x67738041 /* 'APIC' */
+#define MADT_SIGNATURE 0x43495041 /* 'APIC' */
 
 #define MADT_FLAGS_PCAT 0x1 /* there are dual-8259 PICs that must be masked */
 
@@ -45,7 +45,8 @@
 
 typedef PACK(struct
 {
-  uint8_t type, len;
+  uint8_t type;
+  uint8_t len;
   union
   {
     PACK(struct
@@ -57,7 +58,7 @@ typedef PACK(struct
 
     PACK(struct
     {
-      uint8_t ioapic_id;
+      uint8_t id;
       uint8_t reserved;
       uint32_t addr;
       uint32_t gsi_base;
@@ -115,6 +116,8 @@ typedef PACK(struct
   uint32_t flags;
   madt_entry_t entries[1];
 }) madt_t;
+
+void madt_scan(madt_t *madt);
 
 #endif
 

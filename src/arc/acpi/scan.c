@@ -19,6 +19,7 @@
 #include <arc/acpi/rsdt.h>
 #include <arc/acpi/xsdt.h>
 #include <arc/acpi/fadt.h>
+#include <arc/acpi/madt.h>
 #include <arc/mm/mmio.h>
 #include <arc/panic.h>
 #include <arc/tty.h>
@@ -67,6 +68,11 @@ static void acpi_scan_table(uintptr_t addr)
       acpi_scan_table(fadt->facs_addr);
 
     acpi_scan_table(fadt->dsdt_addr);
+  }
+  /* scan the MADT */
+  else if (table->signature == MADT_SIGNATURE)
+  {
+    madt_scan((madt_t *) table);
   }
 }
 
