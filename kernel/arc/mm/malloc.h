@@ -63,10 +63,13 @@
 #define EINVAL 2
 
 /* minimal definitions for translating mmap() to heap_*() */
-#define MAP_ANONYMOUS 1
-#define MAP_PRIVATE   2
-#define PROT_READ  1
-#define PROT_WRITE 2
+#define MAP_ANONYMOUS 0x1
+#define MAP_PRIVATE   0x2
+
+#define PROT_NONE  0x0
+#define PROT_READ  0x1
+#define PROT_WRITE 0x2
+#define PROT_EXEC  0x4
 
 typedef size_t off_t;
 

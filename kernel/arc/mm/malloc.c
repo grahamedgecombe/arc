@@ -24,7 +24,15 @@
 
 void *mmap(void *addr, size_t len, int prot, int flags, int fd, off_t off)
 {
-  return heap_alloc(len, HEAP_R | HEAP_W);
+  int heap_flags = 0;
+  if (prot & PROT_READ)
+    heap_flags |= HEAP_R;
+  if (prot & PROT_WRITE)
+    heap_flags |= HEAP_W;
+  if (prot & PROT_EXEC)
+    heap_flags |= HEAP_X;
+
+  return heap_alloc(len, heap_flags);
 }
 
 int munmap(void *addr, size_t len)
