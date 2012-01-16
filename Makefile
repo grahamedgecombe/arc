@@ -18,7 +18,7 @@ ARCH := x86_64-pc-elf
 
 CC := $(ARCH)-gcc
 CFLAGS := -std=c1x -O3 -Wall -Wextra -pedantic -Wno-unused -ffreestanding \
-          -mno-red-zone -mcmodel=large -Iinclude -mno-sse -mno-sse2 -mno-sse3 \
+          -mno-red-zone -mcmodel=large -Ikernel -mno-sse -mno-sse2 -mno-sse3 \
 	  -mno-3dnow -mno-mmx
 
 AS := nasm
@@ -41,9 +41,9 @@ ifeq ($(AS),nasm)
 endif
 
 TARGET := arc
-SOURCES := $(shell find src -name "*.c" -or -name "*.s" -type f)
+SOURCES := $(shell find kernel -name "*.c" -or -name "*.s" -type f)
 OBJECTS := $(addsuffix .o, $(basename $(SOURCES)))
-DEPENDENCIES := $(shell find src -name "*.d")
+DEPENDENCIES := $(shell find kernel -name "*.d")
 
 .PHONY: all clean
 
