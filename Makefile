@@ -19,7 +19,7 @@ ARCH := x86_64-pc-elf
 CC := $(ARCH)-gcc
 CFLAGS := -std=c1x -O3 -Wall -Wextra -pedantic -Wno-unused -ffreestanding \
           -mno-red-zone -mcmodel=large -Ikernel -mno-sse -mno-sse2 -mno-sse3 \
-	  -mno-3dnow -mno-mmx
+          -mno-3dnow -mno-mmx
 
 AS := nasm
 ASFLAGS := -f elf64
