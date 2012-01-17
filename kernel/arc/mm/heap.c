@@ -29,6 +29,9 @@
 #define HEAP_NODE_RESERVED  1 /* allocated, physical frames not managed by us */
 #define HEAP_NODE_ALLOCATED 2 /* allocated, physical frames managed by us */
 
+/* a magic id used to check if requests are valid */
+#define HEAP_MAGIC 0x461E7B705515DB7F
+
 typedef PACK(struct heap_node
 {
   struct heap_node *next;
@@ -36,6 +39,7 @@ typedef PACK(struct heap_node
   int state;
   uintptr_t start; /* the address of the first page, inclusive */
   uintptr_t end;   /* the address of the last page, exclusive */
+  uint64_t magic;
 }) heap_node_t;
 
 static heap_node_t *heap_root;
@@ -70,6 +74,7 @@ void heap_init(void)
   heap_root->state = HEAP_NODE_FREE;
   heap_root->start = heap_start + FRAME_SIZE;
   heap_root->end = heap_end;
+  heap_root->magic = heap_root->start ^ HEAP_MAGIC;
 }
 
 static heap_node_t *find_node(size_t size)
@@ -104,6 +109,7 @@ static heap_node_t *find_node(size_t size)
           next->state = HEAP_NODE_FREE;
           next->prev = node;
           next->next = node->next;
+          next->magic = next->start ^ HEAP_MAGIC;
 
           /* update the node that was split */
           node->end = (uintptr_t) next;
@@ -128,6 +134,10 @@ static void _heap_free(void *ptr)
 {
   /* find where the node is */
   heap_node_t *node = (heap_node_t *) ((uintptr_t) ptr - FRAME_SIZE);
+
+  /* check if the magic matches to see if we get passed a dodgy pointer */
+  if (node->magic != (node->start ^ HEAP_MAGIC))
+    boot_panic("invalid magic number in heap node");
 
   /* free the physical frames if heap_alloc allocated them */
   if (node->state == HEAP_NODE_ALLOCATED)
