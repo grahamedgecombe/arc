@@ -14,19 +14,19 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef ARC_SMP_PERCPU_H
-#define ARC_SMP_PERCPU_H
+#ifndef ARC_SMP_CPU_H
+#define ARC_SMP_CPU_H
 
 #include <arc/cpu/gdt.h>
 #include <arc/cpu/tss.h>
 
-typedef struct percpu
+typedef struct cpu
 {
   /*
-   * percpu_get() relies on the fact that the first 8 bytes in the structure
+   * cpu_get() relies on the fact that the first 8 bytes in the structure
    * points to itself
    */
-  struct percpu *self;
+  struct cpu *self;
 
   /* the gdt and gdtr for this processor */
   gdtr_t gdtr;
@@ -34,10 +34,10 @@ typedef struct percpu
 
   /* the tss for this processor */
   tss_t tss;
-} percpu_t;
+} cpu_t;
 
-void percpu_bsp_init(void);
-percpu_t *percpu_get(void);
+void cpu_bsp_init(void);
+cpu_t *cpu_get(void);
 
 #endif
 

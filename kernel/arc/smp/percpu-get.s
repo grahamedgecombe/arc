@@ -14,8 +14,8 @@
 ;  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ;
 
-[global percpu_get]
-percpu_get:
+[global cpu_get]
+cpu_get:
   push rbp
   mov rbp, rsp
   mov rax, [gs:0] ; the first entry in the struct points to itself

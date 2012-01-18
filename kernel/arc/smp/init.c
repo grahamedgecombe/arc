@@ -45,7 +45,7 @@ void smp_init(void)
   if (!ap_stack)
     boot_panic("couldn't allocate AP stack");
 
-  uint64_t *rsp = (uint64_t *) (&trampoline_stack - &trampoline_start + TRAMPOLINE_BASE);
+  uint64_t *rsp = (uint64_t *) &trampoline_stack;
   *rsp = (uint64_t) ap_stack + AP_STACK_SIZE;
 
   memcpy((void *) TRAMPOLINE_BASE, &trampoline_start, trampoline_len);

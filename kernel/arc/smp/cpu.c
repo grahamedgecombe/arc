@@ -14,14 +14,14 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <arc/smp/percpu.h>
+#include <arc/smp/cpu.h>
 #include <arc/cpu/msr.h>
 
-static percpu_t percpu_bsp;
+static cpu_t cpu_bsp;
 
-void percpu_bsp_init(void)
+void cpu_bsp_init(void)
 {
-  percpu_bsp.self = &percpu_bsp;
-  msr_write(MSR_GS_BASE, (uint64_t) &percpu_bsp);
+  cpu_bsp.self = &cpu_bsp;
+  msr_write(MSR_GS_BASE, (uint64_t) &cpu_bsp);
 }
 

@@ -15,14 +15,14 @@
  */
 
 #include <arc/cpu/tss.h>
-#include <arc/smp/percpu.h>
+#include <arc/smp/cpu.h>
 #include <string.h>
 
 void tss_init(void)
 {
   /* find this CPU's TSS */
-  percpu_t *percpu = percpu_get();
-  tss_t *tss = &percpu->tss;
+  cpu_t *cpu = cpu_get();
+  tss_t *tss = &cpu->tss;
 
   /* reset all the fields */
   memset(tss, 0, sizeof(*tss));

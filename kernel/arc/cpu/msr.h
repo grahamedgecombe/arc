@@ -24,8 +24,8 @@
 #define MSR_GS_KERNEL_BASE 0xC0000102
 #define MSR_APIC_BASE      0x0000001B
 
-#define APIC_BASE_ENABLE  0x400
-#define APIC_BASE_X2_MODE 0x200
+#define APIC_BASE_ENABLE  0x800
+#define APIC_BASE_X2_MODE 0x400
 #define APIC_BASE_BSP     0x100
 
 uint64_t msr_read(uint32_t msr);

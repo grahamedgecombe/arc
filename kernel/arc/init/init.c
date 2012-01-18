@@ -27,7 +27,7 @@
 #include <arc/cpu/idt.h>
 #include <arc/intr/pic.h>
 #include <arc/panic.h>
-#include <arc/smp/percpu.h>
+#include <arc/smp/cpu.h>
 #include <arc/acpi/scan.h>
 #include <arc/smp/init.h>
 #include <string.h>
@@ -84,7 +84,7 @@ void init(uint32_t magic, multiboot_t *multiboot)
 
   /* set up the BSP's percpu structure */
   tty_printf("Setting up BSP-local data...\n");
-  percpu_bsp_init();
+  cpu_bsp_init();
 
   /* set up the GDT */
   tty_printf("Installing GDT...\n");

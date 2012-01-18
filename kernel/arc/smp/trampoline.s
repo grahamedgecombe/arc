@@ -107,7 +107,8 @@ code64:
 
   ; set up the stack
   mov rbp, 0x0
-  mov rsp, qword trampoline_stack
+  mov rax, [qword trampoline_stack]
+  mov rsp, rax
 
   ; reset RFLAGS
   push 0x0

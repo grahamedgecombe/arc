@@ -16,7 +16,7 @@
 
 #include <arc/cpu/gdt.h>
 #include <arc/cpu/msr.h>
-#include <arc/smp/percpu.h>
+#include <arc/smp/cpu.h>
 #include <string.h>
 
 static void gdt_set_gate(gdt_gate_t *gdt_gates, uint16_t sel, uint8_t flags, uint8_t gran)
@@ -43,14 +43,14 @@ static void gdt_set_xgate(gdt_gate_t *gdt_gates, uint16_t sel, uint8_t flags, ui
 void gdt_init(void)
 {
   /* get this CPU's local data */
-  percpu_t *percpu = percpu_get();
+  cpu_t *cpu = cpu_get();
 
   /* get pointers to the GDT and GDTR */
-  gdtr_t *gdtr = &percpu->gdtr;
-  gdt_gate_t *gdt_gates = percpu->gdt_gates;
+  gdtr_t *gdtr = &cpu->gdtr;
+  gdt_gate_t *gdt_gates = cpu->gdt_gates;
 
   /* get pointer to the TSS and calculate the limit */
-  tss_t *tss = &percpu->tss;
+  tss_t *tss = &cpu->tss;
   uint64_t tss_base = (uint64_t) tss;
   uint64_t tss_limit = sizeof(*tss);
 
