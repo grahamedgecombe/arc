@@ -15,6 +15,7 @@
  */
 
 #include <arc/intr/lapic.h>
+#include <arc/cpu/msr.h>
 #include <arc/mm/common.h>
 #include <arc/mm/mmio.h>
 
@@ -65,6 +66,7 @@
 #define LAPIC_TIMER_DCR    0xF8
 
 static volatile uint32_t *lapic;
+static uintptr_t lapic_phy_addr;
 
 static uint32_t lapic_read(size_t reg)
 {
@@ -78,6 +80,7 @@ static void lapic_write(size_t reg, uint32_t val)
 
 bool lapic_mmio_init(uintptr_t addr)
 {
+  lapic_phy_addr = addr;
   lapic = (volatile uint32_t *) mmio_map(addr, FRAME_SIZE, MMIO_R | MMIO_W);
   if (!lapic)
     return false;
@@ -87,7 +90,8 @@ bool lapic_mmio_init(uintptr_t addr)
 
 void lapic_init(void)
 {
-
+  uint64_t apic_base = (msr_read(MSR_APIC_BASE) & APIC_BASE_BSP) | lapic_phy_addr | APIC_BASE_ENABLE;
+  msr_write(MSR_APIC_BASE, apic_base);
 }
 
 void lapic_ack(void)
