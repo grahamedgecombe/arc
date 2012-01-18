@@ -15,6 +15,7 @@
  */
 
 #include <arc/smp/init.h>
+#include <arc/cpu/pause.h>
 #include <arc/intr/lapic.h>
 #include <arc/mm/vmm.h>
 #include <arc/time/pit.h>
@@ -65,6 +66,12 @@ void smp_init(void)
     lapic_ipi(0x01, 0x06, vector);
     pit_mdelay(1);
   }
+
+  /* wait for the AP to come up */
+  while (!ack_sipi)
+    pause_once();
+
+  vmm_unmap_range(TRAMPOLINE_BASE, trampoline_len);
 }
 
 void smp_ap_init(void)

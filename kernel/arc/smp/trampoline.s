@@ -121,8 +121,7 @@ vcode64:
   popf
 
   ; call the AP init C code
-  mov rax, qword smp_ap_init
-  call rax
+  call smp_ap_init
 
   ; hang the CPU forever
   cli

@@ -224,24 +224,24 @@ start:
 .next:
   ; re-load the GDTR with a virtual base address
   mov rax, [gdtr + 2]
-  mov rbx, qword KERNEL_VMA
+  mov rbx, KERNEL_VMA
   add rax, rbx
   mov [gdtr + 2], rax
-  mov rax, qword gdtr + KERNEL_VMA
+  mov rax, gdtr + KERNEL_VMA
   lgdt [rax]
 
   ; map the rest of the kernel into virtual memory
-  mov rax, qword _start - KERNEL_VMA      ; first page number
+  mov rax, _start - KERNEL_VMA      ; first page number
   shr rax, LOG_PAGE_SIZE + LOG_TABLE_SIZE
-  mov rbx, qword _end - KERNEL_VMA        ; last page number
+  mov rbx, _end - KERNEL_VMA        ; last page number
   shr rbx, LOG_PAGE_SIZE + LOG_TABLE_SIZE
-  mov rcx, qword boot_pml2 + KERNEL_VMA   ; pointer into pml2 table
+  mov rcx, boot_pml2 + KERNEL_VMA   ; pointer into pml2 table
   .map_page:
     ; calculate the value of the page table entry
     mov rdx, rax
     shl rdx, LOG_PAGE_SIZE + LOG_TABLE_SIZE
     mov rsi, rdx
-    mov rdi, qword KERNEL_VMA
+    mov rdi, KERNEL_VMA
     add rsi, rdi
     or rdx, PG_PRESENT + PG_WRITABLE + PG_BIG
 
