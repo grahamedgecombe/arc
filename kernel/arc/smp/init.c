@@ -74,6 +74,5 @@ void smp_ap_init(void)
 
   static int ct = 0;
   tty_printf("AP %d booted!!!\n", ++ct);
-  for (;;);
 }
 

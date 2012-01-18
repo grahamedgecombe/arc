@@ -105,6 +105,12 @@ code64:
   mov gs, ax
   mov ss, ax
 
+  ; switch the RIP to use the higher half virtual address instead of the
+  ; identity-mapped virtual address
+  mov rax, qword vcode64
+  jmp rax
+vcode64:
+
   ; set up the stack
   mov rbp, 0x0
   mov rax, [qword trampoline_stack]
