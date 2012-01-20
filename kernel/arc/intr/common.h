@@ -87,6 +87,9 @@
 #define IRQ22 0x36
 #define IRQ23 0x37
 
+/* LAPIC spurious interrupt */
+#define SPURIOUS 0xFE
+
 /* system call */
 #define SYSCALL 0xFF
 

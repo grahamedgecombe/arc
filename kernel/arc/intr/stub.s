@@ -95,6 +95,11 @@ intr_stub:
   ; return
   iretq
 
+; simple spurious interrupt handler
+[global spurious]
+spurious:
+  iretq
+
 ; the fault and irq stubs are actually made here
 fault     0
 fault     1
