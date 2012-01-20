@@ -60,8 +60,8 @@ void init(uint32_t magic, multiboot_t *multiboot)
 
   /* check the multiboot magic number */
   if (magic != MULTIBOOT_MAGIC)
-    boot_panic("invalid multiboot magic (expected 0x%x, got 0x%x)",
-      MULTIBOOT_MAGIC, magic);
+    panic("invalid multiboot magic (expected 0x%x, got 0x%x)", MULTIBOOT_MAGIC,
+      magic);
 
   /* convert physical 32-bit multiboot address to virtual address */
   multiboot = phy32_to_virt(multiboot);

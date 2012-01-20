@@ -54,7 +54,7 @@ static void acpi_scan_table(uintptr_t addr)
 {
   acpi_header_t *table = acpi_map(addr); 
   if (!table)
-    boot_panic("couldn't map table");
+    panic("couldn't map table");
 
   /* print some information about the structure */
   acpi_print(table, addr);
@@ -92,7 +92,7 @@ bool acpi_scan(void)
     /* map it into virtual memory */
     xsdt_t *xsdt = (xsdt_t *) acpi_map(rsdp->xsdt_addr);
     if (!xsdt)
-      boot_panic("couldn't map XSDT");
+      panic("couldn't map XSDT");
 
     /* print some info about the XSDT */
     acpi_print((acpi_header_t *) xsdt, rsdp->xsdt_addr);
@@ -109,7 +109,7 @@ bool acpi_scan(void)
     /* map it into virtual memory */
     rsdt_t *rsdt = (rsdt_t *) acpi_map(rsdp->rsdt_addr);
     if (!rsdt)
-      boot_panic("couldn't map RSDT");
+      panic("couldn't map RSDT");
 
     /* print some info about the RSDT */
     acpi_print((acpi_header_t *) rsdt, rsdp->rsdt_addr);

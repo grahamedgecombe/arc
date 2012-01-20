@@ -57,16 +57,16 @@ void heap_init(void)
   /* allocate some space for the root node */
   uintptr_t root_phy = pmm_alloc();
   if (!root_phy)
-    boot_panic("couldn't allocate physical frame for heap root node");
+    panic("couldn't allocate physical frame for heap root node");
 
   /* sanity check which probably seems completely ridiculous */
   if (heap_start >= heap_end)
-    boot_panic("no room for heap");
+    panic("no room for heap");
 
   /* the root node will take the first virtual address */
   heap_root = (heap_node_t *) heap_start;
   if (!vmm_map(heap_start, root_phy, PG_WRITABLE | PG_NO_EXEC))
-    boot_panic("couldn't map heap root node into the virtual memory");
+    panic("couldn't map heap root node into the virtual memory");
 
   /* fill out the root node */
   heap_root->next = 0;
@@ -137,7 +137,7 @@ static void _heap_free(void *ptr)
 
   /* check if the magic matches to see if we get passed a dodgy pointer */
   if (node->magic != (node->start ^ HEAP_MAGIC))
-    boot_panic("invalid magic number in heap node");
+    panic("invalid magic number in heap node");
 
   /* free the physical frames if heap_alloc allocated them */
   if (node->state == HEAP_NODE_ALLOCATED)

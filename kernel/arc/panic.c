@@ -19,7 +19,7 @@
 #include <arc/cpu/halt.h>
 #include <stdarg.h>
 
-void boot_panic(const char *message, ...)
+void panic(const char *message, ...)
 {
   /* write panic message */
   va_list args;

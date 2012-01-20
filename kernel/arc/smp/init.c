@@ -40,11 +40,11 @@ void smp_init(void)
   size_t trampoline_len = (uintptr_t) &trampoline_end - (uintptr_t) &trampoline_start;
 
   if (!vmm_map_range(TRAMPOLINE_BASE, TRAMPOLINE_BASE, trampoline_len, PG_WRITABLE))
-    boot_panic("couldn't map SMP trampoline code");
+    panic("couldn't map SMP trampoline code");
 
   void *ap_stack = memalign(AP_STACK_ALIGN, AP_STACK_SIZE);
   if (!ap_stack)
-    boot_panic("couldn't allocate AP stack");
+    panic("couldn't allocate AP stack");
 
   uint64_t *rsp = (uint64_t *) &trampoline_stack;
   *rsp = (uint64_t) ap_stack + AP_STACK_SIZE;

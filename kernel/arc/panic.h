@@ -17,11 +17,7 @@
 #ifndef ARC_PANIC_H
 #define ARC_PANIC_H
 
-/*
- * this should be used to halt the BSP before any APs are started if an error
- * occurs during early boot
- */
-void boot_panic(const char *message, ...);
+void panic(const char *message, ...);
 
 #endif
 

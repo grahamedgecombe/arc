@@ -61,7 +61,7 @@ static void mm_map_add(int type, uintptr_t addr_start, uintptr_t addr_end)
   }
 
   if (map.count == MM_MAP_MAX_ENTRIES)
-    boot_panic("memory map is full (max entries = %d)", MM_MAP_MAX_ENTRIES);
+    panic("memory map is full (max entries = %d)", MM_MAP_MAX_ENTRIES);
 
   mm_map_entry_t *entry = &map.entries[map.count++];
   entry->type = type;
@@ -183,7 +183,7 @@ mm_map_t *mm_map_init(multiboot_t *multiboot)
   /* find the mmap multiboot tag */
   multiboot_tag_t *mmap_tag = multiboot_get(multiboot, MULTIBOOT_TAG_MMAP);
   if (!mmap_tag)
-    boot_panic("no multiboot mmap tag");
+    panic("no multiboot mmap tag");
 
   /* read entries from the e820 map given to us by GRUB */
   uintptr_t entry_addr = (uintptr_t) mmap_tag + sizeof(mmap_tag->type)

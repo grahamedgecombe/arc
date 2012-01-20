@@ -82,7 +82,7 @@ void vmm_init(void)
   for (int pml4_index = (TABLE_SIZE / 2); pml4_index <= TABLE_SIZE; pml4_index++)
   {
     if (!vmm_touch(VM_OFFSET + (pml4_index - (TABLE_SIZE / 2)) * FRAME_SIZE_512G, SIZE_1G))
-      boot_panic("failed to touch pml4 entry %d", pml4_index);
+      panic("failed to touch pml4 entry %d", pml4_index);
   }
 }
 

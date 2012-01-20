@@ -22,7 +22,7 @@
 #include <stddef.h>
 
 /* make it so when dlmalloc aborts a kernel panic is triggered */
-#define ABORT boot_panic("dlmalloc abort()")
+#define ABORT panic("dlmalloc abort()")
 
 /* these headers do not exist (or are not complete) in the kernel */
 #define LACKS_ERRNO_H
