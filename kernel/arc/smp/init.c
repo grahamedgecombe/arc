@@ -16,6 +16,9 @@
 
 #include <arc/smp/init.h>
 #include <arc/smp/cpu.h>
+#include <arc/cpu/gdt.h>
+#include <arc/cpu/tss.h>
+#include <arc/cpu/idt.h>
 #include <arc/cpu/pause.h>
 #include <arc/intr/lapic.h>
 #include <arc/mm/vmm.h>
@@ -106,11 +109,16 @@ void smp_ap_init(void)
   /* save the per-cpu data area pointer so we can ack the SIPI straight away */
   cpu_ap_install(booted_cpu);
 
-  /* acknowledge the STARTUP IPI */
-  ack_sipi = true;
-
   /* print a message to indicate the AP has been booted */
   cpu_t *cpu = cpu_get();
   tty_printf(" =>  AP %d booted\n", cpu->lapic_id);
+
+  /* acknowledge the STARTUP IPI */
+  ack_sipi = true;
+
+  /* now start the real work! - set up the GDT, TSS and BSP */
+  gdt_init();
+  tss_init();
+  idt_ap_init(); /* we re-use the same IDT for every CPU */
 }
 

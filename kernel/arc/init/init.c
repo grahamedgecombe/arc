@@ -83,19 +83,12 @@ void init(uint32_t magic, multiboot_t *multiboot)
   heap_init();
 
   /* set up the BSP's percpu structure */
-  tty_printf("Setting up BSP-local data...\n");
+  tty_printf("Setting up BSP...\n");
   cpu_bsp_init();
 
-  /* set up the GDT */
-  tty_printf("Installing GDT...\n");
+  /* set up the GDT, TSS and IDT */
   gdt_init();
-
-  /* set up the GDT */
-  tty_printf("Installing TSS...\n");
   tss_init();
-
-  /* set up the IDT */
-  tty_printf("Installing IDT...\n");
   idt_bsp_init();
 
   /* search for ACPI tables */
