@@ -27,9 +27,9 @@
 #define LAPIC_PPR       0x28
 #define LAPIC_EOI       0x2C
 #define LAPIC_RRD       0x30
-#define LAPIC_SVR       0x3C
 #define LAPIC_LDR       0x34
 #define LAPIC_DFR       0x38
+#define LAPIC_SVR       0x3C
 #define LAPIC_ISR0      0x40
 #define LAPIC_ISR1      0x44
 #define LAPIC_ISR2      0x48
