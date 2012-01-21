@@ -119,6 +119,11 @@ static heap_node_t *find_node(size_t size)
           if (next->next)
             next->next->prev = next;
         }
+        else
+        {
+          /* free the unused physical frame */
+          pmm_free(phy);
+        }
       }
     }
 
