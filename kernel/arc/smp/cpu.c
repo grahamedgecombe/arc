@@ -16,12 +16,49 @@
 
 #include <arc/smp/cpu.h>
 #include <arc/cpu/msr.h>
+#include <stdlib.h>
+#include <string.h>
 
 static cpu_t cpu_bsp;
 
 void cpu_bsp_init(void)
 {
+  memset(&cpu_bsp, 0, sizeof(cpu_bsp));
   cpu_bsp.self = &cpu_bsp;
+  cpu_bsp.bsp = true;
   msr_write(MSR_GS_BASE, (uint64_t) &cpu_bsp);
+}
+
+bool cpu_ap_init(cpu_lapic_id_t lapic_id, cpu_acpi_id_t acpi_id)
+{
+  static cpu_t *cpu = &cpu_bsp;
+  if (!cpu)
+    return false;
+
+  cpu_t *prev_cpu = cpu;
+
+  cpu = malloc(sizeof(*cpu));
+  if (!cpu)
+    return false;
+
+  prev_cpu->next = cpu;
+
+  memset(cpu, 0, sizeof(*cpu));
+
+  cpu->self = cpu;
+  cpu->lapic_id = lapic_id;
+  cpu->acpi_id = acpi_id;
+
+  return true;
+}
+
+void cpu_ap_install(cpu_t *cpu)
+{
+  msr_write(MSR_GS_BASE, (uint64_t) cpu);
+}
+
+cpu_t *cpu_iter(void)
+{
+  return &cpu_bsp;
 }
 

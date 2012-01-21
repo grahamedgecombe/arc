@@ -19,6 +19,11 @@
 
 #include <arc/cpu/gdt.h>
 #include <arc/cpu/tss.h>
+#include <stdbool.h>
+#include <stdint.h>
+
+typedef uint32_t cpu_acpi_id_t;
+typedef uint32_t cpu_lapic_id_t;
 
 typedef struct cpu
 {
@@ -27,6 +32,16 @@ typedef struct cpu
    * points to itself
    */
   struct cpu *self;
+
+  /* a pointer to the next CPU such that they form a singly-linked list */
+  struct cpu *next;
+
+  /* BSP flag */
+  bool bsp;
+
+  /* the local APIC and ACPI ids of this processor */
+  cpu_lapic_id_t lapic_id;
+  cpu_acpi_id_t acpi_id;
 
   /* the gdt and gdtr for this processor */
   gdtr_t gdtr;
@@ -37,6 +52,9 @@ typedef struct cpu
 } cpu_t;
 
 void cpu_bsp_init(void);
+bool cpu_ap_init(cpu_lapic_id_t lapic_id, cpu_acpi_id_t acpi_id);
+void cpu_ap_install(cpu_t *cpu);
+cpu_t *cpu_iter(void);
 cpu_t *cpu_get(void);
 
 #endif

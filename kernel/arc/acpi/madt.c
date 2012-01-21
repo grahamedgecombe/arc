@@ -15,7 +15,10 @@
  */
 
 #include <arc/acpi/madt.h>
+#include <arc/smp/cpu.h>
+#include <arc/panic.h>
 #include <arc/tty.h>
+#include <stdbool.h>
 #include <stddef.h>
 
 void madt_scan(madt_t *madt)
@@ -23,10 +26,41 @@ void madt_scan(madt_t *madt)
   uintptr_t ptr = (uintptr_t) &madt->entries[0];
   uintptr_t ptr_end = (uintptr_t) madt + madt->header.len;
 
+  bool bsp = true;
+
   while (ptr < ptr_end)
   {
     madt_entry_t *entry = (madt_entry_t *) ptr;
     ptr += entry->len;
+
+    switch (entry->type)
+    {
+      case MADT_TYPE_LAPIC:
+        if (entry->lapic.flags & MADT_LAPIC_FLAGS_ENABLED)
+        {
+          uint8_t acpi_id  = entry->lapic.cpu_id;
+          uint8_t lapic_id = entry->lapic.lapic_id;
+
+          if (bsp)
+          {
+            bsp = false;
+
+            /*
+             * ACPI spec states that the first LAPIC entry is the BSP, fill out
+             * the extra bits not done by cpu_bsp_init() here
+             */
+            cpu_t *cpu_bsp = cpu_get();
+            cpu_bsp->lapic_id = lapic_id;
+            cpu_bsp->acpi_id = acpi_id;
+          }
+          else
+          {
+            if (!cpu_ap_init(lapic_id, acpi_id))
+              panic("failed to register AP");
+          }
+        }
+        break;
+    }
   }
 }
 
