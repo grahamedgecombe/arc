@@ -18,6 +18,7 @@
 #include <arc/cpu/msr.h>
 #include <arc/mm/common.h>
 #include <arc/mm/mmio.h>
+#include <arc/intr/common.h>
 
 #define LAPIC_ID           0x08
 #define LAPIC_VER          0x0C
@@ -65,6 +66,8 @@
 #define LAPIC_TIMER_CCR    0xE4
 #define LAPIC_TIMER_DCR    0xF8
 
+#define SPURIOUS_VEC_ENABLED 0x100
+
 static volatile uint32_t *lapic;
 static uintptr_t lapic_phy_addr;
 
@@ -92,6 +95,8 @@ void lapic_init(void)
 {
   uint64_t apic_base = (msr_read(MSR_APIC_BASE) & APIC_BASE_BSP) | lapic_phy_addr | APIC_BASE_ENABLE;
   msr_write(MSR_APIC_BASE, apic_base);
+
+  lapic_write(LAPIC_SPURIOUS_VEC, SPURIOUS_VEC_ENABLED | SPURIOUS);
 }
 
 void lapic_ack(void)

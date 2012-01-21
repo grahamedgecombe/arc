@@ -16,6 +16,7 @@
 
 #include <arc/intr/lx2apic.h>
 #include <arc/cpu/msr.h>
+#include <arc/intr/common.h>
 
 #define LX2APIC_ID           0x802
 #define LX2APIC_VER          0x803
@@ -60,6 +61,8 @@
 #define LX2APIC_TIMER_DCR    0x83E
 #define LX2APIC_SELF_IPI     0x83F
 
+#define SPURIOUS_VEC_ENABLED 0x100
+
 static uint64_t lx2apic_read(uint32_t reg)
 {
   return msr_read(reg);
@@ -74,6 +77,8 @@ void lx2apic_init(void)
 {
   uint64_t apic_base = (msr_read(MSR_APIC_BASE) & APIC_BASE_BSP) | APIC_BASE_ENABLE | APIC_BASE_X2_MODE;
   msr_write(MSR_APIC_BASE, apic_base);
+
+  lx2apic_write(LX2APIC_SPURIOUS_VEC, SPURIOUS_VEC_ENABLED | SPURIOUS);
 }
 
 void lx2apic_ack(void)

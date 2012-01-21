@@ -88,7 +88,7 @@
 #define IRQ23 0x37
 
 /* LAPIC spurious interrupt */
-#define SPURIOUS 0xFE
+#define SPURIOUS 0xF0 /* in old processors bits 0-3 are hardwired to 0 */
 
 /* system call */
 #define SYSCALL 0xFF
