@@ -25,7 +25,7 @@
 #include <arc/cpu/tss.h>
 #include <arc/cpu/intr.h>
 #include <arc/cpu/idt.h>
-#include <arc/intr/pic.h>
+#include <arc/intr/ic.h>
 #include <arc/panic.h>
 #include <arc/smp/cpu.h>
 #include <arc/acpi/scan.h>
@@ -97,15 +97,21 @@ void init(uint32_t magic, multiboot_t *multiboot)
   {
     /* search for MP tables if the PC doesn't support ACPI */
     tty_printf("Scanning MP tables...\n");
+
+    /* if (!mp_scan()) */
+    {
+      /* fall back to non-SMP mode using the PIC */
+      tty_printf("Falling back to single processor mode...\n");
+      ic_bsp_init(IC_TYPE_PIC);
+    }
   }
+
+  /* set up the interrupt controller */
+  ic_ap_init();
 
   /* set up symmetric multi-processing */
   tty_printf("Setting up SMP...\n");
   smp_init();
-
-  /* set up the PICs */
-  tty_printf("Setting up the PICs and masking all IRQs...\n");
-  pic_init();
 
   /* enable interrupts */
   tty_printf("Enabling interrupts...\n");

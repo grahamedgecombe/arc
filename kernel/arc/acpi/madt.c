@@ -15,6 +15,7 @@
  */
 
 #include <arc/acpi/madt.h>
+#include <arc/intr/ic.h>
 #include <arc/smp/cpu.h>
 #include <arc/panic.h>
 #include <arc/tty.h>
@@ -23,11 +24,15 @@
 
 void madt_scan(madt_t *madt)
 {
-  uintptr_t ptr = (uintptr_t) &madt->entries[0];
-  uintptr_t ptr_end = (uintptr_t) madt + madt->header.len;
+  /* the 32-bit address of the LAPIC */
+  uint64_t lapic_addr = madt->lapic_addr;
 
+  /* a flag indicating if the BSP has been found in the table yet */
   bool bsp = true;
 
+  /* iterate through the MADT entries */
+  uintptr_t ptr = (uintptr_t) &madt->entries[0];
+  uintptr_t ptr_end = (uintptr_t) madt + madt->header.len;
   while (ptr < ptr_end)
   {
     madt_entry_t *entry = (madt_entry_t *) ptr;
@@ -35,6 +40,11 @@ void madt_scan(madt_t *madt)
 
     switch (entry->type)
     {
+      case MADT_TYPE_LAPIC_ADDR:
+        /* override the LAPIC address with a 64-bit one */
+        lapic_addr = entry->lapic_addr.addr;
+        break;
+
       case MADT_TYPE_LAPIC:
         if (entry->lapic.flags & MADT_LAPIC_FLAGS_ENABLED)
         {
@@ -62,5 +72,8 @@ void madt_scan(madt_t *madt)
         break;
     }
   }
+
+  /* initialise the IC */
+  ic_bsp_init(IC_TYPE_LAPIC, lapic_addr);
 }
 

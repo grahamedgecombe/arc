@@ -14,13 +14,25 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <arc/intr/dispatch.h>
-#include <arc/intr/common.h>
-#include <arc/intr/ic.h>
-#include <arc/tty.h>
+#ifndef ARC_INTR_IC_H
+#define ARC_INTR_IC_H
 
-void intr_dispatch(intr_state_t *state)
-{
-  ic_ack(state->id);
-}
+#include <arc/intr/ic.h>
+#include <arc/intr/common.h>
+#include <arc/smp/cpu.h>
+
+#define IC_TYPE_NONE    0x0
+#define IC_TYPE_PIC     0x1
+#define IC_TYPE_LAPIC   0x2
+#define IC_TYPE_LX2APIC 0x3
+
+void ic_bsp_init(int type, ...);
+void ic_ap_init(void);
+
+void ic_ack(intr_id_t id);
+
+void ic_ipi_init(cpu_lapic_id_t id);
+void ic_ipi_startup(cpu_lapic_id_t id, uint8_t trampoline_addr);
+
+#endif
 

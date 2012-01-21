@@ -20,7 +20,7 @@
 #include <arc/cpu/tss.h>
 #include <arc/cpu/idt.h>
 #include <arc/cpu/pause.h>
-#include <arc/intr/lapic.h>
+#include <arc/intr/ic.h>
 #include <arc/mm/vmm.h>
 #include <arc/time/pit.h>
 #include <arc/mp.h>
@@ -67,18 +67,18 @@ static void smp_boot(cpu_t *cpu)
   ack_sipi = false;
  
   /* send INIT IPI */
-  lapic_ipi(cpu->lapic_id, 0x05, 0x00);
+  ic_ipi_init(cpu->lapic_id);
   pit_mdelay(10);
 
   /* send STARTUP IPI */
   uint8_t vector = TRAMPOLINE_BASE / FRAME_SIZE;
-  lapic_ipi(cpu->lapic_id, 0x06, vector);
+  ic_ipi_startup(cpu->lapic_id, vector);
   pit_mdelay(1);
 
   /* send STARTUP IPI again */
   if (!ack_sipi)
   {
-    lapic_ipi(cpu->lapic_id, 0x06, vector);
+    ic_ipi_startup(cpu->lapic_id, vector);
     pit_mdelay(1);
   }
 
@@ -92,8 +92,6 @@ static void smp_boot(cpu_t *cpu)
 
 void smp_init(void)
 {
-  lapic_mmio_init(0xFEE00000);
-
   /* bring up all of the APs */
   for (cpu_t *cpu = cpu_iter(); cpu; cpu = cpu->next)
   {
@@ -120,5 +118,8 @@ void smp_ap_init(void)
   gdt_init();
   tss_init();
   idt_ap_init(); /* we re-use the same IDT for every CPU */
+
+  /* set up the interrupt controller on this CPU */
+  ic_ap_init();
 }
 
