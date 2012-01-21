@@ -93,7 +93,7 @@ bool lapic_mmio_init(uintptr_t addr)
 
 void lapic_init(void)
 {
-  uint64_t apic_base = (msr_read(MSR_APIC_BASE) & APIC_BASE_BSP) | lapic_phy_addr | APIC_BASE_ENABLE;
+  uint64_t apic_base = (msr_read(MSR_APIC_BASE) & APIC_BASE_BSP) | lapic_phy_addr | APIC_BASE_ENABLED;
   msr_write(MSR_APIC_BASE, apic_base);
 
   lapic_write(LAPIC_SVR, SVR_ENABLED | SPURIOUS);

@@ -75,7 +75,7 @@ static void lx2apic_write(uint32_t reg, uint64_t val)
 
 void lx2apic_init(void)
 {
-  uint64_t apic_base = (msr_read(MSR_APIC_BASE) & APIC_BASE_BSP) | APIC_BASE_ENABLE | APIC_BASE_X2_MODE;
+  uint64_t apic_base = (msr_read(MSR_APIC_BASE) & APIC_BASE_BSP) | APIC_BASE_ENABLED | APIC_BASE_X2_MODE;
   msr_write(MSR_APIC_BASE, apic_base);
 
   lx2apic_write(LX2APIC_SVR, SVR_ENABLED | SPURIOUS);
