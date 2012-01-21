@@ -1,10 +1,13 @@
 #!/bin/sh
 BASEDIR=`dirname $0`
 cd $BASEDIR
-sudo losetup /dev/loop0 disk.img
-sudo losetup -o 32256 /dev/loop1 /dev/loop0
-sudo e2fsck -f /dev/loop1
+LOOP0=`sudo losetup -f`
+sudo losetup $LOOP0 disk.img
+LOOP1=`sudo losetup -f`
+sudo losetup -o 32256 $LOOP1 $LOOP0
+sudo e2fsck -f $LOOP1
 sync
-sudo losetup -d /dev/loop1
-sudo losetup -d /dev/loop0
+sudo losetup -d $LOOP1
+sync
+sudo losetup -d $LOOP0
 
