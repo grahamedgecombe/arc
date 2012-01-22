@@ -14,20 +14,14 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef ARC_LOCK_SPINLOCK_H
-#define ARC_LOCK_SPINLOCK_H
+#ifndef ARC_TYPES_H
+#define ARC_TYPES_H
 
-#include <stdbool.h>
 #include <stdint.h>
 
-#define SPIN_UNLOCKED 0
-#define SPIN_LOCKED   1
-
-typedef uint64_t spinlock_t;
-
-void spin_lock(spinlock_t *lock);
-bool spin_try_lock(spinlock_t *lock);
-void spin_unlock(spinlock_t *lock);
+typedef uint8_t intr_id_t;
+typedef uint32_t cpu_acpi_id_t;
+typedef uint32_t cpu_lapic_id_t;
 
 #endif
 

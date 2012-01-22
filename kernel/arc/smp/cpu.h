@@ -19,11 +19,8 @@
 
 #include <arc/cpu/gdt.h>
 #include <arc/cpu/tss.h>
+#include <arc/types.h>
 #include <stdbool.h>
-#include <stdint.h>
-
-typedef uint32_t cpu_acpi_id_t;
-typedef uint32_t cpu_lapic_id_t;
 
 typedef struct cpu
 {

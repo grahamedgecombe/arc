@@ -19,6 +19,7 @@
 
 #include <stdbool.h>
 #include <arc/intr/common.h>
+#include <arc/types.h>
 
 void pic_init(void);
 bool pic_spurious(intr_id_t irq);

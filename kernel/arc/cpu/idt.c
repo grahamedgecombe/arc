@@ -17,6 +17,7 @@
 #include <arc/cpu/idt.h>
 #include <arc/intr/common.h>
 #include <arc/intr/stub.h>
+#include <arc/types.h>
 #include <string.h>
 
 #define GATE_PRESENT   0x80

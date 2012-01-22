@@ -93,9 +93,6 @@
 /* system call */
 #define SYSCALL 0xFF
 
-/* a type suitable for storing an interrupt id */
-typedef uint8_t intr_id_t;
-
 /* interrupt state passed to intr_dispatch() */
 typedef PACK(struct
 {

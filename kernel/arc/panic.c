@@ -17,19 +17,20 @@
 #include <arc/panic.h>
 #include <arc/tty.h>
 #include <arc/cpu/halt.h>
-#include <stdarg.h>
 
 void panic(const char *message, ...)
 {
-  /* write panic message */
   va_list args;
   va_start(args, message);
+  vpanic(message, args);
+  va_end(args);
+}
+
+void vpanic(const char *message, va_list args)
+{
   tty_puts("PANIC: ");
   tty_vprintf(message, args);
-  va_end(args);
   tty_puts("\n");
-
-  /* halt this CPU forever */
   halt_forever();
 }
 

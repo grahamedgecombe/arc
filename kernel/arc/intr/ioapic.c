@@ -17,6 +17,7 @@
 #include <arc/intr/ioapic.h>
 #include <arc/intr/common.h>
 #include <arc/mm/mmio.h>
+#include <arc/types.h>
 #include <stdbool.h>
 #include <stdlib.h>
 
