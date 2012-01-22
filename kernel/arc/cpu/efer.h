@@ -14,23 +14,18 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef ARC_CPU_MSR_H
-#define ARC_CPU_MSR_H
+#ifndef ARC_CPU_EFER_H
+#define ARC_CPU_EFER_H
 
 #include <stdint.h>
 
-#define MSR_EFER           0xC0000080
-#define MSR_FS_BASE        0xC0000100
-#define MSR_GS_BASE        0xC0000101
-#define MSR_GS_KERNEL_BASE 0xC0000102
-#define MSR_APIC_BASE      0x0000001B
+#define EFER_SCE 0x00000000 /* syscall enable */
+#define EFER_LME 0x00000100 /* long mode enable */
+#define EFER_LMA 0x00000400 /* long mode active */
+#define EFER_NXE 0x00000800 /* nx bit enable */
 
-#define APIC_BASE_ENABLED 0x800
-#define APIC_BASE_X2_MODE 0x400
-#define APIC_BASE_BSP     0x100
-
-uint64_t msr_read(uint32_t msr);
-void msr_write(uint32_t msr, uint64_t value);
+uint64_t efer_read(void);
+void efer_write(uint64_t efer);
 
 #endif
 
