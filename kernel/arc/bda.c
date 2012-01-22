@@ -14,17 +14,16 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef ARC_BDA_H
-#define ARC_BDA_H
+#include <arc/bda.h>
+#include <arc/mm/phy32.h>
 
-#include <stdint.h>
+uint8_t bda_read(uint16_t off)
+{
+  return *((uint8_t *) aphy32_to_virt(off));
+}
 
-#define BDA_VGA_MODE 0x449
-#define BDA_VGA_PORT 0x463
-#define BDA_EBDA     0x40E
-
-uint8_t bda_read(uint16_t off);
-uint16_t bda_reads(uint16_t off);
-
-#endif
+uint16_t bda_reads(uint16_t off)
+{
+  return *((uint16_t *) aphy32_to_virt(off));
+}
 
