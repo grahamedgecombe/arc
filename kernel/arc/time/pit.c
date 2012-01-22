@@ -78,7 +78,18 @@ static void _pit_mdelay(int ms)
 
   /* busy-wait for the countdown to reach zero */
   while ((inb_p(PORT_CTRL) & CTRL_OUT) == 0)
+  {
+    /* also check the count ourselves */
+    outb_p(PORT_CMD, CMD_ACC_LATCH | CMD_CH2);
+    uint8_t lo = inb_p(PORT_CH2);
+    uint8_t hi = inb_p(PORT_CH2);
+    uint16_t count = (hi << 8) | lo;
+    if (count == 0)
+      break;
+
+    /* don't burn the CPU! */
     pause_once();
+  }
 }
 
 void pit_mdelay(int ms)
