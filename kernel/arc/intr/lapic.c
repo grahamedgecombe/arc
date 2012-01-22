@@ -19,6 +19,7 @@
 #include <arc/mm/common.h>
 #include <arc/mm/mmio.h>
 #include <arc/intr/common.h>
+#include <arc/tty.h>
 
 #define LAPIC_ID        0x08
 #define LAPIC_VER       0x0C
@@ -79,6 +80,11 @@ static uint32_t lapic_read(size_t reg)
 static void lapic_write(size_t reg, uint32_t val)
 {
   lapic[reg] = val;
+}
+
+void lapic_print_info(void)
+{
+  tty_printf(" => Using local APICs (at %0#18x)\n", lapic_phy_addr);
 }
 
 bool lapic_mmio_init(uintptr_t addr)

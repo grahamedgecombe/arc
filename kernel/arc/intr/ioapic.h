@@ -23,11 +23,23 @@
 
 typedef struct ioapic
 {
-  struct ioapic *next; /* a pointer to the next I/O APIC */
-  ioapic_id_t id; /* the id of this I/O APIC */
-  volatile uint32_t *reg, *val; /* the MMIO registers */
-  gsi_t intr_base; /* the global system interrupt base */
-  intr_id_t intrs; /* the number of interrupts this I/O APIC redirects */
+  /* a pointer to the next I/O APIC */
+  struct ioapic *next;
+
+  /* the id of this I/O APIC */
+  ioapic_id_t id;
+
+  /* the MMIO registers */
+  volatile uint32_t *reg, *val;
+
+  /* the global system interrupt base */
+  gsi_t intr_base;
+
+  /* the number of interrupts this I/O APIC routes */
+  intr_id_t intrs;
+
+  /* used to print debug info */
+  uint64_t _phy_addr;
 } ioapic_t;
 
 bool ioapic_init(ioapic_id_t id, uintptr_t addr, gsi_t intr_base);

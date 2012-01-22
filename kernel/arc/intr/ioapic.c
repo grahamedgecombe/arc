@@ -85,6 +85,7 @@ bool ioapic_init(ioapic_id_t id, uintptr_t addr, gsi_t intr_base)
   apic->reg = (volatile uint32_t *) virt_addr;
   apic->val = (volatile uint32_t *) (virt_addr + 16);
   apic->intrs = ((ioapic_read(apic, IOAPIC_VER) >> 16) & 0xFF) + 1;
+  apic->_phy_addr = addr;
   return true;
 }
 

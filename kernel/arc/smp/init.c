@@ -37,6 +37,12 @@
 static volatile bool ack_sipi = false;
 static cpu_t * volatile booted_cpu;
 
+static void print_cpu_info(cpu_t *cpu)
+{
+  const char *str = cpu->bsp ? ", bsp" : "";
+  tty_printf(" => CPU (struct at %0#18x, id %0#10x%s)\n", cpu, cpu->lapic_id, str);
+}
+
 /* bring up an AP */
 static void smp_boot(cpu_t *cpu)
 {
@@ -98,7 +104,7 @@ void smp_init(void)
     if (!cpu->bsp)
       smp_boot(cpu);
     else
-      tty_printf(" => BSP %d booting APs...\n", cpu->lapic_id);
+      print_cpu_info(cpu);
   }
 }
 
@@ -109,7 +115,7 @@ void smp_ap_init(void)
 
   /* print a message to indicate the AP has been booted */
   cpu_t *cpu = cpu_get();
-  tty_printf(" =>  AP %d booted\n", cpu->lapic_id);
+  print_cpu_info(cpu);
 
   /* acknowledge the STARTUP IPI */
   ack_sipi = true;

@@ -33,6 +33,7 @@
 #define LAPIC_IPI_ET       0x00
 #define LAPIC_IPI_LT       0x80
 
+void lapic_print_info(void);
 bool lapic_mmio_init(uintptr_t addr);
 void lapic_init(void);
 void lapic_ipi(uint8_t dest, uint8_t mode, uint8_t vector);

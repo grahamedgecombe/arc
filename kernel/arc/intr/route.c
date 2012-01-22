@@ -14,29 +14,22 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef ARC_INTR_IC_H
-#define ARC_INTR_IC_H
-
+#include <arc/intr/route.h>
 #include <arc/intr/ic.h>
-#include <arc/intr/common.h>
-#include <arc/smp/cpu.h>
-#include <stdarg.h>
+#include <arc/intr/ioapic.h>
+#include <arc/tty.h>
 
-#define IC_TYPE_NONE    0x0
-#define IC_TYPE_PIC     0x1
-#define IC_TYPE_LAPIC   0x2
-#define IC_TYPE_LX2APIC 0x3
+void intr_route_init(void)
+{
+  ic_print_info();
 
-void ic_print_info(void);
-
-void ic_bsp_init(int type, ...);
-void ic_bsp_vinit(int type, va_list args);
-void ic_ap_init(void);
-
-void ic_ack(intr_id_t id);
-
-void ic_ipi_init(cpu_lapic_id_t id);
-void ic_ipi_startup(cpu_lapic_id_t id, uint8_t trampoline_addr);
-
-#endif
+  for (ioapic_t *apic = ioapic_iter(); apic; apic = apic->next)
+  {
+    uint64_t addr = apic->_phy_addr;
+    ioapic_id_t id = apic->id;
+    gsi_t intr_first = apic->intr_base;
+    gsi_t intr_last = apic->intr_base + apic->intrs - 1;
+    tty_printf(" => Using I/O APIC (at %0#18x, id %0#4x, intrs %d-%d)\n", addr, id, intr_first, intr_last);
+  }
+}
 

@@ -19,8 +19,27 @@
 #include <arc/intr/lapic.h>
 #include <arc/intr/lx2apic.h>
 #include <arc/panic.h>
+#include <arc/tty.h>
 
 static int ic_type = IC_TYPE_NONE;
+
+void ic_print_info(void)
+{
+  switch (ic_type)
+  {
+    case IC_TYPE_PIC:
+      tty_puts(" => Using dual 8259 PICs\n");
+      break;
+
+    case IC_TYPE_LAPIC:
+      lapic_print_info();
+      break;
+
+    case IC_TYPE_LX2APIC:
+      tty_puts(" => Using local x2APICs\n");
+      break;
+  }
+}
 
 void ic_bsp_init(int type, ...)
 {
