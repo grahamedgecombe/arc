@@ -38,7 +38,7 @@ typedef PACK(struct
 static ALIGN(pmm_stack_t pmm_phy_stacks[STACKS], FRAME_SIZE);
 static pmm_stack_t *pmm_stacks = (pmm_stack_t *) VM_STACK_OFFSET;
 static uint64_t *pmm_page_table = (uint64_t *) PAGE_TABLE_OFFSET;
-static spinlock_t pmm_lock;
+static spinlock_t pmm_lock = SPIN_UNLOCKED;
 static uint64_t pmm_counts[STACKS];
 
 static const char *get_zone_str(int zone)

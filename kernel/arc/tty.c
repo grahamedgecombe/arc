@@ -45,7 +45,7 @@
 #define FLAG_ZERO    0x10
 
 /* the tty lock */
-static spinlock_t tty_lock = 0;
+static spinlock_t tty_lock = SPIN_UNLOCKED;
 
 /* the VGA port base */
 static uint16_t vga_port_base;

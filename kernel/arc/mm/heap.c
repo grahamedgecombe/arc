@@ -43,7 +43,7 @@ typedef PACK(struct heap_node
 }) heap_node_t;
 
 static heap_node_t *heap_root;
-static spinlock_t heap_lock;
+static spinlock_t heap_lock = SPIN_UNLOCKED;
 
 void heap_init(void)
 {
