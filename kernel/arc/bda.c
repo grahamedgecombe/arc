@@ -17,13 +17,15 @@
 #include <arc/bda.h>
 #include <arc/mm/phy32.h>
 
-uint8_t bda_read(uint16_t off)
+#define BDA_OFFSET 0x400
+
+uint8_t bda_read(uint8_t off)
 {
-  return *((uint8_t *) aphy32_to_virt(off));
+  return *((uint8_t *) aphy32_to_virt(BDA_OFFSET + off));
 }
 
-uint16_t bda_reads(uint16_t off)
+uint16_t bda_reads(uint8_t off)
 {
-  return *((uint16_t *) aphy32_to_virt(off));
+  return *((uint16_t *) aphy32_to_virt(BDA_OFFSET + off));
 }
 

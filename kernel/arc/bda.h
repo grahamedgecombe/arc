@@ -19,12 +19,12 @@
 
 #include <stdint.h>
 
-#define BDA_VGA_MODE 0x449
-#define BDA_VGA_PORT 0x463
-#define BDA_EBDA     0x40E
+#define BDA_VGA_MODE 0x49
+#define BDA_VGA_PORT 0x63
+#define BDA_EBDA     0x0E
 
-uint8_t bda_read(uint16_t off);
-uint16_t bda_reads(uint16_t off);
+uint8_t bda_read(uint8_t off);
+uint16_t bda_reads(uint8_t off);
 
 #endif
 
