@@ -20,6 +20,7 @@
 #include <arc/intr/ic.h>
 #include <arc/intr/common.h>
 #include <arc/smp/cpu.h>
+#include <stdarg.h>
 
 #define IC_TYPE_NONE    0x0
 #define IC_TYPE_PIC     0x1
@@ -27,6 +28,7 @@
 #define IC_TYPE_LX2APIC 0x3
 
 void ic_bsp_init(int type, ...);
+void ic_bsp_vinit(int type, va_list args);
 void ic_ap_init(void);
 
 void ic_ack(intr_id_t id);

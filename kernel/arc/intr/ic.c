@@ -19,7 +19,6 @@
 #include <arc/intr/lapic.h>
 #include <arc/intr/lx2apic.h>
 #include <arc/panic.h>
-#include <stdarg.h>
 
 static int ic_type = IC_TYPE_NONE;
 
@@ -27,7 +26,12 @@ void ic_bsp_init(int type, ...)
 {
   va_list args;
   va_start(args, type);
+  ic_bsp_vinit(type, args);
+  va_end(args);
+}
 
+void ic_bsp_vinit(int type, va_list args)
+{
   switch (type)
   {
     case IC_TYPE_PIC:
@@ -47,7 +51,6 @@ void ic_bsp_init(int type, ...)
   }
 
   ic_type = type;
-  va_end(args);
 }
 
 void ic_ap_init(void)
