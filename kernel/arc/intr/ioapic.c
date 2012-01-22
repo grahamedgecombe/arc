@@ -97,7 +97,7 @@ ioapic_t *ioapic_iter(void)
 void ioapic_route(ioapic_t *apic, intr_id_t src, intr_id_t vec, bool high, bool lt)
 {
   uint8_t dst = 0xFF;
-  uint64_t redtbl_entry = REDTBL_DESTMOD_PHYSICAL | REDTBL_DELMOD_FIXED | (((uint64_t) (dst & 0xFF)) << 56) | (vec & 0xFF);
+  uint64_t redtbl_entry = REDTBL_DESTMOD_PHYSICAL | REDTBL_DELMOD_LOWPRI | (((uint64_t) (dst & 0xFF)) << 56) | (vec & 0xFF);
 
   if (high)
     redtbl_entry |= REDTBL_ACTIVE_HIGH;
