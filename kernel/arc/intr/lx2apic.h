@@ -20,6 +20,19 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+/* IPI mode flags */
+#define LX2APIC_IPI_FIXED    0x00
+#define LX2APIC_IPI_SMI      0x02
+#define LX2APIC_IPI_NMI      0x04
+#define LX2APIC_IPI_INIT     0x05
+#define LX2APIC_IPI_STARTUP  0x06
+#define LX2APIC_IPI_PHYSICAL 0x00
+#define LX2APIC_IPI_LOGICAL  0x08
+#define LX2APIC_IPI_DEASSERT 0x00
+#define LX2APIC_IPI_ASSERT   0x40
+#define LX2APIC_IPI_ET       0x00
+#define LX2APIC_IPI_LT       0x80
+
 void lx2apic_init(void);
 void lx2apic_ipi(uint32_t dest, uint8_t mode, uint8_t vector);
 void lx2apic_ack(void);

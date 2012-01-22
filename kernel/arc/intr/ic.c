@@ -109,11 +109,11 @@ void ic_ipi_init(cpu_lapic_id_t id)
       break;
 
     case IC_TYPE_LAPIC:
-      lapic_ipi(id, 0x05, 0x00);
+      lapic_ipi(id, LAPIC_IPI_INIT, 0x00);
       break;
 
     case IC_TYPE_LX2APIC:
-      lx2apic_ipi(id, 0x05, 0x00);
+      lx2apic_ipi(id, LX2APIC_IPI_INIT, 0x00);
       break;
   }
 }
@@ -131,11 +131,11 @@ void ic_ipi_startup(cpu_lapic_id_t id, uint8_t trampoline_addr)
       break;
 
     case IC_TYPE_LAPIC:
-      lapic_ipi(id, 0x06, trampoline_addr);
+      lapic_ipi(id, LAPIC_IPI_STARTUP, trampoline_addr);
       break;
 
     case IC_TYPE_LX2APIC:
-      lx2apic_ipi(id, 0x06, trampoline_addr);
+      lx2apic_ipi(id, LX2APIC_IPI_STARTUP, trampoline_addr);
       break;
   }
 }

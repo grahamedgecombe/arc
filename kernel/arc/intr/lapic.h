@@ -20,6 +20,19 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+/* IPI mode flags */
+#define LAPIC_IPI_FIXED    0x00
+#define LAPIC_IPI_SMI      0x02
+#define LAPIC_IPI_NMI      0x04
+#define LAPIC_IPI_INIT     0x05
+#define LAPIC_IPI_STARTUP  0x06
+#define LAPIC_IPI_PHYSICAL 0x00
+#define LAPIC_IPI_LOGICAL  0x08
+#define LAPIC_IPI_DEASSERT 0x00
+#define LAPIC_IPI_ASSERT   0x40
+#define LAPIC_IPI_ET       0x00
+#define LAPIC_IPI_LT       0x80
+
 bool lapic_mmio_init(uintptr_t addr);
 void lapic_init(void);
 void lapic_ipi(uint8_t dest, uint8_t mode, uint8_t vector);
