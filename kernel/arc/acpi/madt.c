@@ -16,6 +16,7 @@
 
 #include <arc/acpi/madt.h>
 #include <arc/intr/ic.h>
+#include <arc/intr/pic.h>
 #include <arc/intr/ioapic.h>
 #include <arc/smp/cpu.h>
 #include <arc/panic.h>
@@ -83,6 +84,10 @@ void madt_scan(madt_t *madt)
         break;
     }
   }
+
+  /* mask the PICs if they are present */
+  if (madt->flags & MADT_FLAGS_PCAT)
+    pic_init();
 
   /* initialise the IC */
   ic_bsp_init(IC_TYPE_LAPIC, lapic_addr);
