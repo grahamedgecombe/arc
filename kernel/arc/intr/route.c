@@ -29,7 +29,7 @@ void intr_route_init(void)
     ioapic_id_t id = apic->id;
     gsi_t intr_first = apic->intr_base;
     gsi_t intr_last = apic->intr_base + apic->intrs - 1;
-    tty_printf(" => Using I/O APIC (at %0#18x, id %0#4x, intrs %d-%d)\n", addr, id, intr_first, intr_last);
+    tty_printf(" => Using I/O APIC (at %0#18x, id %0#4x, irqs %d-%d)\n", addr, id, intr_first, intr_last);
   }
 }
 

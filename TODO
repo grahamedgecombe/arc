@@ -33,3 +33,5 @@
 
 * TLB invalidation/panic should use an IPI to work on all processors
 
+* check if setting the IMCR is required to switch into APIC mode
+
