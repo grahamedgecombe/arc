@@ -225,7 +225,7 @@ static void *_heap_alloc(size_t size, int flags, bool phy_alloc)
       /* if the physical allocation fails, roll back our changes */
       if (!phy)
       {
-        _heap_free(node);
+        _heap_free((void *) ((uintptr_t) node + FRAME_SIZE));
         return 0;
       }
 
@@ -236,7 +236,7 @@ static void *_heap_alloc(size_t size, int flags, bool phy_alloc)
       if (!vmm_map(page, phy, map_flags))
       {
         pmm_free(phy);
-        _heap_free(node);
+        _heap_free((void *) ((uintptr_t) node + FRAME_SIZE));
         return 0;
       }
     }

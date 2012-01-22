@@ -66,6 +66,8 @@
 #define MAP_ANONYMOUS 0x1
 #define MAP_PRIVATE   0x2
 
+#define MAP_FAILED ((void *) -1)
+
 #define PROT_NONE  0x0
 #define PROT_READ  0x1
 #define PROT_WRITE 0x2

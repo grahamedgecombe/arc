@@ -32,7 +32,11 @@ void *mmap(void *addr, size_t len, int prot, int flags, int fd, off_t off)
   if (prot & PROT_EXEC)
     heap_flags |= HEAP_X;
 
-  return heap_alloc(len, heap_flags);
+  void *ptr = heap_alloc(len, heap_flags);
+  if (!ptr)
+    return MAP_FAILED;
+
+  return ptr;
 }
 
 int munmap(void *addr, size_t len)
