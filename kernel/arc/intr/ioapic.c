@@ -18,8 +18,9 @@
 #include <arc/intr/common.h>
 #include <arc/mm/mmio.h>
 #include <arc/types.h>
-#include <stdbool.h>
 #include <stdlib.h>
+
+static ioapic_t *ioapic_head; /* a pointer to the first I/O APIC in the system */
 
 static uint32_t ioapic_read(ioapic_t *apic, uint32_t reg)
 {
@@ -33,22 +34,42 @@ static void ioapic_write(ioapic_t *apic, uint32_t reg, uint32_t val)
   *(apic->val) = val;
 }
 
-ioapic_t *ioapic_init(uintptr_t addr)
+bool ioapic_init(ioapic_id_t id, uintptr_t addr, gsi_t intr_base)
 {
   ioapic_t *apic = malloc(sizeof(*apic));
   if (!apic)
-    return 0;
+    return false;
 
   uintptr_t virt_addr = (uintptr_t) mmio_map(addr, 32, MMIO_R | MMIO_W);
   if (!virt_addr)
   {
     free(apic);
-    return 0;
+    return false;
   }
 
+  static ioapic_t *ioapic_tail = 0;
+  if (ioapic_tail)
+  {
+    ioapic_tail->next = apic;
+    ioapic_tail = apic;
+  }
+  else
+  {
+    ioapic_head = ioapic_tail = apic;
+  }
+
+  apic->next = 0;
+  apic->id = id;
+  apic->intr_base = intr_base;
   apic->reg = (volatile uint32_t *) virt_addr;
   apic->val = (volatile uint32_t *) (virt_addr + 16);
-  return apic;
+  apic->intrs = ((ioapic_read(apic, IOAPIC_VER) >> 24) & 0xFF) + 1;
+  return true;
+}
+
+ioapic_t *ioapic_iter(void)
+{
+  return ioapic_head;
 }
 
 void ioapic_route(ioapic_t *apic, intr_id_t src, intr_id_t vec, bool high, bool lt)
@@ -66,7 +87,7 @@ void ioapic_route(ioapic_t *apic, intr_id_t src, intr_id_t vec, bool high, bool 
   else
     redtbl_entry |= REDTBL_TRIGGER_EDGE;
 
-  ioapic_write(apic, IOAPIC_REDTBL0 + 2 * src, redtbl_entry & 0xFFFFFFFF);
-  ioapic_write(apic, IOAPIC_REDTBL0 + 2 * src + 1, (redtbl_entry >> 32) & 0xFFFFFFFF);
+  ioapic_write(apic, IOAPIC_REDTBL + 2 * src, redtbl_entry & 0xFFFFFFFF);
+  ioapic_write(apic, IOAPIC_REDTBL + 2 * src + 1, (redtbl_entry >> 32) & 0xFFFFFFFF);
 }
 

@@ -19,9 +19,11 @@
 
 #include <stdint.h>
 
+typedef uint32_t gsi_t;
 typedef uint8_t intr_id_t;
 typedef uint32_t cpu_acpi_id_t;
 typedef uint32_t cpu_lapic_id_t;
+typedef uint8_t ioapic_id_t;
 
 #endif
 

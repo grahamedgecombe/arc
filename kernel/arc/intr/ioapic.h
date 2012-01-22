@@ -17,35 +17,14 @@
 #ifndef ARC_INTR_IOAPIC_H
 #define ARC_INTR_IOAPIC_H
 
+#include <stdbool.h>
 #include <stdint.h>
+#include <arc/types.h>
 
-#define IOAPIC_ID       0x00
-#define IOAPIC_VER      0x01
-#define IOAPIC_ARB      0x02
-#define IOAPIC_REDTBL0  0x10
-#define IOAPIC_REDTBL1  0x12
-#define IOAPIC_REDTBL2  0x14
-#define IOAPIC_REDTBL3  0x16
-#define IOAPIC_REDTBL4  0x18
-#define IOAPIC_REDTBL5  0x1A
-#define IOAPIC_REDTBL6  0x1C
-#define IOAPIC_REDTBL7  0x1E
-#define IOAPIC_REDTBL8  0x20
-#define IOAPIC_REDTBL9  0x22
-#define IOAPIC_REDTBL10 0x24
-#define IOAPIC_REDTBL11 0x26
-#define IOAPIC_REDTBL12 0x28
-#define IOAPIC_REDTBL13 0x2A
-#define IOAPIC_REDTBL14 0x2C
-#define IOAPIC_REDTBL15 0x2E
-#define IOAPIC_REDTBL16 0x30
-#define IOAPIC_REDTBL17 0x32
-#define IOAPIC_REDTBL18 0x34
-#define IOAPIC_REDTBL19 0x36
-#define IOAPIC_REDTBL20 0x38
-#define IOAPIC_REDTBL21 0x3A
-#define IOAPIC_REDTBL22 0x3C
-#define IOAPIC_REDTBL23 0x3E
+#define IOAPIC_ID     0x00
+#define IOAPIC_VER    0x01
+#define IOAPIC_ARB    0x02
+#define IOAPIC_REDTBL 0x10
 
 /*
  * first 8 bits of redtbl entry = vector
@@ -74,12 +53,17 @@
 #define REDTBL_DELMOD_INIT      0x0000000000000500
 #define REDTBL_DELMOD_EXTINT    0x0000000000000700
 
-typedef struct
+typedef struct ioapic
 {
-  volatile uint32_t *reg, *val;
+  struct ioapic *next; /* a pointer to the next I/O APIC */
+  ioapic_id_t id; /* the id of this I/O APIC */
+  volatile uint32_t *reg, *val; /* the MMIO registers */
+  gsi_t intr_base; /* the global system interrupt base */
+  intr_id_t intrs; /* the number of interrupts this I/O APIC redirects */
 } ioapic_t;
 
-ioapic_t *ioapic_init(uintptr_t addr);
+bool ioapic_init(ioapic_id_t id, uintptr_t addr, gsi_t intr_base);
+ioapic_t *ioapic_iter(void);
 
 #endif
 

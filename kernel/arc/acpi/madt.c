@@ -16,6 +16,7 @@
 
 #include <arc/acpi/madt.h>
 #include <arc/intr/ic.h>
+#include <arc/intr/ioapic.h>
 #include <arc/smp/cpu.h>
 #include <arc/panic.h>
 #include <arc/tty.h>
@@ -68,6 +69,16 @@ void madt_scan(madt_t *madt)
             if (!cpu_ap_init(lapic_id, acpi_id))
               panic("failed to register AP");
           }
+        }
+        break;
+
+      case MADT_TYPE_IOAPIC:
+        {
+          uint8_t id = entry->ioapic.id;
+          uint32_t addr = entry->ioapic.addr;
+          uint32_t gsi_base = entry->ioapic.gsi_base;
+          if (!ioapic_init(id, addr, gsi_base))
+            panic("failed to register I/O APIC");
         }
         break;
     }
