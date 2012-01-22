@@ -21,38 +21,6 @@
 #include <stdint.h>
 #include <arc/types.h>
 
-#define IOAPIC_ID     0x00
-#define IOAPIC_VER    0x01
-#define IOAPIC_ARB    0x02
-#define IOAPIC_REDTBL 0x10
-
-/*
- * first 8 bits of redtbl entry = vector
- * last 8 bits of redtbl entry  = dest (apic id or set of processors)
- */
-
-#define REDTBL_MASK             0x0000000000010000
-
-#define REDTBL_TRIGGER_LEVEL    0x0000000000008000
-#define REDTBL_TRIGGER_EDGE     0x0000000000000000
-
-#define REDTBL_REMOTE_IRR       0x0000000000004000
-
-#define REDTBL_ACTIVE_HIGH      0x0000000000002000
-#define REDTBL_ACTIVE_LOW       0x0000000000000000
-
-#define REDTBL_DELIVS           0x0000000000001000
-
-#define REDTBL_DESTMOD_LOGICAL  0x0000000000000800
-#define REDTBL_DESTMOD_PHYSICAL 0x0000000000000000
-
-#define REDTBL_DELMOD_FIXED     0x0000000000000000
-#define REDTBL_DELMOD_LOWPRI    0x0000000000000400
-#define REDTBL_DELMOD_SMI       0x0000000000000200
-#define REDTBL_DELMOD_NMI       0x0000000000000100
-#define REDTBL_DELMOD_INIT      0x0000000000000500
-#define REDTBL_DELMOD_EXTINT    0x0000000000000700
-
 typedef struct ioapic
 {
   struct ioapic *next; /* a pointer to the next I/O APIC */
