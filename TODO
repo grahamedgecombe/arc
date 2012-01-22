@@ -31,3 +31,5 @@
 * use APs to boot more APs so that on systems where there are a large number of
   APs it doesn't take a long time to bring them all up
 
+* TLB invalidation/panic should use an IPI to work on all processors
+
