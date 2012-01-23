@@ -60,8 +60,8 @@ void gdt_init(void)
   /* fill in the entries we need */
   gdt_set_gate( gdt_gates, SLTR_KERNEL_CODE, 0x98, 0xA);
   gdt_set_gate( gdt_gates, SLTR_KERNEL_DATA, 0x92, 0xC);
-  gdt_set_gate( gdt_gates, SLTR_USER_CODE,   0xF8, 0xA);
   gdt_set_gate( gdt_gates, SLTR_USER_DATA,   0xF2, 0xC);
+  gdt_set_gate( gdt_gates, SLTR_USER_CODE,   0xF8, 0xA);
   gdt_set_xgate(gdt_gates, SLTR_TSS,         0x89, 0x0, tss_base, tss_limit);
 
   /* read the FS_BASE and GS_BASE MSRs so we can restore them later on */
