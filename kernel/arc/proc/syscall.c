@@ -38,10 +38,12 @@ void syscall_init(void)
    *
    * Required GDT layout:
    *
-   *    0: kernel code (syscall_sel)
-   *    8: kernel data (sysret_sel)
-   *   16: user data
-   *   24: user code
+   *    0: null
+   *    8: kernel code (syscall_sel)
+   *   16: kernel data (sysret_sel)
+   *   24: user data
+   *   32: user code
+   *   (additional entries e.g. TSS at the end)
    */
 
   /* set the long mode SYSCALL target RIP */
