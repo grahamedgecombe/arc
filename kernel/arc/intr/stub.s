@@ -42,13 +42,6 @@ irq%1:
   jmp intr_stub
 %endmacro
 
-; syscall entry code
-[global sys_call]
-sys_call:
-  push 0
-  push 0xFF
-  jmp intr_stub
-
 intr_stub:
   ; save the register file
   push r15

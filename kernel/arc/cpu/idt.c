@@ -114,7 +114,6 @@ void idt_bsp_init(void)
   idt_encode_gate(IRQ22,    &irq22,    GATE_PRESENT | GATE_INTERRUPT);
   idt_encode_gate(IRQ23,    &irq23,    GATE_PRESENT | GATE_INTERRUPT);
   idt_encode_gate(SPURIOUS, &spurious, GATE_PRESENT | GATE_INTERRUPT);
-  idt_encode_gate(SYSCALL,  &sys_call, GATE_PRESENT | GATE_TRAP | GATE_USER);
 
   idtr.addr = (uint64_t) idt_gates;
   idtr.len = sizeof(idt_gates) - 1;

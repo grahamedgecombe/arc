@@ -78,7 +78,5 @@ void irq23(void);
 
 void spurious(void);
 
-void sys_call(void);
-
 #endif
 
