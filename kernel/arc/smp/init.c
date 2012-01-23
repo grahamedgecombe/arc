@@ -23,6 +23,7 @@
 #include <arc/intr/ic.h>
 #include <arc/mm/vmm.h>
 #include <arc/time/pit.h>
+#include <arc/proc/syscall.h>
 #include <arc/mp.h>
 #include <arc/tty.h>
 #include <arc/panic.h>
@@ -120,10 +121,11 @@ void smp_ap_init(void)
   /* acknowledge the STARTUP IPI */
   ack_sipi = true;
 
-  /* now start the real work! - set up the GDT, TSS and BSP */
+  /* now start the real work! - set up the GDT, TSS, BSP and SYSCALL/RET */
   gdt_init();
   tss_init();
   idt_ap_init(); /* we re-use the same IDT for every CPU */
+  syscall_init();
 
   /* set up the interrupt controller on this CPU */
   ic_ap_init();

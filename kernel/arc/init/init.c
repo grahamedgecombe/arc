@@ -31,6 +31,7 @@
 #include <arc/smp/cpu.h>
 #include <arc/acpi/scan.h>
 #include <arc/smp/init.h>
+#include <arc/proc/syscall.h>
 #include <string.h>
 
 static void print_banner(void)
@@ -86,10 +87,11 @@ void init(uint32_t magic, multiboot_t *multiboot)
   /* set up the BSP's percpu structure */
   cpu_bsp_init();
 
-  /* set up the GDT, TSS and IDT */
+  /* set up the GDT, TSS, IDT and SYSCALL/RET */
   gdt_init();
   tss_init();
   idt_bsp_init();
+  syscall_init();
 
   /* search for ACPI tables */
   tty_puts("Scanning ACPI tables...\n");
