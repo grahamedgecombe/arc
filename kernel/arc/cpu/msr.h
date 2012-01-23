@@ -24,6 +24,10 @@
 #define MSR_GS_BASE        0xC0000101
 #define MSR_GS_KERNEL_BASE 0xC0000102
 #define MSR_APIC_BASE      0x0000001B
+#define MSR_STAR           0xC0000081
+#define MSR_LSTAR          0xC0000082
+#define MSR_CSTAR          0xC0000083
+#define MSR_SFMASK         0xC0000084
 
 #define APIC_BASE_ENABLED 0x800
 #define APIC_BASE_X2_MODE 0x400
