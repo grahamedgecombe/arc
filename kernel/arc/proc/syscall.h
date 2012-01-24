@@ -14,8 +14,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef ARC_SMP_SYSCALL_H
-#define ARC_SMP_SYSCALL_H
+#ifndef ARC_PROC_SYSCALL_H
+#define ARC_PROC_SYSCALL_H
 
 void syscall_init(void);
 void syscall_stub(void);
