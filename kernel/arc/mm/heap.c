@@ -152,6 +152,12 @@ static void _heap_free(void *ptr)
       int size = vmm_size(page);
       if (size != -1)
         pmm_frees(size, vmm_unmap(page));
+
+      /* add on the extra space to get to the next actual page */
+      if (size == SIZE_2M)
+        page += FRAME_SIZE_2M - FRAME_SIZE;
+      else if (size == SIZE_1G)
+        page += FRAME_SIZE_1G - FRAME_SIZE;
     }
   }
 
