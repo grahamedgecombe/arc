@@ -147,17 +147,19 @@ static void _heap_free(void *ptr)
   /* free the physical frames if heap_alloc allocated them */
   if (node->state == HEAP_NODE_ALLOCATED)
   {
-    for (uintptr_t page = node->start; page < node->end; page += FRAME_SIZE)
+    for (uintptr_t page = node->start; page < node->end;)
     {
       int size = vmm_size(page);
       if (size != -1)
-        pmm_frees(size, vmm_unmap(page));
+        pmm_frees(size, vmm_unmaps(size, page));
 
       /* add on the extra space to get to the next actual page */
-      if (size == SIZE_2M)
-        page += FRAME_SIZE_2M - FRAME_SIZE;
-      else if (size == SIZE_1G)
-        page += FRAME_SIZE_1G - FRAME_SIZE;
+      if (size == SIZE_1G)
+        page += FRAME_SIZE_1G;
+      else if (size == SIZE_2M)
+        page += FRAME_SIZE_2M;
+      else
+        page += FRAME_SIZE_4K;
     }
   }
 

@@ -344,7 +344,18 @@ rollback:
 
 void vmm_unmap_range(uintptr_t virt, size_t len)
 {
-  for (size_t off = 0; off < PAGE_ALIGN(len); off += FRAME_SIZE)
-    vmm_unmap(virt + off);
+  for (size_t off = 0; off < PAGE_ALIGN(len);)
+  {
+    int size = vmm_size(virt + off);
+    if (size != -1)
+      vmm_unmaps(size, virt + off);
+
+    if (size == SIZE_1G)
+      off += FRAME_SIZE_1G;
+    else if (size == SIZE_2M)
+      off += FRAME_SIZE_2M;
+    else
+      off += FRAME_SIZE;
+  }
 }
 
