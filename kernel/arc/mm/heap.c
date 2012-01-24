@@ -159,7 +159,7 @@ static void _heap_free(void *ptr)
       else if (size == SIZE_2M)
         page += FRAME_SIZE_2M;
       else
-        page += FRAME_SIZE_4K;
+        page += FRAME_SIZE;
     }
   }
 
