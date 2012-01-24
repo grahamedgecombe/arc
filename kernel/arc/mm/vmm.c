@@ -326,20 +326,15 @@ void vmm_untouch(uintptr_t virt, int size)
 
 bool vmm_map_range(uintptr_t virt, uintptr_t phy, size_t len, uint64_t flags)
 {
-  size_t off;
-  for (off = 0; off < PAGE_ALIGN(len); off += FRAME_SIZE)
+  for (size_t off = 0; off < PAGE_ALIGN(len); off += FRAME_SIZE)
   {
     if (!vmm_map(virt + off, phy + off, flags))
     {
-      goto rollback;
+      vmm_unmap_range(virt, off);
+      return false;
     }
   }
   return true;
-
-rollback:
-  for (size_t rb_off = 0; rb_off < off; rb_off += FRAME_SIZE)
-    vmm_unmap(rb_off);
-  return false;
 }
 
 void vmm_unmap_range(uintptr_t virt, size_t len)
