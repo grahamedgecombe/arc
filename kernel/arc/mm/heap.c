@@ -149,9 +149,9 @@ static void _heap_free(void *ptr)
   {
     for (uintptr_t page = node->start; page < node->end; page += FRAME_SIZE)
     {
-      uintptr_t phy = vmm_unmap(page);
-      if (phy) /* frames that weren't mapped yet are NULL */
-        pmm_free(phy);
+      int size = vmm_size(page);
+      if (size != -1)
+        pmm_frees(size, vmm_unmap(page));
     }
   }
 
@@ -225,7 +225,7 @@ static void *_heap_alloc(size_t size, int flags, bool phy_alloc)
       /* if the physical allocation fails, roll back our changes */
       if (!phy)
       {
-        _heap_free((void *) ((uintptr_t) node + FRAME_SIZE));
+        _heap_free((void *) node->start);
         return 0;
       }
 
@@ -236,7 +236,7 @@ static void *_heap_alloc(size_t size, int flags, bool phy_alloc)
       if (!vmm_map(page, phy, map_flags))
       {
         pmm_free(phy);
-        _heap_free((void *) ((uintptr_t) node + FRAME_SIZE));
+        _heap_free((void *) node->start);
         return 0;
       }
     }

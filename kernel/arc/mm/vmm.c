@@ -86,6 +86,34 @@ void vmm_init(void)
   }
 }
 
+int vmm_size(uintptr_t virt)
+{
+  page_index_t index;
+  addr_to_index(&index, virt);
+
+  uint64_t pml4 = index.pml4[index.pml4e];
+  if (!(pml4 & PG_PRESENT))
+    return -1;
+
+  uint64_t pml3 = index.pml3[index.pml3e];
+  if (!(pml3 & PG_PRESENT))
+    return -1;
+  if (pml3 & PG_BIG)
+    return SIZE_1G;
+
+  uint64_t pml2 = index.pml2[index.pml2e];
+  if (!(pml2 & PG_PRESENT))
+    return -1;
+  if (pml2 & PG_BIG)
+    return SIZE_2M;
+
+  uint64_t pml1 = index.pml1[index.pml1e];
+  if (!(pml1 & PG_PRESENT))
+    return -1;
+
+  return SIZE_4K;
+}
+
 bool vmm_touch(uintptr_t virt, int size)
 {
   page_index_t index;
