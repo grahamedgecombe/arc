@@ -14,6 +14,8 @@
 #  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
+include ../template.mk
+
 ARCH := x86_64-pc-elf
 
 CC := $(ARCH)-gcc

@@ -14,16 +14,4 @@
 #  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-MODULES := kernel
-
-.PHONY: all clean $(MODULES)
-
-all: $(MODULES)
-
-$(MODULES):
-	@ echo " MAKE   $@"
-	@ $(MAKE) -sC $@
-
-clean:
-	$(foreach module,$(MODULES),@ $(MAKE) -sC $(module) clean)
 
