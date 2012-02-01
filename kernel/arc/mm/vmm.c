@@ -198,6 +198,9 @@ bool vmm_map(uintptr_t virt, uintptr_t phy, uint64_t flags)
 
 bool vmm_maps(uintptr_t virt, uintptr_t phy, uint64_t flags, int size)
 {
+  if (size == SIZE_1G && !vmm_1g_pages)
+    return false;
+
   if (!vmm_touch(virt, size))
     return false;
 
@@ -332,7 +335,7 @@ bool vmm_map_range(uintptr_t virt, uintptr_t phy, size_t len, uint64_t flags)
   for (size_t off = 0; off < len;)
   {
     size_t remaining = len - off;
-    if (vmm_1g_pages && (PAGE_ALIGN_1G(virt + off) == (virt + off)) && remaining >= FRAME_SIZE_1G)
+    if ((PAGE_ALIGN_1G(virt + off) == (virt + off)) && remaining >= FRAME_SIZE_1G)
     {
       if (vmm_maps(virt + off, phy + off, flags, SIZE_1G))
       {

@@ -225,8 +225,46 @@ static void *_heap_alloc(size_t size, int flags, bool phy_alloc)
 
     /* allocate physical frames and map them into memory */
     uintptr_t end = node->start + size;
-    for (uintptr_t page = node->start; page < end; page += FRAME_SIZE)
+    for (uintptr_t page = node->start; page < end;)
     {
+      uintptr_t remaining = end - page;
+
+      /* try to use a 1 gigabyte frame first */
+      if (PAGE_ALIGN_1G(page) == page && remaining >= FRAME_SIZE_1G)
+      {
+        uintptr_t phy = pmm_allocs(SIZE_1G);
+        if (phy)
+        {
+          if (!vmm_maps(page, phy, map_flags, SIZE_1G))
+          {
+            pmm_frees(phy, SIZE_1G);
+          }
+          else
+          {
+            page += FRAME_SIZE_1G;
+            continue;
+          }
+        }
+      }
+
+      /* then try to use a 2 megabyte frame */
+      if (PAGE_ALIGN_2M(page) == page && remaining >= FRAME_SIZE_2M)
+      {
+        uintptr_t phy = pmm_allocs(SIZE_2M);
+        if (phy)
+        {
+          if (!vmm_maps(page, phy, map_flags, SIZE_2M))
+          {
+            pmm_frees(phy, SIZE_2M);
+          }
+          else
+          {
+            page += FRAME_SIZE_2M;
+            continue;
+          }
+        }
+      }
+
       /* allocate a physical frame */
       uintptr_t phy = pmm_alloc();
 
@@ -247,6 +285,8 @@ static void *_heap_alloc(size_t size, int flags, bool phy_alloc)
         _heap_free((void *) node->start);
         return 0;
       }
+
+      page += FRAME_SIZE;
     }
   }
 
