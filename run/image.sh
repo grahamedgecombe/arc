@@ -8,7 +8,7 @@ if [ ! -f disk.img ]; then
 fi
 mkdir -p mnt
 sudo mount -o loop,offset=32256 disk.img mnt
-sudo cp ../arc mnt/boot
+sudo cp ../kernel/vmarc mnt/boot
 sudo cp grub.cfg mnt/boot/grub
 sync
 sudo umount mnt

@@ -14,55 +14,16 @@
 #  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-ARCH := x86_64-pc-elf
+MODULES := kernel
 
-CC := $(ARCH)-gcc
-CFLAGS := -std=c1x -O3 -Wall -Wextra -pedantic -Wno-unused -ffreestanding \
-          -mno-red-zone -mcmodel=large -Ikernel -mno-sse -mno-sse2 -mno-sse3 \
-          -mno-3dnow -mno-mmx
+.PHONY: all clean $(MODULES)
 
-AS := nasm
-ASFLAGS := -f elf64
+all: $(MODULES)
 
-LD := $(ARCH)-ld
-LDFLAGS := -Tarc.lds -z max-page-size=0x1000
-
-AR := $(ARCH)-ar
-
-# if clang is used, we must specify the architecture on its command line rather
-# than in the name of the executable itself
-ifeq ($(CC),clang)
-  CFLAGS += -ccc-host-triple $(ARCH)
-endif
-
-# nasm supports the -Ox command for performing multi-pass optimizations
-ifeq ($(AS),nasm)
-  ASFLAGS += -Ox
-endif
-
-TARGET := arc
-SOURCES := $(shell find kernel -name "*.c" -or -name "*.s" -type f)
-OBJECTS := $(addsuffix .o, $(basename $(SOURCES)))
-DEPENDENCIES := $(shell find kernel -name "*.d")
-
-.PHONY: all clean
-
-all: $(TARGET)
+$(MODULES):
+	@ echo " MAKE   $@"
+	@ $(MAKE) -sC $@ -f Makefile.mk
 
 clean:
-	@ rm -f $(TARGET) $(OBJECTS) $(DEPENDENCIES)
-
-$(TARGET): $(OBJECTS)
-	@ echo " LD     $@"
-	@ $(LD) $(LDFLAGS) -o $@ $^
-
-include $(DEPENDENCIES)
-
-.c.o:
-	@ echo " CC     $<"
-	@ $(CC) $(CFLAGS) -MD -MP -MT $@ -MF $(addsuffix .d,$(basename $@)) -c -o $@ $<
-
-.s.o:
-	@ echo " AS     $<"
-	@ $(AS) $(ASFLAGS) -o $@ $<
+	$(foreach module,$(MODULES),@ $(MAKE) -sC $(module) -f Makefile.mk clean)
 

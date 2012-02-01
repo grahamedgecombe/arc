@@ -2,7 +2,6 @@
 *~
 *.o
 *.d
-/arc
 !.git*
 !.mailmap
 
