@@ -33,6 +33,8 @@ typedef struct
   size_t pml4e, pml3e, pml2e, pml1e;
 } page_index_t;
 
+static bool vmm_1g_pages = false;
+
 static void addr_to_index(page_index_t *index, uintptr_t addr)
 {
   /* calculate pml4 pointer */
@@ -326,20 +328,43 @@ void vmm_untouch(uintptr_t virt, int size)
 
 bool vmm_map_range(uintptr_t virt, uintptr_t phy, size_t len, uint64_t flags)
 {
-  for (size_t off = 0; off < PAGE_ALIGN(len); off += FRAME_SIZE)
+  len = PAGE_ALIGN(len);
+  for (size_t off = 0; off < len;)
   {
+    size_t remaining = len - off;
+    if (vmm_1g_pages && (PAGE_ALIGN_1G(virt + off) == (virt + off)) && remaining >= FRAME_SIZE_1G)
+    {
+      if (vmm_maps(virt + off, phy + off, flags, SIZE_1G))
+      {
+        off += FRAME_SIZE_1G;
+        continue;
+      }
+    }
+
+    if ((PAGE_ALIGN_2M(virt + off) == (virt + off)) && remaining >= FRAME_SIZE_2M)
+    {
+      if (vmm_maps(virt + off, phy + off, flags, SIZE_2M))
+      {
+        off += FRAME_SIZE_2M;
+        continue;
+      }
+    }
+
     if (!vmm_map(virt + off, phy + off, flags))
     {
       vmm_unmap_range(virt, off);
       return false;
     }
+
+    off += FRAME_SIZE;
   }
   return true;
 }
 
 void vmm_unmap_range(uintptr_t virt, size_t len)
 {
-  for (size_t off = 0; off < PAGE_ALIGN(len);)
+  len = PAGE_ALIGN(len);
+  for (size_t off = 0; off < len;)
   {
     int size = vmm_size(virt + off);
     if (size != -1)

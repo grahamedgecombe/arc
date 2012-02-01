@@ -35,3 +35,5 @@
 
 * check if setting the IMCR is required to switch into APIC mode
 
+* detect and enable vmm_1g_pages
+
