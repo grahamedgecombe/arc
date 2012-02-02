@@ -31,7 +31,7 @@ DEPENDENCIES := $(shell find -name "*.d")
 all: $(TARGET)
 
 clean:
-	@ rm -f $(TARGET) $(OBJECTS) $(DEPENDENCIES)
+	@ $(RM) $(TARGET) $(OBJECTS) $(DEPENDENCIES)
 
 $(TARGET): $(OBJECTS)
 	@ echo " LD     $@"
