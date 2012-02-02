@@ -16,31 +16,10 @@
 
 include ../template.mk
 
-ARCH := x86_64-pc-elf
+CFLAGS += -I. -ffreestanding -mno-red-zone -mcmodel=large -mno-sse -mno-sse2 \
+	  -mno-sse3 -mno-3dnow -mno-mmx
 
-CC := $(ARCH)-gcc
-CFLAGS := -std=c1x -O3 -Wall -Wextra -pedantic -Wno-unused -ffreestanding \
-          -mno-red-zone -mcmodel=large -I. -mno-sse -mno-sse2 -mno-sse3 \
-          -mno-3dnow -mno-mmx
-
-AS := nasm
-ASFLAGS := -f elf64
-
-LD := $(ARCH)-ld
-LDFLAGS := -Tvmarc.lds -z max-page-size=0x1000
-
-AR := $(ARCH)-ar
-
-# if clang is used, we must specify the architecture on its command line rather
-# than in the name of the executable itself
-ifeq ($(CC),clang)
-  CFLAGS += -ccc-host-triple $(ARCH)
-endif
-
-# nasm supports the -Ox command for performing multi-pass optimizations
-ifeq ($(AS),nasm)
-  ASFLAGS += -Ox
-endif
+LDFLAGS += -Tvmarc.lds
 
 TARGET := vmarc
 SOURCES := $(shell find -name "*.c" -or -name "*.s" -type f)

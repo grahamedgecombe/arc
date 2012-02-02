@@ -14,4 +14,28 @@
 #  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
+ARCH := x86_64-pc-elf
+
+CC := $(ARCH)-gcc
+CFLAGS := -std=c1x -O3 -Wall -Wextra -pedantic -Wno-unused 
+
+AS := nasm
+ASFLAGS := -f elf64
+
+LD := $(ARCH)-ld
+LDFLAGS := -z max-page-size=0x1000
+
+AR := $(ARCH)-ar
+
+# if clang is used, we must specify the architecture on its command line rather
+# than in the name of the executable itself
+ifeq ($(CC),clang)
+  CFLAGS += -ccc-host-triple $(ARCH)
+endif
+
+# nasm supports the -Ox command for performing multi-pass optimizations
+ifeq ($(AS),nasm)
+  ASFLAGS += -Ox
+endif
+
 
