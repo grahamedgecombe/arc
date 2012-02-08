@@ -19,6 +19,7 @@
 #include <arc/mm/pmm.h>
 #include <arc/panic.h>
 #include <arc/cpu/tlb.h>
+#include <arc/cpu/features.h>
 #include <stddef.h>
 #include <string.h>
 
@@ -33,7 +34,7 @@ typedef struct
   size_t pml4e, pml3e, pml2e, pml1e;
 } page_index_t;
 
-static bool vmm_1g_pages = false;
+static bool vmm_1g_pages;
 
 static void addr_to_index(page_index_t *index, uintptr_t addr)
 {
@@ -75,6 +76,9 @@ static void addr_to_index(page_index_t *index, uintptr_t addr)
 
 void vmm_init(void)
 {
+  /* set 1g support flag */
+  vmm_1g_pages = cpu_feature_supported(FEATURE_1G_PAGE);
+
   /*
    * touch all higher half pml4 entries, this means when we have multiple
    * address spaces, we can easily keep the higher half mapped in exactly the

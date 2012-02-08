@@ -69,6 +69,9 @@ void init(uint32_t magic, multiboot_t *multiboot)
   /* convert physical 32-bit multiboot address to virtual address */
   multiboot = phy32_to_virt(multiboot);
 
+  /* scan CPU features */
+  cpu_features_init();
+
   /* map physical memory */
   tty_puts("Mapping physical memory...\n");
   mm_map_t *map = mm_map_init(multiboot);
@@ -93,9 +96,6 @@ void init(uint32_t magic, multiboot_t *multiboot)
   tss_init();
   idt_bsp_init();
   syscall_init();
-
-  /* scan CPU features */
-  cpu_features_init();
 
   /* search for ACPI tables */
   tty_puts("Scanning ACPI tables...\n");
