@@ -95,7 +95,7 @@ void ic_ack(intr_id_t id)
   switch (ic_type)
   {
     case IC_TYPE_NONE:
-      panic("no IC initialised");
+      panic("no IC initialised, intr %d", id);
       break;
 
     case IC_TYPE_PIC:

@@ -14,19 +14,19 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef ARC_CPU_CPUID_H
-#define ARC_CPU_CPUID_H
+#ifndef ARC_CPU_FEATURES_H
+#define ARC_CPU_FEATURES_H
 
-#include <stdint.h>
+#include <stdbool.h>
 
-#define CPUID_VENDOR       0x00000000
-#define CPUID_FEATURES     0x00000001
-#define CPUID_EXT_VENDOR   0x80000000
-#define CPUID_EXT_FEATURES 0x80000001
+typedef enum
+{
+  FEATURE_1G_PAGE,
+  _FEATURE_MAX
+} cpu_feature_t;
 
-#define CPUID_EXT_FEATURE_EDX_1GB_PAGE 0x04000000
-
-void cpu_id(uint32_t code, uint32_t *eax, uint32_t *ebx, uint32_t *ecx, uint32_t *edx);
+void cpu_features_init(void);
+bool cpu_feature_supported(cpu_feature_t feature);
 
 #endif
 

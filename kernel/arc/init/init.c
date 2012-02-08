@@ -21,6 +21,7 @@
 #include <arc/mm/pmm.h>
 #include <arc/mm/vmm.h>
 #include <arc/mm/heap.h>
+#include <arc/cpu/features.h>
 #include <arc/cpu/gdt.h>
 #include <arc/cpu/tss.h>
 #include <arc/cpu/intr.h>
@@ -92,6 +93,9 @@ void init(uint32_t magic, multiboot_t *multiboot)
   tss_init();
   idt_bsp_init();
   syscall_init();
+
+  /* scan CPU features */
+  cpu_features_init();
 
   /* search for ACPI tables */
   tty_puts("Scanning ACPI tables...\n");
