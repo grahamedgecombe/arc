@@ -34,3 +34,5 @@
 
 * detect and enable vmm_1g_pages
 
+* split features into local CPU features and features that all CPUs share
+
