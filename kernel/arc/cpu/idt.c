@@ -39,7 +39,7 @@ typedef PACK(struct
 static idt_gate_t idt_gates[INTERRUPTS];
 static idtr_t idtr;
 
-static void idt_encode_gate(intr_id_t id, void (*handler)(void), uint8_t flags)
+static void idt_encode_gate(intr_t id, void (*handler)(void), uint8_t flags)
 {
   idt_gate_t *gate = &idt_gates[id];
 

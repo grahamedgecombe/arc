@@ -32,17 +32,17 @@ typedef struct ioapic
   /* the MMIO registers */
   volatile uint32_t *reg, *val;
 
-  /* the global system interrupt base */
-  gsi_t intr_base;
+  /* the base IRQ number */
+  irq_t irq_base;
 
-  /* the number of interrupts this I/O APIC routes */
-  intr_id_t intrs;
+  /* the number of IRQs this I/O APIC routes */
+  irq_t irqs;
 
   /* used to print debug info */
   uint64_t _phy_addr;
 } ioapic_t;
 
-bool ioapic_init(ioapic_id_t id, uintptr_t addr, gsi_t intr_base);
+bool ioapic_init(ioapic_id_t id, uintptr_t addr, irq_t irq_base);
 ioapic_t *ioapic_iter(void);
 
 #endif

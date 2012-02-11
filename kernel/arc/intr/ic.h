@@ -33,7 +33,7 @@ void ic_bsp_init(int type, ...);
 void ic_bsp_vinit(int type, va_list args);
 void ic_ap_init(void);
 
-void ic_ack(intr_id_t id);
+void ic_ack(intr_t id);
 
 void ic_ipi_init(cpu_lapic_id_t id);
 void ic_ipi_startup(cpu_lapic_id_t id, uint8_t trampoline_addr);

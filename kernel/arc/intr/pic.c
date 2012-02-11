@@ -49,7 +49,7 @@ void pic_init(void)
 
 /* checks if an IRQ is spurious, and deals with acknowledging the master PIC
  * if there is a spurious IRQ15 */
-bool pic_spurious(uint8_t irq)
+bool pic_spurious(intr_t irq)
 {
   if (irq == IRQ7)
   {
@@ -71,7 +71,7 @@ bool pic_spurious(uint8_t irq)
 }
 
 /* masks an IRQ */
-void pic_mask(uint8_t irq)
+void pic_mask(intr_t irq)
 {
   uint16_t port;
   if (irq < IRQ8)
@@ -90,7 +90,7 @@ void pic_mask(uint8_t irq)
 }
 
 /* unmasks an IRQ */
-void pic_unmask(uint8_t irq)
+void pic_unmask(intr_t irq)
 {
   uint16_t port;
   if (irq < IRQ8)
@@ -109,7 +109,7 @@ void pic_unmask(uint8_t irq)
 }
 
 /* acknowledges the handling of an interrupt */
-void pic_ack(uint8_t irq)
+void pic_ack(intr_t irq)
 {
   if (irq >= IRQ8)
     outb_p(PIC2_CMD, 0x20);

@@ -19,10 +19,25 @@
 
 #include <stdint.h>
 
-typedef uint32_t gsi_t;
-typedef uint8_t intr_id_t;
+/*
+ * IRQ number type
+ *
+ * This type is distinct from intr_t as the amd64 architecture limits the
+ * number of interrupts to 256. However, in a system with several I/O APICs, it
+ * is possible to have far more than 256 IRQ lines.
+ *
+ * IRQ numbers are 32 bits in the ACPI tables, hence this value being 32 bits.
+ */
+typedef uint32_t irq_t;
+
+/* interrupt number type, this is 8 bits as expected for amd64 */
+typedef uint8_t intr_t;
+
+/* CPU ID (ACPI and local APIC) types */
 typedef uint32_t cpu_acpi_id_t;
 typedef uint32_t cpu_lapic_id_t;
+
+/* I/O APIC id type */
 typedef uint8_t ioapic_id_t;
 
 #endif

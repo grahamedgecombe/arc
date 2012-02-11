@@ -90,7 +90,7 @@ void ic_ap_init(void)
   }
 }
 
-void ic_ack(intr_id_t id)
+void ic_ack(intr_t id)
 {
   switch (ic_type)
   {

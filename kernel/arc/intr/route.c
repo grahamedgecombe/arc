@@ -27,9 +27,9 @@ void intr_route_init(void)
   {
     uint64_t addr = apic->_phy_addr;
     ioapic_id_t id = apic->id;
-    gsi_t intr_first = apic->intr_base;
-    gsi_t intr_last = apic->intr_base + apic->intrs - 1;
-    tty_printf(" => Using I/O APIC (at %0#18x, id %0#4x, irqs %d-%d)\n", addr, id, intr_first, intr_last);
+    irq_t irq_first = apic->irq_base;
+    irq_t irq_last = apic->irq_base + apic->irqs - 1;
+    tty_printf(" => Using I/O APIC (at %0#18x, id %0#4x, irqs %d-%d)\n", addr, id, irq_first, irq_last);
   }
 }
 

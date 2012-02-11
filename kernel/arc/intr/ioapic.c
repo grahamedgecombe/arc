@@ -55,7 +55,7 @@ static void ioapic_write(ioapic_t *apic, uint32_t reg, uint32_t val)
   *(apic->val) = val;
 }
 
-bool ioapic_init(ioapic_id_t id, uintptr_t addr, gsi_t intr_base)
+bool ioapic_init(ioapic_id_t id, uintptr_t addr, irq_t irq_base)
 {
   ioapic_t *apic = malloc(sizeof(*apic));
   if (!apic)
@@ -81,10 +81,10 @@ bool ioapic_init(ioapic_id_t id, uintptr_t addr, gsi_t intr_base)
 
   apic->next = 0;
   apic->id = id;
-  apic->intr_base = intr_base;
+  apic->irq_base = irq_base;
   apic->reg = (volatile uint32_t *) virt_addr;
   apic->val = (volatile uint32_t *) (virt_addr + 16);
-  apic->intrs = ((ioapic_read(apic, IOAPIC_VER) >> 16) & 0xFF) + 1;
+  apic->irqs = ((ioapic_read(apic, IOAPIC_VER) >> 16) & 0xFF) + 1;
   apic->_phy_addr = addr;
   return true;
 }
@@ -94,7 +94,7 @@ ioapic_t *ioapic_iter(void)
   return ioapic_head;
 }
 
-void ioapic_route(ioapic_t *apic, intr_id_t src, intr_id_t vec, bool high, bool lt)
+void ioapic_route(ioapic_t *apic, irq_t src, intr_t vec, bool high, bool lt)
 {
   uint8_t dst = 0xFF;
   uint64_t redtbl_entry = REDTBL_DESTMOD_PHYSICAL | REDTBL_DELMOD_LOWPRI | (((uint64_t) (dst & 0xFF)) << 56) | (vec & 0xFF);
