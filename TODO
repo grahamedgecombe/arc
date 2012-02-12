@@ -2,14 +2,10 @@
    - global lock for the higher half
    - per address-space lock for the lower half
 
-* dlmalloc ABORT should call generic panic (rather than boot_panic) function
-  when it is made
-
 * use #defines in gdt.c instead of hardcoding the flags
 
 * use PG_GLOBAL flag for anything in the kernel addresss space and check all
-  the TLB flushing is done properly (also look into TLB shootdown when SMP is
-  supported)
+  the TLB flushing is done properly
 
 * look at how caching should work for memory-mapped I/O devices like the local
   APIC and I/O APIC
@@ -31,8 +27,6 @@
 * TLB invalidation/panic should use an IPI to work on all processors
 
 * check if setting the IMCR is required to switch into APIC mode
-
-* detect and enable vmm_1g_pages
 
 * split features into local CPU features and features that all CPUs share
 
