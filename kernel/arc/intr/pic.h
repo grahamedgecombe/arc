@@ -22,10 +22,10 @@
 #include <arc/types.h>
 
 void pic_init(void);
-bool pic_spurious(intr_t irq);
-void pic_mask(intr_t irq);
-void pic_unmask(intr_t irq);
-void pic_ack(intr_t irq);
+bool pic_spurious(irq_t irq);
+void pic_mask(irq_t irq);
+void pic_unmask(irq_t irq);
+void pic_ack(irq_t irq);
 
 #endif
 

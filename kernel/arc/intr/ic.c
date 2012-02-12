@@ -100,7 +100,7 @@ void ic_ack(intr_t id)
 
     case IC_TYPE_PIC:
       if (id >= IRQ0 && id <= IRQ15)
-        pic_ack(id);
+        pic_ack(id - IRQ0);
       break;
 
     case IC_TYPE_LAPIC:
