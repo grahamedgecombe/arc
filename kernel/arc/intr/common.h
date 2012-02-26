@@ -77,7 +77,7 @@
 #define IRQ14 0x2E
 #define IRQ15 0x2F
 
-/* APIC IRQs */
+/* I/O APIC IRQs */
 #define IRQ16 0x30
 #define IRQ17 0x31
 #define IRQ18 0x32
@@ -86,6 +86,17 @@
 #define IRQ21 0x35
 #define IRQ22 0x36
 #define IRQ23 0x37
+
+/* total number of IRQ interrupts */
+#define IRQS 24
+
+/*
+ * note: I/O APICs can have more than 24 IRQs, and several I/O APICs can also
+ * be used at the same time to support hundreds or even thousands of IRQs
+ *
+ * on systems where this is the case, IRQ24 will actually be mapped to the IRQ0
+ * interrupt, IRQ25 will be mapped to IRQ1, etc. - essentially doing irq%24
+ */
 
 /* LAPIC spurious interrupt */
 #define SPURIOUS 0xFF /* in old processors bits 0-3 are hardwired to 1 */

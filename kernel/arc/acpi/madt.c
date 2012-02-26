@@ -15,6 +15,7 @@
  */
 
 #include <arc/acpi/madt.h>
+#include <arc/bus/isa.h>
 #include <arc/intr/ic.h>
 #include <arc/intr/pic.h>
 #include <arc/intr/ioapic.h>
@@ -42,6 +43,34 @@ void madt_scan(madt_t *madt)
 
     switch (entry->type)
     {
+      case MADT_TYPE_INTR:
+        {
+          uint8_t bus = entry->intr.bus;
+          uint8_t line = entry->intr.irq;
+          uint32_t gsi = entry->intr.gsi;
+          uint16_t flags = entry->intr.flags;
+
+          if (bus == MADT_INTR_BUS_ISA)
+          {
+            if (line >= ISA_INTR_LINES)
+              panic("ISA interrupt line out of range: %d", line);
+
+            irq_tuple_t *tuple = isa_irq(line);
+            tuple->irq = gsi;
+
+            if (flags & MADT_INTR_POLARITY_HIGH)
+              tuple->active_polarity = POLARITY_HIGH;
+            else if (flags & MADT_INTR_POLARITY_LOW)
+              tuple->active_polarity = POLARITY_LOW;
+
+            if (flags & MADT_INTR_TRIGGER_EDGE)
+              tuple->trigger = TRIGGER_EDGE;
+            else if (flags & MADT_INTR_TRIGGER_LEVEL)
+              tuple->trigger = TRIGGER_LEVEL;
+          }
+        }
+        break;
+
       case MADT_TYPE_LAPIC_ADDR:
         /* override the LAPIC address with a 64-bit one */
         lapic_addr = entry->lapic_addr.addr;

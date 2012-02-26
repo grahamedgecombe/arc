@@ -21,17 +21,20 @@
 #include <arc/mm/pmm.h>
 #include <arc/mm/vmm.h>
 #include <arc/mm/heap.h>
+#include <arc/bus/isa.h>
 #include <arc/cpu/features.h>
 #include <arc/cpu/gdt.h>
 #include <arc/cpu/tss.h>
 #include <arc/cpu/intr.h>
 #include <arc/cpu/idt.h>
+#include <arc/cpu/halt.h>
 #include <arc/intr/ic.h>
 #include <arc/intr/route.h>
 #include <arc/panic.h>
 #include <arc/smp/cpu.h>
 #include <arc/acpi/scan.h>
 #include <arc/smp/init.h>
+#include <arc/time/pit.h>
 #include <arc/proc/syscall.h>
 #include <string.h>
 
@@ -51,6 +54,11 @@ static void print_banner(void)
   gap[gap_len] = 0;
 
   tty_printf("%s%s%s%s%s", dashes, gap, banner, gap, dashes);
+}
+
+void tick(intr_state_t *state)
+{
+  tty_putch('.');
 }
 
 void init(uint32_t magic, multiboot_t *multiboot)
@@ -97,6 +105,9 @@ void init(uint32_t magic, multiboot_t *multiboot)
   idt_bsp_init();
   syscall_init();
 
+  /* init ISA bus */
+  isa_init();
+
   /* search for ACPI tables */
   tty_puts("Scanning ACPI tables...\n");
   if (!acpi_scan())
@@ -123,8 +134,9 @@ void init(uint32_t magic, multiboot_t *multiboot)
   tty_puts("Setting up interrupt routing...\n");
   intr_route_init();
 
-  /* enable interrupts */
-  tty_puts("Enabling interrupts...\n");
+  /* test interrupts using the PIT */
+  pit_monotonic(20, &tick);
   intr_enable();
+  halt_forever();
 }
 

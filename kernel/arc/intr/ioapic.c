@@ -35,9 +35,9 @@
 #define REDTBL_DESTMOD_LOGICAL  0x0000000000000800
 #define REDTBL_DESTMOD_PHYSICAL 0x0000000000000000
 #define REDTBL_DELMOD_FIXED     0x0000000000000000
-#define REDTBL_DELMOD_LOWPRI    0x0000000000000400
+#define REDTBL_DELMOD_LOWPRI    0x0000000000000100
 #define REDTBL_DELMOD_SMI       0x0000000000000200
-#define REDTBL_DELMOD_NMI       0x0000000000000100
+#define REDTBL_DELMOD_NMI       0x0000000000000400
 #define REDTBL_DELMOD_INIT      0x0000000000000500
 #define REDTBL_DELMOD_EXTINT    0x0000000000000700
 
@@ -94,22 +94,31 @@ ioapic_t *ioapic_iter(void)
   return ioapic_head;
 }
 
-void ioapic_route(ioapic_t *apic, irq_t src, intr_t vec, bool high, bool lt)
+void ioapic_route(ioapic_t *apic, irq_tuple_t *tuple, intr_t intr)
 {
-  uint8_t dst = 0xFF;
-  uint64_t redtbl_entry = REDTBL_DESTMOD_PHYSICAL | REDTBL_DELMOD_LOWPRI | (((uint64_t) (dst & 0xFF)) << 56) | (vec & 0xFF);
+  uint8_t src = tuple->irq - apic->irq_base;
+  uint64_t redtbl_entry = (0xFFL << 56) | REDTBL_DESTMOD_PHYSICAL | REDTBL_DELMOD_LOWPRI | intr;
 
-  if (high)
+  if (tuple->active_polarity == POLARITY_HIGH)
     redtbl_entry |= REDTBL_ACTIVE_HIGH;
   else
     redtbl_entry |= REDTBL_ACTIVE_LOW;
 
-  if (lt)
+  if (tuple->trigger == TRIGGER_LEVEL)
     redtbl_entry |= REDTBL_TRIGGER_LEVEL;
   else
     redtbl_entry |= REDTBL_TRIGGER_EDGE;
 
   ioapic_write(apic, IOAPIC_REDTBL + 2 * src + 1, (redtbl_entry >> 32) & 0xFFFFFFFF);
-  ioapic_write(apic, IOAPIC_REDTBL + 2 * src, redtbl_entry & 0xFFFFFFFF);
+  ioapic_write(apic, IOAPIC_REDTBL + 2 * src, redtbl_entry & 0xFFFFFFFF); /* unset mask bit last */
+}
+
+void ioapic_mask(ioapic_t *apic, irq_tuple_t *tuple)
+{
+  uint8_t src = tuple->irq - apic->irq_base;
+  uint64_t redtbl_entry = REDTBL_MASK;
+
+  ioapic_write(apic, IOAPIC_REDTBL + 2 * src, redtbl_entry & 0xFFFFFFFF); /* set mask bit first */
+  ioapic_write(apic, IOAPIC_REDTBL + 2 * src + 1, (redtbl_entry >> 32) & 0xFFFFFFFF);
 }
 

@@ -14,13 +14,34 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <arc/intr/dispatch.h>
-#include <arc/intr/common.h>
-#include <arc/intr/ic.h>
-#include <arc/tty.h>
+#include <arc/bus/isa.h>
+#include <arc/panic.h>
+#include <string.h>
 
-void intr_dispatch(intr_state_t *state)
+static irq_tuple_t isa_irqs[ISA_INTR_LINES];
+
+void isa_init(void)
 {
-  ic_ack(state->id);
+  /*
+   * the default mapping of ISA interrupt lines to GSI numbers is 1:1 but they
+   * can also be overridden by MADT entries
+   *
+   * ISA IRQs are edge-triggered and active high by default
+   */
+  for (int line = 0; line < ISA_INTR_LINES; line++)
+  {
+    irq_tuple_t *tuple = &isa_irqs[line];
+    tuple->irq = line;
+    tuple->active_polarity = POLARITY_HIGH;
+    tuple->trigger = TRIGGER_EDGE;
+  }
+}
+
+irq_tuple_t *isa_irq(isa_line_t line)
+{
+  if (line >= ISA_INTR_LINES)
+    panic("invalid ISA interrupt line %d\n", line);
+
+  return &isa_irqs[line];
 }
 

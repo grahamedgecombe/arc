@@ -30,3 +30,9 @@
 
 * split features into local CPU features and features that all CPUs share
 
+* implement some form of read/write lock which allows unlimited read locks to
+  be held but only one write lock, use this for the interrupt routing
+
+* possible deadlock when intr_(unroute)_* is used (obtains lock, interrupt
+  happens, interrupt cannot continue due to lock being held and waits forever)
+

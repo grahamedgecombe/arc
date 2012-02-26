@@ -44,6 +44,8 @@ typedef struct ioapic
 
 bool ioapic_init(ioapic_id_t id, uintptr_t addr, irq_t irq_base);
 ioapic_t *ioapic_iter(void);
+void ioapic_route(ioapic_t *apic, irq_tuple_t *tuple, intr_t intr);
+void ioapic_mask(ioapic_t *apic, irq_tuple_t *tuple);
 
 #endif
 

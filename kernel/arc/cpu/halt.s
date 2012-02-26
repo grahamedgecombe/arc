@@ -26,7 +26,6 @@ halt_once:
 halt_forever:
   push rbp
   mov rbp, rsp
-  cli
   .hang:
     hlt
     jmp .hang

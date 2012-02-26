@@ -78,7 +78,14 @@ void lx2apic_init(void)
   uint64_t apic_base = (msr_read(MSR_APIC_BASE) & APIC_BASE_BSP) | APIC_BASE_ENABLED | APIC_BASE_X2_MODE;
   msr_write(MSR_APIC_BASE, apic_base);
 
+  /* enable the local APIC and set the spurious vector */
   lx2apic_write(LX2APIC_SVR, SVR_ENABLED | SPURIOUS);
+
+  /* reset the priority so we accept all interrupts */
+  lx2apic_write(LX2APIC_TPR, 0);
+
+  /* perform an ack just to make sure we can receive interrupts from now on */
+  lx2apic_ack();
 }
 
 void lx2apic_ack(void)

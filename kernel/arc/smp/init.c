@@ -20,6 +20,8 @@
 #include <arc/cpu/tss.h>
 #include <arc/cpu/idt.h>
 #include <arc/cpu/pause.h>
+#include <arc/cpu/halt.h>
+#include <arc/cpu/intr.h>
 #include <arc/intr/ic.h>
 #include <arc/mm/vmm.h>
 #include <arc/time/pit.h>
@@ -129,5 +131,9 @@ void smp_ap_init(void)
 
   /* set up the interrupt controller on this CPU */
   ic_ap_init();
+
+  /* enable interrupts and halt forever */
+  intr_enable();
+  halt_forever();
 }
 

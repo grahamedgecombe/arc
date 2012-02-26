@@ -57,8 +57,8 @@
 #define LAPIC_IRR7      0x9C
 #define LAPIC_ESR       0xA0
 #define LAPIC_LVT_CMCI  0xBC
-#define LAPIC_ICR0      0xC0
-#define LAPIC_ICR1      0xC4
+#define LAPIC_ICRL      0xC0
+#define LAPIC_ICRH      0xC4
 #define LAPIC_LVT_TIMER 0xC8
 #define LAPIC_LVT_LINT0 0xD4
 #define LAPIC_LVT_LINT1 0xD8
@@ -68,6 +68,8 @@
 #define LAPIC_TIMER_DCR 0xF8
 
 #define SVR_ENABLED 0x100
+
+#define LVT_MASKED 0x00010000
 
 static volatile uint32_t *lapic;
 static uintptr_t lapic_phy_addr;
@@ -102,7 +104,24 @@ void lapic_init(void)
   uint64_t apic_base = (msr_read(MSR_APIC_BASE) & APIC_BASE_BSP) | lapic_phy_addr | APIC_BASE_ENABLED;
   msr_write(MSR_APIC_BASE, apic_base);
 
+  /* enable the local APIC and set the spurious vector */
   lapic_write(LAPIC_SVR, SVR_ENABLED | SPURIOUS);
+
+  /* reset the error status register */
+  lapic_write(LAPIC_ESR, 0);
+  lapic_write(LAPIC_ESR, 0);
+
+  /* mask LVT entries */
+  lapic_write(LAPIC_LVT_LINT0, LVT_MASKED);
+  lapic_write(LAPIC_LVT_LINT1, LVT_MASKED);
+  lapic_write(LAPIC_LVT_TIMER, LVT_MASKED);
+  lapic_write(LAPIC_LVT_ERROR, LVT_MASKED);
+
+  /* reset the priority so we accept all interrupts */
+  lapic_write(LAPIC_TPR, 0);
+
+  /* perform an ack just to make sure we can receive interrupts from now on */
+  lapic_ack();
 }
 
 void lapic_ack(void)
@@ -117,7 +136,7 @@ void lapic_ipi(uint8_t dest, uint8_t mode, uint8_t vector)
   uint32_t icrl = vector | (mode << 8);
 
   /* write the high (must be first!) and low parts of the ICR */
-  lapic_write(LAPIC_ICR1, icrh);
-  lapic_write(LAPIC_ICR0, icrl);
+  lapic_write(LAPIC_ICRH, icrh);
+  lapic_write(LAPIC_ICRL, icrl);
 }
 

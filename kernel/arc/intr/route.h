@@ -17,7 +17,27 @@
 #ifndef ARC_INTR_ROUTE_H
 #define ARC_INTR_ROUTE_H
 
+#include <arc/types.h>
+#include <arc/intr/common.h>
+#include <stdbool.h>
+
+typedef void (*intr_handler_t)(intr_state_t *state);
+
 void intr_route_init(void);
+
+/* dispatches an interrupt */
+void intr_dispatch(intr_state_t *state);
+
+/* route by interrupt id */
+bool intr_route_intr(intr_t intr, intr_handler_t handler);
+void intr_unroute_intr(intr_t intr, intr_handler_t handler);
+
+/*
+ * route by IRQ, these actually work by figuring out which interrupt an IRQ is
+ * routed to by the I/O APICs and then using the above functions
+ */
+bool intr_route_irq(irq_tuple_t *tuple, intr_handler_t handler);
+void intr_unroute_irq(irq_tuple_t *tuple, intr_handler_t handler);
 
 #endif
 

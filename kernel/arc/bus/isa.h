@@ -14,12 +14,18 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef ARC_INTR_DISPATCH_H
-#define ARC_INTR_DISPATCH_H
+#ifndef ARC_BUS_ISA_H
+#define ARC_BUS_ISA_H
 
-#include <arc/intr/common.h>
+#include <arc/types.h>
+#include <stdint.h>
 
-void intr_dispatch(intr_state_t *state);
+#define ISA_INTR_LINES 16
+
+typedef uint8_t isa_line_t;
+
+void isa_init(void);
+irq_tuple_t *isa_irq(isa_line_t line);
 
 #endif
 

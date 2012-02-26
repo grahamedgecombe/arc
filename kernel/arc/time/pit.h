@@ -17,6 +17,9 @@
 #ifndef ARC_TIME_PIT_H
 #define ARC_TIME_PIT_H
 
+#include <arc/intr/route.h>
+
+void pit_monotonic(int freq, intr_handler_t handler);
 void pit_mdelay(int ms);
 
 #endif

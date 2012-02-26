@@ -16,6 +16,7 @@
 
 #include <arc/panic.h>
 #include <arc/tty.h>
+#include <arc/cpu/intr.h>
 #include <arc/cpu/halt.h>
 
 void panic(const char *message, ...)
@@ -31,6 +32,7 @@ void vpanic(const char *message, va_list args)
   tty_puts("PANIC: ");
   tty_vprintf(message, args);
   tty_puts("\n");
+  intr_disable();
   halt_forever();
 }
 

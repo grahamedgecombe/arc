@@ -15,8 +15,10 @@
  */
 
 #include <arc/time/pit.h>
+#include <arc/bus/isa.h>
 #include <arc/cpu/pause.h>
 #include <arc/cpu/port.h>
+#include <arc/panic.h>
 #include <stdint.h>
 
 /* the frequency of the PIT */
@@ -55,6 +57,19 @@
 /* readback flags, lowest 6 bits are the same as the CMD bits */
 #define RB_NULL 0x40
 #define RB_OUT  0x80
+
+void pit_monotonic(int freq, intr_handler_t handler)
+{
+  /* program channel 0 */
+  uint16_t count = PIT_FREQ / freq;
+  outb_p(PORT_CMD, CMD_BINARY | CMD_MODE2 | CMD_ACC_LOHI | CMD_CH0);
+  outb_p(PORT_CH0, count & 0xFF);
+  outb_p(PORT_CH0, (count >> 8) & 0xFF);
+
+  /* set the interrupt handler, PIT channel 0 is connected to ISA IRQ0 */
+  if (!intr_route_irq(isa_irq(0), handler))
+    panic("failed to route ISA IRQ0");
+}
 
 static void _pit_mdelay(int ms)
 {

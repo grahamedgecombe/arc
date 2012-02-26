@@ -40,5 +40,27 @@ typedef uint32_t cpu_lapic_id_t;
 /* I/O APIC id type */
 typedef uint8_t ioapic_id_t;
 
+/* polarity type */
+typedef enum
+{
+  POLARITY_HIGH,
+  POLARITY_LOW
+} polarity_t;
+
+/* trigger type */
+typedef enum
+{
+  TRIGGER_EDGE,
+  TRIGGER_LEVEL
+} trigger_t;
+
+/* a tuple consisting of an IRQ number, active polarity and trigger type */
+typedef struct
+{
+  irq_t irq;
+  polarity_t active_polarity;
+  trigger_t trigger;
+} irq_tuple_t;
+
 #endif
 
