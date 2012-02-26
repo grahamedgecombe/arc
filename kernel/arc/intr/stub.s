@@ -42,6 +42,20 @@ irq%1:
   jmp intr_stub
 %endmacro
 
+; lvt timer entry code
+[global lvt_timer]
+lvt_timer:
+  push 0
+  push 0xFD
+  jmp intr_stub
+
+; lvt error entry code
+[global lvt_error]
+lvt_error:
+  push 0
+  push 0xFE
+  jmp intr_stub
+
 intr_stub:
   ; save the register file
   push r15

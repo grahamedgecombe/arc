@@ -76,6 +76,8 @@ void irq21(void);
 void irq22(void);
 void irq23(void);
 
+void lvt_timer(void);
+void lvt_error(void);
 void spurious(void);
 
 #endif

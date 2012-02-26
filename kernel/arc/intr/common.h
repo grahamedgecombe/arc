@@ -98,6 +98,10 @@
  * interrupt, IRQ25 will be mapped to IRQ1, etc. - essentially doing irq%24
  */
 
+/* LAPIC LVT interrupts */
+#define LVT_TIMER 0xFD
+#define LVT_ERROR 0xFE
+
 /* LAPIC spurious interrupt */
 #define SPURIOUS 0xFF /* in old processors bits 0-3 are hardwired to 1 */
 
