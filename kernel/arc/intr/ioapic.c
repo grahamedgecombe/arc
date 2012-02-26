@@ -109,7 +109,7 @@ void ioapic_route(ioapic_t *apic, irq_t src, intr_t vec, bool high, bool lt)
   else
     redtbl_entry |= REDTBL_TRIGGER_EDGE;
 
-  ioapic_write(apic, IOAPIC_REDTBL + 2 * src, redtbl_entry & 0xFFFFFFFF);
   ioapic_write(apic, IOAPIC_REDTBL + 2 * src + 1, (redtbl_entry >> 32) & 0xFFFFFFFF);
+  ioapic_write(apic, IOAPIC_REDTBL + 2 * src, redtbl_entry & 0xFFFFFFFF);
 }
 
