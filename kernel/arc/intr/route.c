@@ -33,13 +33,19 @@ static intr_handler_node_t *intr_handlers[INTERRUPTS];
 
 void intr_dispatch(intr_state_t *state)
 {
-  /* acknowledge we received this interrupt */
+  /* acknowledge we received this interrupt if it isn't a fault and spurious */
   intr_t intr = state->id;
-  ic_ack(intr);
+  if (intr > FAULT31 && intr != SPURIOUS)
+    ic_ack(intr);
 
-  /* call the handler(s) */
+  /* if there is no handler panic (this is for debugging purposes) */
   spin_lock(&intr_route_lock);
-  for (intr_handler_node_t *node = intr_handlers[state->id]; node; node = node->next)
+  intr_handler_node_t *head = intr_handlers[state->id];
+  if (!head)
+    panic("unhandled interrupt %d\n", state->id);
+
+  /* call all the handlers */
+  for (intr_handler_node_t *node = head; node; node = node->next)
   {
     intr_handler_t handler = node->handler;
     (*handler)(state);

@@ -56,6 +56,13 @@ lvt_error:
   push 0xFE
   jmp intr_stub
 
+; spurious entry code
+[global spurious]
+spurious:
+  push 0
+  push 0xFF
+  jmp intr_stub
+
 intr_stub:
   ; save the register file
   push r15
@@ -100,11 +107,6 @@ intr_stub:
   add rsp, 16
 
   ; return
-  iretq
-
-; simple spurious interrupt handler
-[global spurious]
-spurious:
   iretq
 
 ; the fault and irq stubs are actually made here
