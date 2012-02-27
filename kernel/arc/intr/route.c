@@ -92,11 +92,14 @@ static void _intr_unroute_intr(intr_t intr, intr_handler_t handler)
   {
     if (node->handler == handler)
     {
-      /* get rid of it */
+      /* unlink it from the list */
       if (prev == 0)
         intr_handlers[intr] = node->next;
       else
         prev->next = node->next;
+
+      /* free the memory used by the list node */
+      free(node);
 
       /* all done! */
       return;
