@@ -14,23 +14,29 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef ARC_PROC_PROC_H
-#define ARC_PROC_PROC_H
+#include <arc/proc/proc.h>
+#include <arc/mm/pmm.h>
+#include <stdlib.h>
 
-#include <arc/proc/thread.h>
-#include <stdint.h>
-
-typedef struct proc
+proc_t *proc_create(void)
 {
-  /* physical address of the pml4 table of this process */
-  uintptr_t pml4_table;
+  proc_t *proc = malloc(sizeof(*proc));
+  if (!proc)
+    return 0;
 
-  /* head and tail nodes of threads within this process */
-  thread_t *thread_head, *thread_tail;
-} proc_t;
+  proc->pml4_table = pmm_alloc();
+  if (!proc->pml4_table)
+  {
+    free(proc);
+    return 0;
+  }
 
-proc_t *proc_create(void);
-void proc_destroy(proc_t *proc);
+  return proc;
+}
 
-#endif
+void proc_destroy(proc_t *proc)
+{
+  pmm_free(proc->pml4_table);
+  free(proc);
+}
 

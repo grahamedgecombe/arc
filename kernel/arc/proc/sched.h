@@ -14,23 +14,10 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef ARC_PROC_PROC_H
-#define ARC_PROC_PROC_H
+#ifndef ARC_PROC_SCHED_H
+#define ARC_PROC_SCHED_H
 
-#include <arc/proc/thread.h>
-#include <stdint.h>
 
-typedef struct proc
-{
-  /* physical address of the pml4 table of this process */
-  uintptr_t pml4_table;
-
-  /* head and tail nodes of threads within this process */
-  thread_t *thread_head, *thread_tail;
-} proc_t;
-
-proc_t *proc_create(void);
-void proc_destroy(proc_t *proc);
 
 #endif
 
