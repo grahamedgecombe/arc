@@ -42,6 +42,13 @@ irq%1:
   jmp intr_stub
 %endmacro
 
+; TLB shootdown IPI entry code
+[global ipi_tlb]
+ipi_tlb:
+  push 0
+  push 0xFC
+  jmp intr_stub
+
 ; lvt timer entry code
 [global lvt_timer]
 lvt_timer:

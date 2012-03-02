@@ -98,6 +98,9 @@
  * interrupt, IRQ25 will be mapped to IRQ1, etc. - essentially doing irq%24
  */
 
+/* TLB shootdown IPI */
+#define IPI_TLB 0xFC
+
 /* LAPIC LVT interrupts */
 #define LVT_TIMER 0xFD
 #define LVT_ERROR 0xFE

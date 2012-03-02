@@ -159,3 +159,47 @@ void ic_ipi_startup(cpu_lapic_id_t id, uint8_t trampoline_addr)
   }
 }
 
+void ic_ipi_all(intr_t intr)
+{
+  switch (ic_type)
+  {
+    case IC_TYPE_NONE:
+      panic("no IC initialised");
+      break;
+
+    case IC_TYPE_PIC:
+      panic("8259 PICs do not support IPIs");
+      break;
+
+    case IC_TYPE_LAPIC:
+      lapic_ipi(0, LAPIC_IPI_ALL | LAPIC_IPI_FIXED, intr);
+      break;
+
+    case IC_TYPE_LX2APIC:
+      lx2apic_ipi(0, LX2APIC_IPI_ALL | LX2APIC_IPI_FIXED, intr);
+      break;
+  }
+}
+
+void ic_ipi_all_exc_self(intr_t intr)
+{
+  switch (ic_type)
+  {
+    case IC_TYPE_NONE:
+      panic("no IC initialised");
+      break;
+
+    case IC_TYPE_PIC:
+      panic("8259 PICs do not support IPIs");
+      break;
+
+    case IC_TYPE_LAPIC:
+      lapic_ipi(0, LAPIC_IPI_ALL_EXC_SELF | LAPIC_IPI_STARTUP, intr);
+      break;
+
+    case IC_TYPE_LX2APIC:
+      lx2apic_ipi(0, LX2APIC_IPI_ALL_EXC_SELF | LX2APIC_IPI_STARTUP, intr);
+      break;
+  }
+}
+

@@ -18,6 +18,8 @@
 #include <arc/cpu/tlb.h>
 #include <arc/cpu/intr.h>
 #include <arc/intr/common.h>
+#include <arc/intr/route.h>
+#include <arc/intr/ic.h>
 #include <arc/lock/spinlock.h>
 #include <arc/smp/cpu.h>
 #include <stdbool.h>
@@ -88,7 +90,7 @@ static void tlb_handle_ipi(intr_state_t *state)
 
 void tlb_init(void)
 {
-  // TODO route interrupt
+  intr_route_intr(IPI_TLB, &tlb_handle_ipi);
 }
 
 void tlb_transaction_init(void)
@@ -101,7 +103,7 @@ void tlb_transaction_init(void)
   tlb_wait_cpus = cpu_count() - 1;
 
   /* send the IPIs to all CPUs but this one */
-  // TODO actually send the IPI
+  ic_ipi_all_exc_self(IPI_TLB);
 
   /* wait for all CPUs to respond to the IPI */
   int wait_cpus;

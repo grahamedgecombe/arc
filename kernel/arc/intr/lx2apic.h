@@ -33,8 +33,13 @@
 #define LX2APIC_IPI_ET       0x00
 #define LX2APIC_IPI_LT       0x80
 
+/* IPI DSH */
+#define LX2APIC_IPI_SELF         0x400 // TODO: use self IPI register for these
+#define LX2APIC_IPI_ALL          0x800
+#define LX2APIC_IPI_ALL_EXC_SELF 0xC00
+
 void lx2apic_init(void);
-void lx2apic_ipi(uint32_t dest, uint8_t mode, uint8_t vector);
+void lx2apic_ipi(uint32_t dest, uint16_t mode, uint8_t vector);
 void lx2apic_ack(void);
 
 #endif

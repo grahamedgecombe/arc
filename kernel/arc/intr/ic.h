@@ -38,5 +38,8 @@ void ic_ack(intr_t id);
 void ic_ipi_init(cpu_lapic_id_t id);
 void ic_ipi_startup(cpu_lapic_id_t id, uint8_t trampoline_addr);
 
+void ic_ipi_all(intr_t intr);
+void ic_ipi_all_exc_self(intr_t intr);
+
 #endif
 

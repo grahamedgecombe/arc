@@ -93,7 +93,7 @@ void lx2apic_ack(void)
   lx2apic_write(LX2APIC_EOI, 0);
 }
 
-void lx2apic_ipi(uint32_t dest, uint8_t mode, uint8_t vector)
+void lx2apic_ipi(uint32_t dest, uint16_t mode, uint8_t vector)
 {
   /* format the ICR high and low dwords */
   uint64_t icrh = dest;

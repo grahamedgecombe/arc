@@ -33,10 +33,15 @@
 #define LAPIC_IPI_ET       0x00
 #define LAPIC_IPI_LT       0x80
 
+/* IPI DSH */
+#define LAPIC_IPI_SELF         0x400
+#define LAPIC_IPI_ALL          0x800
+#define LAPIC_IPI_ALL_EXC_SELF 0xC00
+
 void lapic_print_info(void);
 bool lapic_mmio_init(uintptr_t addr);
 void lapic_init(void);
-void lapic_ipi(uint8_t dest, uint8_t mode, uint8_t vector);
+void lapic_ipi(uint8_t dest, uint16_t mode, uint8_t vector);
 void lapic_ack(void);
 
 #endif
