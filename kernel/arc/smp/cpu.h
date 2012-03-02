@@ -53,6 +53,7 @@ bool cpu_ap_init(cpu_lapic_id_t lapic_id, cpu_acpi_id_t acpi_id);
 void cpu_ap_install(cpu_t *cpu);
 cpu_t *cpu_iter(void);
 cpu_t *cpu_get(void);
+int cpu_count(void);
 
 #endif
 

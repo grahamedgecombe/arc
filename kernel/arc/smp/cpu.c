@@ -20,6 +20,7 @@
 #include <string.h>
 
 static cpu_t cpu_bsp;
+static int cpu_cnt = 1;
 
 void cpu_bsp_init(void)
 {
@@ -48,6 +49,7 @@ bool cpu_ap_init(cpu_lapic_id_t lapic_id, cpu_acpi_id_t acpi_id)
   cpu->self = cpu;
   cpu->lapic_id = lapic_id;
   cpu->acpi_id = acpi_id;
+  cpu_cnt++;
 
   return true;
 }
@@ -60,5 +62,10 @@ void cpu_ap_install(cpu_t *cpu)
 cpu_t *cpu_iter(void)
 {
   return &cpu_bsp;
+}
+
+int cpu_count(void)
+{
+  return cpu_cnt;
 }
 

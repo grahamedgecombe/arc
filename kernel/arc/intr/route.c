@@ -28,7 +28,7 @@ typedef struct intr_handler_node
   struct intr_handler_node *next;
 } intr_handler_node_t;
 
-static spinlock_t intr_route_lock;
+static spinlock_t intr_route_lock = SPIN_UNLOCKED;
 static intr_handler_node_t *intr_handlers[INTERRUPTS];
 
 void intr_dispatch(intr_state_t *state)
