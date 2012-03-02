@@ -25,7 +25,6 @@
 #include <arc/cpu/features.h>
 #include <arc/cpu/gdt.h>
 #include <arc/cpu/tss.h>
-#include <arc/cpu/intr.h>
 #include <arc/cpu/idt.h>
 #include <arc/cpu/halt.h>
 #include <arc/intr/ic.h>
@@ -36,6 +35,7 @@
 #include <arc/smp/init.h>
 #include <arc/time/pit.h>
 #include <arc/proc/syscall.h>
+#include <arc/lock/intr.h>
 #include <string.h>
 
 static void print_banner(void)
@@ -136,7 +136,7 @@ void init(uint32_t magic, multiboot_t *multiboot)
 
   /* test interrupts using the PIT */
   pit_monotonic(20, &tick);
-  intr_enable();
+  intr_unlock();
   halt_forever();
 }
 

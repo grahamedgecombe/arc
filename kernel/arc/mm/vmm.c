@@ -15,6 +15,7 @@
  */
 
 #include <arc/mm/vmm.h>
+#include <arc/mm/tlb.h>
 #include <arc/mm/align.h>
 #include <arc/mm/pmm.h>
 #include <arc/panic.h>
@@ -78,6 +79,9 @@ void vmm_init(void)
 {
   /* set 1g support flag */
   vmm_1g_pages = cpu_feature_supported(FEATURE_1G_PAGE);
+
+  /* init tlb shootdown stuff */
+  tlb_init();
 
   /*
    * touch all higher half pml4 entries, this means when we have multiple

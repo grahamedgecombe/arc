@@ -46,6 +46,9 @@ typedef struct cpu
 
   /* the tss for this processor */
   tss_t tss;
+
+  /* current 'depth' of the interrupt lock */
+  int intr_depth;
 } cpu_t;
 
 void cpu_bsp_init(void);

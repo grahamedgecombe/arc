@@ -14,31 +14,21 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef ARC_MM_TLB_H
-#define ARC_MM_TLB_H
+#include <arc/lock/intr.h>
+#include <arc/cpu/intr.h>
+#include <arc/smp/cpu.h>
 
-#include <stdint.h>
-
-#define TLB_OP_INVLPG 0x0
-#define TLB_OP_FLUSH  0x1
-
-typedef struct tlb_op
+void intr_lock(void)
 {
-  struct tlb_op *next;
+  cpu_t *cpu = cpu_get();
+  if (cpu->intr_depth++ == 0)
+    intr_disable();
+}
 
-  int type;
-  uintptr_t addr;
-} tlb_op_t;
-
-void tlb_init(void);
-
-void tlb_transaction_init(void);
-
-void tlb_transaction_queue_invlpg(uintptr_t addr);
-void tlb_transaction_queue_flush(void);
-
-void tlb_transaction_rollback(void);
-void tlb_transaction_commit(void);
-
-#endif
+void intr_unlock(void)
+{
+  cpu_t *cpu = cpu_get();
+  if (--cpu->intr_depth == 0)
+    intr_enable();
+}
 
