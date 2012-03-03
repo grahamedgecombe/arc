@@ -17,8 +17,11 @@
 #ifndef ARC_PANIC_H
 #define ARC_PANIC_H
 
+#include <arc/intr/common.h>
 #include <stdarg.h>
 
+void panic_init(void);
+void panic_handle_ipi(intr_state_t *state);
 void panic(const char *message, ...);
 void vpanic(const char *message, va_list args);
 

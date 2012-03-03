@@ -42,6 +42,13 @@ irq%1:
   jmp intr_stub
 %endmacro
 
+; panic IPI entry code
+[global ipi_panic]
+ipi_panic:
+  push 0
+  push 0xFB
+  jmp intr_stub
+
 ; TLB shootdown IPI entry code
 [global ipi_tlb]
 ipi_tlb:

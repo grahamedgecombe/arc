@@ -21,6 +21,7 @@
 #include <arc/intr/common.h>
 #include <arc/smp/cpu.h>
 #include <stdarg.h>
+#include <stdbool.h>
 
 #define IC_TYPE_NONE    0x0
 #define IC_TYPE_PIC     0x1
@@ -28,6 +29,7 @@
 #define IC_TYPE_LX2APIC 0x3
 
 void ic_print_info(void);
+bool ic_ready(void);
 
 void ic_bsp_init(int type, ...);
 void ic_bsp_vinit(int type, va_list args);

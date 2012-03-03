@@ -24,10 +24,6 @@
 * use APs to boot more APs so that on systems where there are a large number of
   APs it doesn't take a long time to bring them all up
 
-* TLB invalidation/panic should use an IPI to work on all processors
-
-* check if setting the IMCR is required to switch into APIC mode
-
 * split features into local CPU features and features that all CPUs share
 
 * implement some form of read/write lock which allows unlimited read locks to

@@ -18,6 +18,19 @@
 #include <arc/tty.h>
 #include <arc/cpu/intr.h>
 #include <arc/cpu/halt.h>
+#include <arc/intr/route.h>
+#include <arc/intr/ic.h>
+
+void panic_init(void)
+{
+  intr_route_intr(IPI_PANIC, &panic_handle_ipi);
+}
+
+void panic_handle_ipi(intr_state_t *state)
+{
+  intr_disable();
+  halt_forever();
+}
 
 void panic(const char *message, ...)
 {
@@ -29,9 +42,13 @@ void panic(const char *message, ...)
 
 void vpanic(const char *message, va_list args)
 {
+  if (ic_ready())
+    ic_ipi_all_exc_self(IPI_PANIC);
+
   tty_puts("PANIC: ");
   tty_vprintf(message, args);
   tty_puts("\n");
+
   intr_disable();
   halt_forever();
 }

@@ -126,13 +126,16 @@ void init(uint32_t magic, multiboot_t *multiboot)
   /* set up the interrupt controller */
   ic_ap_init();
 
-  /* set up symmetric multi-processing */
-  tty_puts("Setting up SMP...\n");
-  smp_init();
-
   /* set up interrupt routing */
   tty_puts("Setting up interrupt routing...\n");
   intr_route_init();
+
+  /* set up panic to work with multiple processors (needs intr router) */
+  panic_init();
+
+  /* set up symmetric multi-processing */
+  tty_puts("Setting up SMP...\n");
+  smp_init();
 
   /* test interrupts using the PIT */
   pit_monotonic(20, &tick);

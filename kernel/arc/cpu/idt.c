@@ -113,6 +113,7 @@ void idt_bsp_init(void)
   idt_encode_gate(IRQ21,     &irq21,     GATE_PRESENT | GATE_INTERRUPT);
   idt_encode_gate(IRQ22,     &irq22,     GATE_PRESENT | GATE_INTERRUPT);
   idt_encode_gate(IRQ23,     &irq23,     GATE_PRESENT | GATE_INTERRUPT);
+  idt_encode_gate(IPI_PANIC, &ipi_panic, GATE_PRESENT | GATE_INTERRUPT);
   idt_encode_gate(IPI_TLB,   &ipi_tlb,   GATE_PRESENT | GATE_INTERRUPT);
   idt_encode_gate(LVT_TIMER, &lvt_timer, GATE_PRESENT | GATE_INTERRUPT);
   idt_encode_gate(LVT_ERROR, &lvt_error, GATE_PRESENT | GATE_INTERRUPT);

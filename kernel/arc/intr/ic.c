@@ -41,6 +41,11 @@ void ic_print_info(void)
   }
 }
 
+bool ic_ready(void)
+{
+  return ic_type != IC_TYPE_NONE;
+}
+
 void ic_bsp_init(int type, ...)
 {
   va_list args;
@@ -190,15 +195,21 @@ void ic_ipi_all_exc_self(intr_t intr)
       break;
 
     case IC_TYPE_PIC:
-      panic("8259 PICs do not support IPIs");
+      /*
+       * we can allow this: if the PIC is in use, there is only this single BSP
+       * and no APs, so an IPI to all processors including self would do
+       * nothing
+       *
+       * TODO is this the best way of mixing SMP and UP code?
+       */
       break;
 
     case IC_TYPE_LAPIC:
-      lapic_ipi(0, LAPIC_IPI_ALL_EXC_SELF | LAPIC_IPI_STARTUP, intr);
+      lapic_ipi(0, LAPIC_IPI_ALL_EXC_SELF | LAPIC_IPI_FIXED, intr);
       break;
 
     case IC_TYPE_LX2APIC:
-      lx2apic_ipi(0, LX2APIC_IPI_ALL_EXC_SELF | LX2APIC_IPI_STARTUP, intr);
+      lx2apic_ipi(0, LX2APIC_IPI_ALL_EXC_SELF | LX2APIC_IPI_FIXED, intr);
       break;
   }
 }
