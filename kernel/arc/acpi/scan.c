@@ -18,7 +18,6 @@
 #include <arc/acpi/rsdp.h>
 #include <arc/acpi/rsdt.h>
 #include <arc/acpi/xsdt.h>
-#include <arc/acpi/fadt.h>
 #include <arc/acpi/madt.h>
 #include <arc/mm/mmio.h>
 #include <arc/panic.h>
@@ -36,44 +35,37 @@ static acpi_header_t *acpi_map(uintptr_t addr)
   return mmio_map(addr, len, MMIO_R);
 }
 
-static void acpi_print(acpi_header_t *table, uintptr_t addr)
+static void acpi_unmap(acpi_header_t *table)
 {
-  /* convert the signature to a null-terminated string */
-  char sig[5];
-  sig[0] = table->signature & 0xFF;
-  sig[1] = (table->signature >> 8) & 0xFF;
-  sig[2] = (table->signature >> 16) & 0xFF;
-  sig[3] = (table->signature >> 24) & 0xFF;
-  sig[4] = 0;
-
-  /* print some information about the structure */
-  tty_printf(" => Found %s (at %0#18x) \n", sig, addr);
+  mmio_unmap(table, table->len);
 }
 
 static void acpi_scan_table(uintptr_t addr)
 {
+  /* map the table into virtual memory */
   acpi_header_t *table = acpi_map(addr); 
   if (!table)
     panic("couldn't map table");
 
-  /* print some information about the structure */
-  acpi_print(table, addr);
-
-  /* look up the FACS and DSDT if this table is the FADT */
-  if (table->signature == FADT_SIGNATURE)
+  /* check to see if the table has a valid checksum */
+  if (!acpi_table_valid(table))
   {
-    fadt_t *fadt = (fadt_t *) table;
+    char sig[5];
+    sig[0] = table->signature & 0xFF;
+    sig[1] = (table->signature >> 8) & 0xFF;
+    sig[2] = (table->signature >> 16) & 0xFF;
+    sig[3] = (table->signature >> 24) & 0xFF;
+    sig[4] = 0;
 
-    if (fadt->facs_addr)
-      acpi_scan_table(fadt->facs_addr);
-
-    acpi_scan_table(fadt->dsdt_addr);
+    panic("invalid checksum in ACPI %s table", sig);
   }
+
   /* scan the MADT */
-  else if (table->signature == MADT_SIGNATURE)
-  {
+  if (table->signature == MADT_SIGNATURE)
     madt_scan((madt_t *) table);
-  }
+
+  /* we're done with it, unmap it */
+  acpi_unmap(table);
 }
 
 bool acpi_scan(void)
@@ -89,13 +81,10 @@ bool acpi_scan(void)
   /* check the ACPI revision */
   if (rsdp->revision >= 2)
   {
-    /* map it into virtual memory */
+    /* map the XSDT into virtual memory */
     xsdt_t *xsdt = (xsdt_t *) acpi_map(rsdp->xsdt_addr);
     if (!xsdt)
       panic("couldn't map XSDT");
-
-    /* print some info about the XSDT */
-    acpi_print((acpi_header_t *) xsdt, rsdp->xsdt_addr);
 
     /* calculate the number of entries */
     size_t len = (xsdt->header.len - sizeof(xsdt->header)) / sizeof(xsdt->entries[0]);
@@ -106,13 +95,10 @@ bool acpi_scan(void)
   }
   else
   {
-    /* map it into virtual memory */
+    /* map the RSDT into virtual memory */
     rsdt_t *rsdt = (rsdt_t *) acpi_map(rsdp->rsdt_addr);
     if (!rsdt)
       panic("couldn't map RSDT");
-
-    /* print some info about the RSDT */
-    acpi_print((acpi_header_t *) rsdt, rsdp->rsdt_addr);
 
     /* calculate the number of entries */
     size_t len = (rsdt->header.len - sizeof(rsdt->header)) / sizeof(rsdt->entries[0]);
