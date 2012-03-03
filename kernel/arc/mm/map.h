@@ -22,9 +22,11 @@
 #include <arc/multiboot.h>
 
 /* 
- * Doing the memory map allocation dynamically is actually quite difficult,
- * especially with the way the Multiboot structures are layed out. For
- * simplicity it is allocated statically with this maximum size instead.
+ * Doing the memory map allocation dynamically is actually quite difficult
+ * early during boot, especially with the way the Multiboot structures are
+ * layed out (it can be absolutely anywhere in the first 4G). For simplicity
+ * the physical memory map is allocated statically with this maximum size
+ * instead.
  *
  * You may need to adjust this if the e820 table created by your BIOS is
  * unusually large.
