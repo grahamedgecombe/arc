@@ -20,11 +20,13 @@
 #include <arc/lock/spinlock.h>
 #include <stdbool.h>
 
+#define RWLOCK_UNLOCKED { .read_permits = 0, .writing = false, .lock = SPIN_UNLOCKED }
+
 typedef struct
 {
   int read_permits;
-  bool writing; /* false = 0, so this is ok */
-  spinlock_t lock; /* SPIN_UNLOCKED = 0, so this is ok */
+  bool writing;
+  spinlock_t lock;
 } rwlock_t;
 
 void rw_rlock(rwlock_t *lock);
