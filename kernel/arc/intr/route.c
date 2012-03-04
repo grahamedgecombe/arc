@@ -17,7 +17,8 @@
 #include <arc/intr/route.h>
 #include <arc/intr/ic.h>
 #include <arc/intr/ioapic.h>
-#include <arc/lock/spinlock.h>
+#include <arc/lock/rwlock.h>
+#include <arc/lock/intr.h>
 #include <arc/tty.h>
 #include <arc/panic.h>
 #include <stdlib.h>
@@ -28,7 +29,7 @@ typedef struct intr_handler_node
   struct intr_handler_node *next;
 } intr_handler_node_t;
 
-static spinlock_t intr_route_lock = SPIN_UNLOCKED;
+static rwlock_t intr_route_lock;
 static intr_handler_node_t *intr_handlers[INTERRUPTS];
 
 void intr_dispatch(intr_state_t *state)
@@ -39,7 +40,7 @@ void intr_dispatch(intr_state_t *state)
     ic_ack(intr);
 
   /* if there is no handler panic (this is for debugging purposes) */
-  spin_lock(&intr_route_lock);
+  rw_rlock(&intr_route_lock);
   intr_handler_node_t *head = intr_handlers[state->id];
   if (!head)
     panic("unhandled interrupt %d\n", state->id);
@@ -50,7 +51,7 @@ void intr_dispatch(intr_state_t *state)
     intr_handler_t handler = node->handler;
     (*handler)(state);
   }
-  spin_unlock(&intr_route_lock);
+  rw_runlock(&intr_route_lock);
 }
 
 void intr_route_init(void)
@@ -109,17 +110,21 @@ static void _intr_unroute_intr(intr_t intr, intr_handler_t handler)
 
 bool intr_route_intr(intr_t intr, intr_handler_t handler)
 {
-  spin_lock(&intr_route_lock);
+  intr_lock();
+  rw_wlock(&intr_route_lock);
   bool ok = _intr_route_intr(intr, handler);
-  spin_unlock(&intr_route_lock);
+  rw_wunlock(&intr_route_lock);
+  intr_unlock();
   return ok;
 }
 
 void intr_unroute_intr(intr_t intr, intr_handler_t handler)
 {
-  spin_lock(&intr_route_lock);
+  intr_lock();
+  rw_wlock(&intr_route_lock);
   _intr_unroute_intr(intr, handler);
-  spin_unlock(&intr_route_lock);
+  rw_wunlock(&intr_route_lock);
+  intr_unlock();
 }
 
 bool intr_route_irq(irq_tuple_t *tuple, intr_handler_t handler)
@@ -129,7 +134,8 @@ bool intr_route_irq(irq_tuple_t *tuple, intr_handler_t handler)
   intr_t intr = (irq % IRQS) + IRQ0;
 
   /* iterate through the I/O APICs */
-  spin_lock(&intr_route_lock);
+  intr_lock();
+  rw_wlock(&intr_route_lock);
   for (ioapic_t *apic = ioapic_iter(); apic; apic = apic->next)
   {
     /* check if the IRQ belongs to this I/O APIC */
@@ -144,12 +150,14 @@ bool intr_route_irq(irq_tuple_t *tuple, intr_handler_t handler)
       ioapic_route(apic, tuple, intr);
 
       /* all done! */
-      spin_unlock(&intr_route_lock);
+      rw_wunlock(&intr_route_lock);
+      intr_unlock();
       return ok;
     }
   }
 
-  spin_unlock(&intr_route_lock);
+  rw_wunlock(&intr_route_lock);
+  intr_unlock();
   return false;
 }
 
@@ -160,7 +168,8 @@ void intr_unroute_irq(irq_tuple_t *tuple, intr_handler_t handler)
   intr_t intr = (irq % IRQS) + IRQ0;
 
   /* iterate through the I/O APICs */
-  spin_lock(&intr_route_lock);
+  intr_lock();
+  rw_wlock(&intr_route_lock);
   for (ioapic_t *apic = ioapic_iter(); apic; apic = apic->next)
   {
     /* check if the IRQ belongs to this I/O APIC */
@@ -175,6 +184,7 @@ void intr_unroute_irq(irq_tuple_t *tuple, intr_handler_t handler)
 
   /* unroute this interrupt */
   _intr_unroute_intr(intr, handler);
-  spin_unlock(&intr_route_lock);
+  rw_wunlock(&intr_route_lock);
+  intr_unlock();
 }
 

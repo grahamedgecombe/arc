@@ -29,9 +29,6 @@
 * implement some form of read/write lock which allows unlimited read locks to
   be held but only one write lock, use this for the interrupt routing
 
-* possible deadlock when intr_(unroute)_* is used (obtains lock, interrupt
-  happens, interrupt cannot continue due to lock being held and waits forever)
-
 * shouldn't mask all of LVT, I/O APIC interrupts don't seem to work at all in
   Bochs, keyboard IRQ (IRQ1) doesn't seem to work in QEMU
 

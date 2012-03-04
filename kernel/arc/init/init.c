@@ -77,6 +77,15 @@ void init(uint32_t magic, multiboot_t *multiboot)
   /* convert physical 32-bit multiboot address to virtual address */
   multiboot = phy32_to_virt(multiboot);
 
+  /* set up the BSP's percpu structure */
+  cpu_bsp_init();
+
+  /* set up the GDT, TSS, IDT and SYSCALL/RET */
+  gdt_init();
+  tss_init();
+  idt_bsp_init();
+  syscall_init();
+
   /* scan CPU features */
   cpu_features_init();
 
@@ -95,15 +104,6 @@ void init(uint32_t magic, multiboot_t *multiboot)
   /* set up the heap */
   tty_puts("Setting up the heap...\n");
   heap_init();
-
-  /* set up the BSP's percpu structure */
-  cpu_bsp_init();
-
-  /* set up the GDT, TSS, IDT and SYSCALL/RET */
-  gdt_init();
-  tss_init();
-  idt_bsp_init();
-  syscall_init();
 
   /* init ISA bus */
   isa_init();
