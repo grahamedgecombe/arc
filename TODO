@@ -12,22 +12,12 @@
 
 * documentation and testing of the new physical memory manager
 
-* deal with the fact that some ACPI tables (e.g. FACS) do not use the standard
-  header
-
-* fill out the FADT structure
-
 * check if in*_p() and out*_p() are still required
-
-* consider how locking should work with port 0x61 (NMI status & control)
 
 * use APs to boot more APs so that on systems where there are a large number of
   APs it doesn't take a long time to bring them all up
 
 * split features into local CPU features and features that all CPUs share
-
-* implement some form of read/write lock which allows unlimited read locks to
-  be held but only one write lock, use this for the interrupt routing
 
 * shouldn't mask all of LVT, I/O APIC interrupts don't seem to work at all in
   Bochs, keyboard IRQ (IRQ1) doesn't seem to work in QEMU
