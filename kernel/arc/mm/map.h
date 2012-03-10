@@ -31,7 +31,7 @@
  * You may need to adjust this if the e820 table created by your BIOS is
  * unusually large.
  */
-#define MM_MAP_MAX_ENTRIES 32
+#define MM_MAP_MAX_ENTRIES 64
 
 typedef struct
 {
