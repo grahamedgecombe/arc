@@ -15,6 +15,7 @@
  */
 
 #include <arc/lock/rwlock.h>
+#include <limits.h>
 
 void rw_rlock(rwlock_t *lock)
 {
@@ -22,7 +23,7 @@ void rw_rlock(rwlock_t *lock)
   do
   {
     spin_lock(&lock->lock);
-    if (!lock->writing)
+    if (!lock->writing && lock->read_permits != INT_MAX)
     {
       lock->read_permits++;
       acquired = true;
