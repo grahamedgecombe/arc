@@ -45,7 +45,7 @@ void rw_wlock(rwlock_t *lock)
   do
   {
     spin_lock(&lock->lock);
-    if (lock->read_permits == 0 && !lock->writing)
+    if (!lock->writing && lock->read_permits == 0)
     {
       lock->writing = true;
       acquired = true;
