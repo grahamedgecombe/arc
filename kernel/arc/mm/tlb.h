@@ -22,10 +22,8 @@
 #define TLB_OP_INVLPG 0x0
 #define TLB_OP_FLUSH  0x1
 
-typedef struct tlb_op
+typedef struct
 {
-  struct tlb_op *next;
-
   int type;
   uintptr_t addr;
 } tlb_op_t;
