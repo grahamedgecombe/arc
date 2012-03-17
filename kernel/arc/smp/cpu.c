@@ -28,6 +28,8 @@ void cpu_bsp_init(void)
   cpu_bsp.self = &cpu_bsp;
   cpu_bsp.bsp = true;
   cpu_bsp.intr_depth = 1;
+  cpu_bsp.proc = 0;
+  cpu_bsp.thread = 0;
   msr_write(MSR_GS_BASE, (uint64_t) &cpu_bsp);
 }
 
@@ -51,6 +53,8 @@ bool cpu_ap_init(cpu_lapic_id_t lapic_id, cpu_acpi_id_t acpi_id)
   cpu->lapic_id = lapic_id;
   cpu->acpi_id = acpi_id;
   cpu->intr_depth = 1;
+  cpu->proc = 0;
+  cpu->thread = 0;
   cpu_cnt++;
 
   return true;

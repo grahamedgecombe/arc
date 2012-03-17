@@ -15,6 +15,7 @@
  */
 
 #include <arc/proc/proc.h>
+#include <arc/smp/cpu.h>
 #include <arc/mm/pmm.h>
 #include <stdlib.h>
 
@@ -35,6 +36,12 @@ proc_t *proc_create(void)
   proc->thread_head = 0;
   proc->thread_tail = 0;
   return proc;
+}
+
+proc_t *proc_get(void)
+{
+  cpu_t *cpu = cpu_get();
+  return cpu->proc;
 }
 
 void proc_destroy(proc_t *proc)

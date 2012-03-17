@@ -34,6 +34,7 @@ typedef struct proc
 } proc_t;
 
 proc_t *proc_create(void);
+proc_t *proc_get(void);
 void proc_destroy(proc_t *proc);
 
 #endif

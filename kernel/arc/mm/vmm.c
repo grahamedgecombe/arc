@@ -15,6 +15,8 @@
  */
 
 #include <arc/mm/vmm.h>
+#include <arc/proc/proc.h>
+#include <arc/lock/spinlock.h>
 #include <arc/mm/tlb.h>
 #include <arc/mm/align.h>
 #include <arc/mm/pmm.h>
@@ -36,6 +38,25 @@ typedef struct
 } page_index_t;
 
 static bool vmm_1g_pages;
+static spinlock_t kernel_vmm_lock = SPIN_UNLOCKED;
+
+static void vmm_lock(uintptr_t addr)
+{
+  proc_t *proc = proc_get();
+  if (proc && addr < VM_OFFSET)
+    spin_lock(&proc->vmm_lock);
+  else
+    spin_lock(&kernel_vmm_lock);
+}
+
+static void vmm_unlock(uintptr_t addr)
+{
+  proc_t *proc = proc_get();
+  if (proc && addr < VM_OFFSET)
+    spin_unlock(&proc->vmm_lock);
+  else
+    spin_unlock(&kernel_vmm_lock);
+}
 
 static void addr_to_index(page_index_t *index, uintptr_t addr)
 {

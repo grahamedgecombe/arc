@@ -19,6 +19,8 @@
 
 #include <arc/cpu/gdt.h>
 #include <arc/cpu/tss.h>
+#include <arc/proc/proc.h>
+#include <arc/proc/thread.h>
 #include <arc/types.h>
 #include <stdbool.h>
 
@@ -49,6 +51,10 @@ typedef struct cpu
 
   /* current 'depth' of the interrupt lock */
   int intr_depth;
+
+  /* current process/thread running on this cpu */
+  proc_t *proc;
+  thread_t *thread;
 } cpu_t;
 
 void cpu_bsp_init(void);
