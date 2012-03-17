@@ -18,12 +18,16 @@
 #define ARC_PROC_PROC_H
 
 #include <arc/proc/thread.h>
+#include <arc/lock/spinlock.h>
 #include <stdint.h>
 
 typedef struct proc
 {
   /* physical address of the pml4 table of this process */
   uintptr_t pml4_table;
+
+  /* vmm address space lock */
+  spinlock_t vmm_lock;
 
   /* head and tail nodes of threads within this process */
   thread_t *thread_head, *thread_tail;

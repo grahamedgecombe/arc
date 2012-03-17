@@ -31,6 +31,9 @@ proc_t *proc_create(void)
     return 0;
   }
 
+  proc->vmm_lock = SPIN_UNLOCKED;
+  proc->thread_head = 0;
+  proc->thread_tail = 0;
   return proc;
 }
 
