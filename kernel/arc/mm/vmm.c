@@ -40,6 +40,17 @@ typedef struct
 static bool vmm_1g_pages;
 static spinlock_t kernel_vmm_lock = SPIN_UNLOCKED;
 
+/* forward declarations of internal vmm functions with no locking */
+static bool _vmm_touch(uintptr_t virt, int size);
+static bool _vmm_map(uintptr_t virt, uintptr_t phy, uint64_t flags);
+static bool _vmm_maps(uintptr_t virt, uintptr_t phy, uint64_t flags, int size);
+static uintptr_t _vmm_unmap(uintptr_t virt);
+static uintptr_t _vmm_unmaps(uintptr_t virt, int size);
+static void _vmm_untouch(uintptr_t virt, int size);
+static bool _vmm_map_range(uintptr_t virt, uintptr_t phy, size_t len, uint64_t flags);
+static void _vmm_unmap_range(uintptr_t virt, size_t len);
+static int _vmm_size(uintptr_t virt);
+
 static void vmm_lock(uintptr_t addr)
 {
   proc_t *proc = proc_get();
@@ -112,12 +123,12 @@ void vmm_init(void)
    */
   for (int pml4_index = (TABLE_SIZE / 2); pml4_index <= TABLE_SIZE; pml4_index++)
   {
-    if (!vmm_touch(VM_OFFSET + (pml4_index - (TABLE_SIZE / 2)) * FRAME_SIZE_512G, SIZE_1G))
+    if (!_vmm_touch(VM_OFFSET + (pml4_index - (TABLE_SIZE / 2)) * FRAME_SIZE_512G, SIZE_1G))
       panic("failed to touch pml4 entry %d", pml4_index);
   }
 }
 
-int vmm_size(uintptr_t virt)
+static int _vmm_size(uintptr_t virt)
 {
   page_index_t index;
   addr_to_index(&index, virt);
@@ -145,7 +156,7 @@ int vmm_size(uintptr_t virt)
   return SIZE_4K;
 }
 
-bool vmm_touch(uintptr_t virt, int size)
+static bool _vmm_touch(uintptr_t virt, int size)
 {
   page_index_t index;
   addr_to_index(&index, virt);  
@@ -220,17 +231,17 @@ rollback_pml4:
   return false;
 }
 
-bool vmm_map(uintptr_t virt, uintptr_t phy, uint64_t flags)
+static bool _vmm_map(uintptr_t virt, uintptr_t phy, uint64_t flags)
 {
-  return vmm_maps(virt, phy, flags, SIZE_4K);
+  return _vmm_maps(virt, phy, flags, SIZE_4K);
 }
 
-bool vmm_maps(uintptr_t virt, uintptr_t phy, uint64_t flags, int size)
+static bool _vmm_maps(uintptr_t virt, uintptr_t phy, uint64_t flags, int size)
 {
   if (size == SIZE_1G && !vmm_1g_pages)
     return false;
 
-  if (!vmm_touch(virt, size))
+  if (!_vmm_touch(virt, size))
     return false;
 
   page_index_t index;
@@ -255,12 +266,12 @@ bool vmm_maps(uintptr_t virt, uintptr_t phy, uint64_t flags, int size)
   return true;
 }
 
-uintptr_t vmm_unmap(uintptr_t virt)
+static uintptr_t _vmm_unmap(uintptr_t virt)
 {
-  return vmm_unmaps(virt, SIZE_4K);
+  return _vmm_unmaps(virt, SIZE_4K);
 }
 
-uintptr_t vmm_unmaps(uintptr_t virt, int size)
+static uintptr_t _vmm_unmaps(uintptr_t virt, int size)
 {
   page_index_t index;
   addr_to_index(&index, virt);
@@ -288,11 +299,11 @@ uintptr_t vmm_unmaps(uintptr_t virt, int size)
   }
 
   tlb_invlpg(virt);
-  vmm_untouch(virt, size);
+  _vmm_untouch(virt, size);
   return frame;
 }
 
-void vmm_untouch(uintptr_t virt, int size)
+static void _vmm_untouch(uintptr_t virt, int size)
 {
   page_index_t index;
   addr_to_index(&index, virt);
@@ -358,7 +369,7 @@ void vmm_untouch(uintptr_t virt, int size)
   }
 }
 
-bool vmm_map_range(uintptr_t virt, uintptr_t phy, size_t len, uint64_t flags)
+static bool _vmm_map_range(uintptr_t virt, uintptr_t phy, size_t len, uint64_t flags)
 {
   len = PAGE_ALIGN(len);
   for (size_t off = 0; off < len;)
@@ -366,7 +377,7 @@ bool vmm_map_range(uintptr_t virt, uintptr_t phy, size_t len, uint64_t flags)
     size_t remaining = len - off;
     if ((PAGE_ALIGN_1G(virt + off) == (virt + off)) && remaining >= FRAME_SIZE_1G)
     {
-      if (vmm_maps(virt + off, phy + off, flags, SIZE_1G))
+      if (_vmm_maps(virt + off, phy + off, flags, SIZE_1G))
       {
         off += FRAME_SIZE_1G;
         continue;
@@ -375,16 +386,16 @@ bool vmm_map_range(uintptr_t virt, uintptr_t phy, size_t len, uint64_t flags)
 
     if ((PAGE_ALIGN_2M(virt + off) == (virt + off)) && remaining >= FRAME_SIZE_2M)
     {
-      if (vmm_maps(virt + off, phy + off, flags, SIZE_2M))
+      if (_vmm_maps(virt + off, phy + off, flags, SIZE_2M))
       {
         off += FRAME_SIZE_2M;
         continue;
       }
     }
 
-    if (!vmm_map(virt + off, phy + off, flags))
+    if (!_vmm_map(virt + off, phy + off, flags))
     {
-      vmm_unmap_range(virt, off);
+      _vmm_unmap_range(virt, off);
       return false;
     }
 
@@ -393,14 +404,14 @@ bool vmm_map_range(uintptr_t virt, uintptr_t phy, size_t len, uint64_t flags)
   return true;
 }
 
-void vmm_unmap_range(uintptr_t virt, size_t len)
+static void _vmm_unmap_range(uintptr_t virt, size_t len)
 {
   len = PAGE_ALIGN(len);
   for (size_t off = 0; off < len;)
   {
-    int size = vmm_size(virt + off);
+    int size = _vmm_size(virt + off);
     if (size != -1)
-      vmm_unmaps(size, virt + off);
+      _vmm_unmaps(size, virt + off);
 
     if (size == SIZE_1G)
       off += FRAME_SIZE_1G;
@@ -409,5 +420,75 @@ void vmm_unmap_range(uintptr_t virt, size_t len)
     else
       off += FRAME_SIZE;
   }
+}
+
+bool vmm_touch(uintptr_t virt, int size)
+{
+  vmm_lock(virt);
+  bool ok = _vmm_touch(virt, size);
+  vmm_unlock(virt);
+  return ok;
+}
+
+bool vmm_map(uintptr_t virt, uintptr_t phy, uint64_t flags)
+{
+  vmm_lock(virt);
+  bool ok = _vmm_map(virt, phy, flags);
+  vmm_unlock(virt);
+  return ok;
+}
+
+bool vmm_maps(uintptr_t virt, uintptr_t phy, uint64_t flags, int size)
+{
+  vmm_lock(virt);
+  bool ok = _vmm_maps(virt, phy, flags, size);
+  vmm_unlock(virt);
+  return ok;
+}
+
+uintptr_t vmm_unmap(uintptr_t virt)
+{
+  vmm_lock(virt);
+  uintptr_t addr = _vmm_unmap(virt);
+  vmm_unlock(virt);
+  return addr;
+}
+
+uintptr_t vmm_unmaps(uintptr_t virt, int size)
+{
+  vmm_lock(virt);
+  uintptr_t addr = _vmm_unmaps(virt, size);
+  vmm_unlock(virt);
+  return addr;
+}
+
+void vmm_untouch(uintptr_t virt, int size)
+{
+  vmm_lock(virt);
+  _vmm_untouch(virt, size);
+  vmm_unlock(virt);
+}
+
+bool vmm_map_range(uintptr_t virt, uintptr_t phy, size_t len, uint64_t flags)
+{
+  vmm_lock(virt);
+  bool ok = _vmm_map_range(virt, phy, len, flags);
+  vmm_unlock(virt);
+  return ok;
+}
+
+void vmm_unmap_range(uintptr_t virt, size_t len)
+{
+  vmm_lock(virt);
+  _vmm_unmap_range(virt, len);
+  vmm_unlock(virt);
+}
+
+int vmm_size(uintptr_t virt)
+{
+  vmm_lock(virt);
+  int size = _vmm_size(virt);
+  vmm_unlock(virt);
+  return size;
 }
 
