@@ -43,7 +43,7 @@ void intr_dispatch(intr_state_t *state)
   rw_rlock(&intr_route_lock);
   intr_handler_node_t *head = intr_handlers[state->id];
   if (!head)
-    panic("unhandled interrupt %d\n", state->id);
+    panic("unhandled interrupt %d", state->id);
 
   /* call all the handlers */
   for (intr_handler_node_t *node = head; node; node = node->next)

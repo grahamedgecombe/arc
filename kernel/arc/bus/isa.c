@@ -40,7 +40,7 @@ void isa_init(void)
 irq_tuple_t *isa_irq(isa_line_t line)
 {
   if (line >= ISA_INTR_LINES)
-    panic("invalid ISA interrupt line %d\n", line);
+    panic("invalid ISA interrupt line %d", line);
 
   return &isa_irqs[line];
 }
