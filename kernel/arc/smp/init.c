@@ -29,7 +29,6 @@
 #include <arc/mm/vmm.h>
 #include <arc/time/pit.h>
 #include <arc/proc/syscall.h>
-#include <arc/mp.h>
 #include <arc/tty.h>
 #include <arc/panic.h>
 #include <stdlib.h>

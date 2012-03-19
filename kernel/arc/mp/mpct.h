@@ -14,15 +14,13 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef ARC_MP_H
-#define ARC_MP_H
+#ifndef ARC_MP_MPCT_H
+#define ARC_MP_MPCT_H
 
 #include <arc/pack.h>
-#include <stdbool.h>
 #include <stdint.h>
+#include <stdbool.h>
 
-#define MP_ALIGN       16
-#define MPFP_SIGNATURE 0x5F504D5F /* '_MP_' */
 #define MPCT_SIGNATURE 0x504D4350 /* 'PCMP' */
 
 #define MPCT_TYPE_PROC       0
@@ -35,16 +33,6 @@
 #define MPCT_TYPE_ADDR_MAPPING     128
 #define MPCT_TYPE_BUS_HIERARCHY    129
 #define MPCT_TYPE_BUS_ADDR_MAPPING 130
-
-typedef PACK(struct
-{
-  uint32_t signature;
-  uint32_t phy_addr;
-  uint8_t len;
-  uint8_t spec_rev;
-  uint8_t checksum;
-  uint8_t features[5];
-}) mpfp_t;
 
 typedef PACK(struct
 {
@@ -146,8 +134,8 @@ typedef PACK(struct
   mpct_entry_t entries[1];
 }) mpct_t;
 
-mpfp_t *mpfp_scan(void);
 bool mpct_valid(mpct_t *mpct);
+void mpct_scan(mpct_t *mpct);
 
 #endif
 

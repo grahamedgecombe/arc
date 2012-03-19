@@ -14,9 +14,11 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <arc/mp.h>
+#include <arc/mp/mpfp.h>
+#include <arc/mp/common.h>
 #include <arc/mm/phy32.h>
 #include <arc/bda.h>
+#include <stdbool.h>
 
 static bool mpfp_valid(mpfp_t *mpfp)
 {
@@ -26,21 +28,6 @@ static bool mpfp_valid(mpfp_t *mpfp)
   uint8_t sum = 0;
   uint8_t *ptr_start = (uint8_t *) mpfp;
   uint8_t *ptr_end = ptr_start + mpfp->len * MP_ALIGN;
-
-  for (uint8_t *ptr = ptr_start; ptr < ptr_end; ptr++)
-    sum += *ptr;
-
-  return sum == 0;
-}
-
-bool mpct_valid(mpct_t *mpct)
-{
-  if (mpct->signature != MPCT_SIGNATURE)
-    return false;
-
-  uint8_t sum = 0;
-  uint8_t *ptr_start = (uint8_t *) mpct;
-  uint8_t *ptr_end = ptr_start + mpct->len;
 
   for (uint8_t *ptr = ptr_start; ptr < ptr_end; ptr++)
     sum += *ptr;

@@ -33,6 +33,7 @@
 #include <arc/panic.h>
 #include <arc/smp/cpu.h>
 #include <arc/acpi/scan.h>
+#include <arc/mp/scan.h>
 #include <arc/smp/init.h>
 #include <arc/time/pit.h>
 #include <arc/proc/syscall.h>
@@ -120,7 +121,7 @@ void init(uint32_t magic, multiboot_t *multiboot)
     /* search for MP tables if the PC doesn't support ACPI */
     tty_puts("Scanning MP tables...\n");
 
-    /* if (!mp_scan()) */
+    if (!mp_scan())
     {
       /* fall back to non-SMP mode using the PIC */
       tty_puts("Falling back to single processor mode...\n");
