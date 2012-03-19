@@ -29,7 +29,6 @@
 #define IC_TYPE_LX2APIC 0x3
 
 void ic_print_info(void);
-bool ic_ready(void);
 
 void ic_bsp_init(int type, ...);
 void ic_bsp_vinit(int type, va_list args);

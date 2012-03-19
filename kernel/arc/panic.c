@@ -16,6 +16,7 @@
 
 #include <arc/panic.h>
 #include <arc/tty.h>
+#include <arc/smp/mode.h>
 #include <arc/cpu/intr.h>
 #include <arc/cpu/halt.h>
 #include <arc/intr/route.h>
@@ -43,7 +44,7 @@ void panic(const char *message, ...)
 
 void vpanic(const char *message, va_list args)
 {
-  if (ic_ready())
+  if (smp_mode == MODE_SMP)
     ic_ipi_all_exc_self(IPI_PANIC);
 
   tty_puts("PANIC: ");
