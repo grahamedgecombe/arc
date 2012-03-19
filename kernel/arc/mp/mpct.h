@@ -42,10 +42,10 @@ typedef PACK(struct
     PACK(struct
     {
       uint8_t id;
-      uint8_t local_apic_ver;
-      uint8_t cpu_flags;
-      uint32_t cpu_signature;
-      uint32_t feature_flags;
+      uint8_t ver;
+      uint8_t flags;
+      uint32_t signature;
+      uint32_t features;
       uint64_t reserved;
     }) proc;
 
@@ -60,27 +60,27 @@ typedef PACK(struct
       uint8_t id;
       uint8_t ver;
       uint8_t flags;
-      uint32_t phy_addr;
+      uint32_t addr;
     }) io_apic;
 
     PACK(struct
     {
-      uint8_t intr_type;
-      uint16_t intr_flags;
-      uint8_t source_bus;
-      uint8_t source_irq;
-      uint8_t dest_io_apic;
-      uint8_t dest_intr;
+      uint8_t type;
+      uint16_t flags;
+      uint8_t bus;    /* source bus id */
+      uint8_t irq;    /* bus irq number */
+      uint8_t ioapic; /* dest ioapic id */
+      uint8_t intr;   /* ioapic interrupt number */
     }) io_intr;
 
     PACK(struct
     {
-      uint8_t intr_type;
-      uint16_t intr_flags;
-      uint8_t source_bus;
-      uint8_t source_irq;
-      uint8_t dest_local_apic;
-      uint8_t dest_intr;
+      uint8_t type;
+      uint16_t flags;
+      uint8_t bus;    /* source bus id */
+      uint8_t irq;    /* bus irq number */
+      uint8_t lapic;  /* lapic interrupt number */
+      uint8_t lint;   /* lapic LINT number */
     }) local_intr;
   };
 }) mpct_entry_t;
