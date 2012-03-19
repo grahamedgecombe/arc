@@ -38,6 +38,7 @@
 #include <arc/proc/syscall.h>
 #include <arc/lock/intr.h>
 #include <string.h>
+#include <stdbool.h>
 
 static void print_banner(void)
 {
@@ -109,6 +110,9 @@ void init(uint32_t magic, multiboot_t *multiboot)
   /* init ISA bus */
   isa_init();
 
+  /* uniprocessor fallback flag */
+  bool up_fallback = false;
+
   /* search for ACPI tables */
   tty_puts("Scanning ACPI tables...\n");
   if (!acpi_scan())
@@ -121,6 +125,7 @@ void init(uint32_t magic, multiboot_t *multiboot)
       /* fall back to non-SMP mode using the PIC */
       tty_puts("Falling back to single processor mode...\n");
       ic_bsp_init(IC_TYPE_PIC);
+      up_fallback = true;
     }
   }
 
@@ -138,11 +143,15 @@ void init(uint32_t magic, multiboot_t *multiboot)
   panic_init();
 
   /* set up symmetric multi-processing */
-  tty_puts("Setting up SMP...\n");
-  smp_init();
+  if (!up_fallback)
+  {
+    tty_puts("Setting up SMP...\n");
+    smp_init();
+  }
 
   /* test interrupts using the PIT */
   pit_monotonic(20, &tick);
+
   intr_unlock();
   halt_forever();
 }

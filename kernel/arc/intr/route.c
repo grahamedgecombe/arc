@@ -15,10 +15,12 @@
  */
 
 #include <arc/intr/route.h>
+#include <arc/intr/pic.h>
 #include <arc/intr/ic.h>
 #include <arc/intr/ioapic.h>
 #include <arc/lock/rwlock.h>
 #include <arc/lock/intr.h>
+#include <arc/smp/mode.h>
 #include <arc/tty.h>
 #include <arc/panic.h>
 #include <stdlib.h>
@@ -129,33 +131,60 @@ void intr_unroute_intr(intr_t intr, intr_handler_t handler)
 
 bool intr_route_irq(irq_tuple_t *tuple, intr_handler_t handler)
 {
-  /* calculate the interrupt number */
-  irq_t irq = tuple->irq;
-  intr_t intr = (irq % IRQS) + IRQ0;
-
-  /* iterate through the I/O APICs */
+  /* obtain the write lock */
   intr_lock();
   rw_wlock(&intr_route_lock);
-  for (ioapic_t *apic = ioapic_iter(); apic; apic = apic->next)
+
+  /* check if we are in uni-processor or SMP mode */
+  if (smp_mode == MODE_UP)
   {
-    /* check if the IRQ belongs to this I/O APIC */
-    irq_t irq_first = apic->irq_base;
-    irq_t irq_last = apic->irq_base + apic->irqs - 1;
-    if (irq >= irq_first && irq < irq_last)
+    /* calculate the interrupt number, only IRQ0-15 can be routed */
+    irq_t irq = tuple->irq;
+    if (irq < 16)
     {
-      /* route the interrupt */
+      intr_t intr = irq + IRQ0;
+
+      /* actually route the interrupt */
       bool ok = _intr_route_intr(intr, handler);
 
-      /* program the I/O APIC */
-      ioapic_route(apic, tuple, intr);
+      /* unmask the interrupt in the PIC */
+      pic_unmask(irq);
 
-      /* all done! */
+      /* release the write lock */
       rw_wunlock(&intr_route_lock);
       intr_unlock();
       return ok;
     }
   }
+  else
+  {
+    /* calculate the interrupt number */
+    irq_t irq = tuple->irq;
+    intr_t intr = (irq % IRQS) + IRQ0;
 
+    /* iterate through the I/O APICs */
+    for (ioapic_t *apic = ioapic_iter(); apic; apic = apic->next)
+    {
+      /* check if the IRQ belongs to this I/O APIC */
+      irq_t irq_first = apic->irq_base;
+      irq_t irq_last = apic->irq_base + apic->irqs - 1;
+      if (irq >= irq_first && irq < irq_last)
+      {
+        /* route the interrupt */
+        bool ok = _intr_route_intr(intr, handler);
+
+        /* program the I/O APIC */
+        ioapic_route(apic, tuple, intr);
+
+        /* all done! */
+        rw_wunlock(&intr_route_lock);
+        intr_unlock();
+        return ok;
+      }
+    }
+  }
+
+  /* release the write lock */
   rw_wunlock(&intr_route_lock);
   intr_unlock();
   return false;
@@ -163,27 +192,51 @@ bool intr_route_irq(irq_tuple_t *tuple, intr_handler_t handler)
 
 void intr_unroute_irq(irq_tuple_t *tuple, intr_handler_t handler)
 {
-  /* calculate the interrupt number */
-  irq_t irq = tuple->irq;
-  intr_t intr = (irq % IRQS) + IRQ0;
-
-  /* iterate through the I/O APICs */
+  /* obtain the write lock */
   intr_lock();
   rw_wlock(&intr_route_lock);
-  for (ioapic_t *apic = ioapic_iter(); apic; apic = apic->next)
+
+  /* check if we are in uni-processor or SMP mode */
+  if (smp_mode == MODE_UP)
   {
-    /* check if the IRQ belongs to this I/O APIC */
-    irq_t irq_first = apic->irq_base;
-    irq_t irq_last = apic->irq_base + apic->irqs - 1;
-    if (irq >= irq_first && irq < irq_last)
+    /* calculate the interrupt number, only IRQ0-15 can be unrouted */
+    irq_t irq = tuple->irq;
+    if (irq < 16)
     {
-      /* program the I/O APIC */
-      ioapic_mask(apic, tuple);
+      intr_t intr = irq + IRQ0;
+
+      /* actually unroute the interrupt */
+      _intr_unroute_intr(intr, handler);
+
+      /* mask the interrupt in the PIC if it is no longer used */
+      if (!intr_handlers[intr])
+        pic_mask(irq);
     }
   }
+  else
+  {
+    /* calculate the interrupt number */
+    irq_t irq = tuple->irq;
+    intr_t intr = (irq % IRQS) + IRQ0;
 
-  /* unroute this interrupt */
-  _intr_unroute_intr(intr, handler);
+    /* iterate through the I/O APICs */
+    for (ioapic_t *apic = ioapic_iter(); apic; apic = apic->next)
+    {
+      /* check if the IRQ belongs to this I/O APIC */
+      irq_t irq_first = apic->irq_base;
+      irq_t irq_last = apic->irq_base + apic->irqs - 1;
+      if (irq >= irq_first && irq < irq_last)
+      {
+        /* program the I/O APIC */
+        ioapic_mask(apic, tuple);
+      }
+    }
+
+    /* unroute this interrupt */
+    _intr_unroute_intr(intr, handler);
+  }
+
+  /* release the write lock */
   rw_wunlock(&intr_route_lock);
   intr_unlock();
 }
