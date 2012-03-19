@@ -96,6 +96,9 @@ bool acpi_scan(void)
     /* iterate through all of the tables */
     for (size_t i = 0; i < len; i++)
       acpi_scan_table((uintptr_t) xsdt->entries[i]);
+
+    /* unmap XSDT */
+    acpi_unmap((acpi_header_t *) xsdt);
   }
   else
   {
@@ -114,6 +117,9 @@ bool acpi_scan(void)
     /* iterate through all of the tables */
     for (size_t i = 0; i < len; i++)
       acpi_scan_table((uintptr_t) rsdt->entries[i]);
+
+    /* unmap RSDT */
+    acpi_unmap((acpi_header_t *) rsdt);
   }
 
   return true;
