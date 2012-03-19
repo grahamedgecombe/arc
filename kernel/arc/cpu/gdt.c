@@ -19,6 +19,17 @@
 #include <arc/smp/cpu.h>
 #include <string.h>
 
+/* flags */
+#define GDT_CS       0x18
+#define GDT_DS       0x10
+#define GDT_TSS      0x09
+#define GDT_WRITABLE 0x02
+#define GDT_USER     0x60
+#define GDT_PRESENT  0x80
+
+/* granularity */
+#define GDT_LM       0x2
+
 static void gdt_set_gate(gdt_gate_t *gdt_gates, uint16_t sel, uint8_t flags, uint8_t gran)
 {
   gdt_gate_t *gate = &gdt_gates[sel / sizeof(*gdt_gates)];
@@ -58,11 +69,11 @@ void gdt_init(void)
   memset(gdt_gates, 0, sizeof(*gdt_gates) * GDT_GATES);
 
   /* fill in the entries we need */
-  gdt_set_gate( gdt_gates, SLTR_KERNEL_CODE, 0x98, 0xA);
-  gdt_set_gate( gdt_gates, SLTR_KERNEL_DATA, 0x92, 0xC);
-  gdt_set_gate( gdt_gates, SLTR_USER_DATA,   0xF2, 0xC);
-  gdt_set_gate( gdt_gates, SLTR_USER_CODE,   0xF8, 0xA);
-  gdt_set_xgate(gdt_gates, SLTR_TSS,         0x89, 0x0, tss_base, tss_limit);
+  gdt_set_gate( gdt_gates, SLTR_KERNEL_CODE, GDT_PRESENT | GDT_CS,                           GDT_LM);
+  gdt_set_gate( gdt_gates, SLTR_KERNEL_DATA, GDT_PRESENT | GDT_DS | GDT_WRITABLE,            0);
+  gdt_set_gate( gdt_gates, SLTR_USER_DATA,   GDT_PRESENT | GDT_DS | GDT_USER | GDT_WRITABLE, 0);
+  gdt_set_gate( gdt_gates, SLTR_USER_CODE,   GDT_PRESENT | GDT_CS | GDT_USER,                GDT_LM);
+  gdt_set_xgate(gdt_gates, SLTR_TSS,         GDT_PRESENT | GDT_TSS,                          0, tss_base, tss_limit);
 
   /* read the FS_BASE and GS_BASE MSRs so we can restore them later on */
   uint64_t fs_base = msr_read(MSR_FS_BASE);
