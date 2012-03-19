@@ -14,43 +14,16 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <arc/panic.h>
-#include <arc/tty.h>
-#include <arc/cpu/intr.h>
-#include <arc/cpu/halt.h>
-#include <arc/intr/route.h>
-#include <arc/intr/ic.h>
+#ifndef ARC_SMP_MODE_H
+#define ARC_SMP_MODE_H
 
-void panic_init(void)
+typedef enum
 {
-  if (!intr_route_intr(IPI_PANIC, &panic_handle_ipi))
-    panic("failed to route panic IPI");
-}
+  MODE_UP, /* uni-processor mode */
+  MODE_SMP /* symmetric multi-processor mode */
+} smp_mode_t;
 
-void panic_handle_ipi(intr_state_t *state)
-{
-  intr_disable();
-  halt_forever();
-}
+extern smp_mode_t smp_mode;
 
-void panic(const char *message, ...)
-{
-  va_list args;
-  va_start(args, message);
-  vpanic(message, args);
-  va_end(args);
-}
-
-void vpanic(const char *message, va_list args)
-{
-  if (ic_ready())
-    ic_ipi_all_exc_self(IPI_PANIC);
-
-  tty_puts("PANIC: ");
-  tty_vprintf(message, args);
-  tty_puts("\n");
-
-  intr_disable();
-  halt_forever();
-}
+#endif
 

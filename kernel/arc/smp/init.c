@@ -16,12 +16,15 @@
 
 #include <arc/smp/init.h>
 #include <arc/smp/cpu.h>
+#include <arc/smp/mode.h>
 #include <arc/cpu/gdt.h>
 #include <arc/cpu/tss.h>
 #include <arc/cpu/idt.h>
 #include <arc/cpu/pause.h>
 #include <arc/cpu/halt.h>
+#include <arc/cpu/tlb.h>
 #include <arc/lock/intr.h>
+#include <arc/lock/spinlock.h>
 #include <arc/intr/ic.h>
 #include <arc/mm/vmm.h>
 #include <arc/time/pit.h>
@@ -39,6 +42,10 @@
 /* some variables used to exchange data between the BSP and APs */
 static volatile bool ack_sipi = false;
 static cpu_t * volatile booted_cpu;
+
+/* a counter of ready CPUs, smp_init() blocks until all APs are ready */
+static int ready_cpus = 1;
+static spinlock_t ready_cpus_lock = SPIN_UNLOCKED;
 
 static void print_cpu_info(cpu_t *cpu)
 {
@@ -109,6 +116,18 @@ void smp_init(void)
     else
       print_cpu_info(cpu);
   }
+
+  /* wait for all CPUs to be ready */
+  int ready;
+  do
+  {
+    spin_lock(&ready_cpus_lock);
+    ready = ready_cpus;
+    spin_unlock(&ready_cpus_lock);
+  } while (ready != cpu_count());
+
+  /* switch to SMP mode */
+  smp_mode = MODE_SMP;
 }
 
 void smp_ap_init(void)
@@ -131,6 +150,14 @@ void smp_ap_init(void)
 
   /* set up the interrupt controller on this CPU */
   ic_ap_init();
+
+  /* flush the TLB (as up until this point we won't have received TLB shootdowns) */
+  tlb_flush();
+
+  /* increment the ready counter */
+  spin_lock(&ready_cpus_lock);
+  ready_cpus++;
+  spin_unlock(&ready_cpus_lock);
 
   /* enable interrupts and halt forever */
   intr_unlock();

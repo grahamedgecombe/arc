@@ -112,9 +112,6 @@ void vmm_init(void)
   /* set 1g support flag */
   vmm_1g_pages = cpu_feature_supported(FEATURE_1G_PAGE);
 
-  /* init tlb shootdown stuff */
-  tlb_init();
-
   /*
    * touch all higher half pml4 entries, this means when we have multiple
    * address spaces, we can easily keep the higher half mapped in exactly the
@@ -171,7 +168,7 @@ static bool _vmm_touch(uintptr_t virt, int size)
 
     pml4 = frame3 | PG_WRITABLE | PG_PRESENT;
     index.pml4[index.pml4e] = pml4;
-    tlb_invlpg((uintptr_t) index.pml3);
+    tlb_transaction_queue_invlpg((uintptr_t) index.pml3);
     memset(index.pml3, 0, FRAME_SIZE);
   }
 
@@ -190,7 +187,7 @@ static bool _vmm_touch(uintptr_t virt, int size)
 
     pml3 = frame2 | PG_WRITABLE | PG_PRESENT;
     index.pml3[index.pml3e] = pml3;
-    tlb_invlpg((uintptr_t) index.pml2);
+    tlb_transaction_queue_invlpg((uintptr_t) index.pml2);
     memset(index.pml2, 0, FRAME_SIZE);
   }
 
@@ -208,7 +205,7 @@ static bool _vmm_touch(uintptr_t virt, int size)
 
     pml2 = frame1 | PG_WRITABLE | PG_PRESENT;
     index.pml2[index.pml2e] = pml2;
-    tlb_invlpg((uintptr_t) index.pml1);
+    tlb_transaction_queue_invlpg((uintptr_t) index.pml1);
     memset(index.pml1, 0, FRAME_SIZE);
   }
 
@@ -218,14 +215,14 @@ rollback_pml3:
   if (frame2)
   {
     index.pml3[index.pml3e] = 0;
-    tlb_invlpg((uintptr_t) index.pml2);
+    tlb_transaction_queue_invlpg((uintptr_t) index.pml2);
     pmm_free(frame2);
   }
 rollback_pml4:
   if (frame3)
   {
     index.pml4[index.pml4e] = 0;
-    tlb_invlpg((uintptr_t) index.pml3);
+    tlb_transaction_queue_invlpg((uintptr_t) index.pml3);
     pmm_free(frame3);
   }
   return false;
@@ -262,7 +259,7 @@ static bool _vmm_maps(uintptr_t virt, uintptr_t phy, uint64_t flags, int size)
       break;
   }
 
-  tlb_invlpg(virt);
+  tlb_transaction_queue_invlpg(virt);
   return true;
 }
 
@@ -298,7 +295,7 @@ static uintptr_t _vmm_unmaps(uintptr_t virt, int size)
       break;
   }
 
-  tlb_invlpg(virt);
+  tlb_transaction_queue_invlpg(virt);
   _vmm_untouch(virt, size);
   return frame;
 }
@@ -324,7 +321,7 @@ static void _vmm_untouch(uintptr_t virt, int size)
     {
       pmm_free(index.pml2[index.pml2e] & PG_ADDR_MASK);
       index.pml2[index.pml2e] = 0;
-      tlb_invlpg((uintptr_t) index.pml1);
+      tlb_transaction_queue_invlpg((uintptr_t) index.pml1);
     }
   }
 
@@ -344,7 +341,7 @@ static void _vmm_untouch(uintptr_t virt, int size)
     {
       pmm_free(index.pml3[index.pml3e] & PG_ADDR_MASK);
       index.pml3[index.pml3e] = 0;
-      tlb_invlpg((uintptr_t) index.pml2);
+      tlb_transaction_queue_invlpg((uintptr_t) index.pml2);
     }
   }
 
@@ -364,7 +361,7 @@ static void _vmm_untouch(uintptr_t virt, int size)
     {
       pmm_free(index.pml4[index.pml4e] & PG_ADDR_MASK);
       index.pml4[index.pml4e] = 0;
-      tlb_invlpg((uintptr_t) index.pml3);
+      tlb_transaction_queue_invlpg((uintptr_t) index.pml3);
     }
   }
 }
@@ -425,7 +422,14 @@ static void _vmm_unmap_range(uintptr_t virt, size_t len)
 bool vmm_touch(uintptr_t virt, int size)
 {
   vmm_lock(virt);
+
+  tlb_transaction_init();
   bool ok = _vmm_touch(virt, size);
+  if (ok)
+    tlb_transaction_commit();
+  else
+    tlb_transaction_rollback();
+
   vmm_unlock(virt);
   return ok;
 }
@@ -433,7 +437,14 @@ bool vmm_touch(uintptr_t virt, int size)
 bool vmm_map(uintptr_t virt, uintptr_t phy, uint64_t flags)
 {
   vmm_lock(virt);
+
+  tlb_transaction_init();
   bool ok = _vmm_map(virt, phy, flags);
+  if (ok)
+    tlb_transaction_commit();
+  else
+    tlb_transaction_rollback();
+
   vmm_unlock(virt);
   return ok;
 }
@@ -441,7 +452,14 @@ bool vmm_map(uintptr_t virt, uintptr_t phy, uint64_t flags)
 bool vmm_maps(uintptr_t virt, uintptr_t phy, uint64_t flags, int size)
 {
   vmm_lock(virt);
+
+  tlb_transaction_init();
   bool ok = _vmm_maps(virt, phy, flags, size);
+  if (ok)
+    tlb_transaction_commit();
+  else
+    tlb_transaction_rollback();
+
   vmm_unlock(virt);
   return ok;
 }
@@ -449,7 +467,9 @@ bool vmm_maps(uintptr_t virt, uintptr_t phy, uint64_t flags, int size)
 uintptr_t vmm_unmap(uintptr_t virt)
 {
   vmm_lock(virt);
+  tlb_transaction_init();
   uintptr_t addr = _vmm_unmap(virt);
+  tlb_transaction_commit();
   vmm_unlock(virt);
   return addr;
 }
@@ -457,7 +477,9 @@ uintptr_t vmm_unmap(uintptr_t virt)
 uintptr_t vmm_unmaps(uintptr_t virt, int size)
 {
   vmm_lock(virt);
+  tlb_transaction_init();
   uintptr_t addr = _vmm_unmaps(virt, size);
+  tlb_transaction_commit();
   vmm_unlock(virt);
   return addr;
 }
@@ -465,14 +487,23 @@ uintptr_t vmm_unmaps(uintptr_t virt, int size)
 void vmm_untouch(uintptr_t virt, int size)
 {
   vmm_lock(virt);
+  tlb_transaction_init();
   _vmm_untouch(virt, size);
+  tlb_transaction_commit();
   vmm_unlock(virt);
 }
 
 bool vmm_map_range(uintptr_t virt, uintptr_t phy, size_t len, uint64_t flags)
 {
   vmm_lock(virt);
+
+  tlb_transaction_init();
   bool ok = _vmm_map_range(virt, phy, len, flags);
+  if (ok)
+    tlb_transaction_commit();
+  else
+    tlb_transaction_rollback();
+
   vmm_unlock(virt);
   return ok;
 }
@@ -480,7 +511,9 @@ bool vmm_map_range(uintptr_t virt, uintptr_t phy, size_t len, uint64_t flags)
 void vmm_unmap_range(uintptr_t virt, size_t len)
 {
   vmm_lock(virt);
+  tlb_transaction_init();
   _vmm_unmap_range(virt, len);
+  tlb_transaction_commit();
   vmm_unlock(virt);
 }
 

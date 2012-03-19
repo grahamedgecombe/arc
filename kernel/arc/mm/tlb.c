@@ -23,10 +23,15 @@
 #include <arc/lock/intr.h>
 #include <arc/lock/spinlock.h>
 #include <arc/smp/cpu.h>
+#include <arc/smp/mode.h>
+#include <arc/panic.h>
 #include <stdbool.h>
 #include <stddef.h>
 
 #define TLB_OP_QUEUE_SIZE 16
+
+/* flag which indicates if tlb_init() has been called */
+static bool tlb_initialised = false;
 
 /* queue of pending TLB operations */
 static tlb_op_t tlb_op_queue[TLB_OP_QUEUE_SIZE];
@@ -91,7 +96,10 @@ static void tlb_handle_ipi(intr_state_t *state)
 
 void tlb_init(void)
 {
-  intr_route_intr(IPI_TLB, &tlb_handle_ipi);
+  if (!intr_route_intr(IPI_TLB, &tlb_handle_ipi))
+    panic("failed to route TLB shootdown IPI");
+
+  tlb_initialised = true;
 }
 
 void tlb_transaction_init(void)
@@ -103,17 +111,24 @@ void tlb_transaction_init(void)
   tlb_commit = false;
   tlb_wait_cpus = cpu_count() - 1;
 
-  /* send the IPIs to all CPUs but this one */
-  ic_ipi_all_exc_self(IPI_TLB);
-
-  /* wait for all CPUs to respond to the IPI */
-  int wait_cpus;
-  do
+  /* if we're in SMP mode, stop all the other CPUs */
+  if (smp_mode == MODE_SMP)
   {
-    spin_lock(&tlb_wait_lock);
-    wait_cpus = tlb_wait_cpus;
-    spin_unlock(&tlb_wait_lock);
-  } while (wait_cpus != 0);
+    if (!tlb_initialised)
+      panic("TLB shootdown in SMP mode before IPI routed");
+
+    /* send the IPIs to all CPUs but this one */
+    ic_ipi_all_exc_self(IPI_TLB);
+
+    /* wait for all CPUs to respond to the IPI */
+    int wait_cpus;
+    do
+    {
+      spin_lock(&tlb_wait_lock);
+      wait_cpus = tlb_wait_cpus;
+      spin_unlock(&tlb_wait_lock);
+    } while (wait_cpus != 0);
+  }
 }
 
 void tlb_transaction_queue_invlpg(uintptr_t addr)
@@ -148,22 +163,28 @@ void tlb_transaction_commit(void)
   /* reset cpu waiting counter */
   tlb_wait_cpus = cpu_count() - 1;
 
-  /* set the commit flag */
-  spin_lock(&tlb_commit_lock);
-  tlb_commit = true;
-  spin_unlock(&tlb_commit_lock);
+  /* set the commit flag to make other processors handle the op queue */
+  if (smp_mode == MODE_SMP)
+  {
+    spin_lock(&tlb_commit_lock);
+    tlb_commit = true;
+    spin_unlock(&tlb_commit_lock);
+  }
 
   /* iterate through the op queue on the calling processor */
   tlb_handle_ops();
 
   /* wait for all cpus to finish dealing with their tlb */
-  int wait_cpus;
-  do
+  if (smp_mode == MODE_SMP)
   {
-    spin_lock(&tlb_wait_lock);
-    wait_cpus = tlb_wait_cpus;
-    spin_unlock(&tlb_wait_lock);
-  } while (wait_cpus != 0);
+    int wait_cpus;
+    do
+    {
+      spin_lock(&tlb_wait_lock);
+      wait_cpus = tlb_wait_cpus;
+      spin_unlock(&tlb_wait_lock);
+    } while (wait_cpus != 0);
+  }
 
   /* reset the queue */
   tlb_op_ptr = 0;

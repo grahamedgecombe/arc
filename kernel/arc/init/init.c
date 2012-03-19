@@ -21,6 +21,7 @@
 #include <arc/mm/pmm.h>
 #include <arc/mm/vmm.h>
 #include <arc/mm/heap.h>
+#include <arc/mm/tlb.h>
 #include <arc/bus/isa.h>
 #include <arc/cpu/features.h>
 #include <arc/cpu/gdt.h>
@@ -129,6 +130,9 @@ void init(uint32_t magic, multiboot_t *multiboot)
   /* set up interrupt routing */
   tty_puts("Setting up interrupt routing...\n");
   intr_route_init();
+
+  /* set up TLB shootdown (needs intr router) */
+  tlb_init();
 
   /* set up panic to work with multiple processors (needs intr router) */
   panic_init();
