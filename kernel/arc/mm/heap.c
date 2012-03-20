@@ -21,6 +21,7 @@
 #include <arc/mm/align.h>
 #include <arc/pack.h>
 #include <arc/panic.h>
+#include <assert.h>
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -141,8 +142,7 @@ static void _heap_free(void *ptr)
   heap_node_t *node = (heap_node_t *) ((uintptr_t) ptr - FRAME_SIZE);
 
   /* check if the magic matches to see if we get passed a dodgy pointer */
-  if (node->magic != (node->start ^ HEAP_MAGIC))
-    panic("invalid magic number in heap node");
+  assert(node->magic == (node->start ^ HEAP_MAGIC));
 
   /* free the physical frames if heap_alloc allocated them */
   if (node->state == HEAP_NODE_ALLOCATED)
