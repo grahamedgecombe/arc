@@ -24,6 +24,9 @@
 /* make it so when dlmalloc aborts a kernel panic is triggered */
 #define ABORT panic("dlmalloc abort()")
 
+/* use assert() assert.h for assertions */
+#define ABORT_ON_ASSERT_FAILURE 0
+
 /* these headers do not exist (or are not complete) in the kernel */
 #define LACKS_ERRNO_H
 #define LACKS_STDLIB_H
