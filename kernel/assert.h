@@ -14,16 +14,11 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef ASSERT_H
-#define ASSERT_H
-
 #include <arc/panic.h>
 
 #ifdef NDEBUG
 #define assert(expr) ((void) 0)
 #else
 #define assert(expr) ((expr) ? ((void) 0) : panic("%s:%d: %s: Assertion `%s' failed.", __FILE__, __LINE__, __func__, #expr))
-#endif
-
 #endif
 
