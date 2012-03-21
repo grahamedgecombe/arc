@@ -63,6 +63,18 @@
 
 #define SVR_ENABLED 0x100
 
+#define LVT_MASKED         0x00010000
+#define LVT_TYPE_FIXED     0x00000000
+#define LVT_TYPE_SMI       0x00000200
+#define LVT_TYPE_NMI       0x00000400
+#define LVT_TYPE_EXTINT    0x00000700
+#define LVT_DELIVS         0x00001000
+#define LVT_REMOTE_IRR     0x00004000
+#define LVT_TRIGGER_LEVEL  0x00008000
+#define LVT_TRIGGER_EDGE   0x00000000
+#define LVT_TIMER_PERIODIC 0x00020000
+#define LVT_TIMER_ONE_SHOT 0x00000000
+
 static uint64_t lx2apic_read(uint32_t reg)
 {
   return msr_read(reg);
@@ -80,6 +92,16 @@ void lx2apic_init(void)
 
   /* enable the local APIC and set the spurious vector */
   lx2apic_write(LX2APIC_SVR, SVR_ENABLED | SPURIOUS);
+
+  /* reset the error status register */
+  lx2apic_write(LX2APIC_ESR, 0);
+  lx2apic_write(LX2APIC_ESR, 0);
+
+  /* program LVT entries */
+  lx2apic_write(LX2APIC_LVT_LINT0, LVT_MASKED);
+  lx2apic_write(LX2APIC_LVT_LINT1, LVT_MASKED);
+  lx2apic_write(LX2APIC_LVT_TIMER, LVT_MASKED);
+  lx2apic_write(LX2APIC_LVT_ERROR, LVT_TYPE_FIXED | LVT_ERROR);
 
   /* reset the priority so we accept all interrupts */
   lx2apic_write(LX2APIC_TPR, 0);

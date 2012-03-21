@@ -69,7 +69,17 @@
 
 #define SVR_ENABLED 0x100
 
-#define LVT_MASKED 0x00010000
+#define LVT_MASKED         0x00010000
+#define LVT_TYPE_FIXED     0x00000000
+#define LVT_TYPE_SMI       0x00000200
+#define LVT_TYPE_NMI       0x00000400
+#define LVT_TYPE_EXTINT    0x00000700
+#define LVT_DELIVS         0x00001000
+#define LVT_REMOTE_IRR     0x00004000
+#define LVT_TRIGGER_LEVEL  0x00008000
+#define LVT_TRIGGER_EDGE   0x00000000
+#define LVT_TIMER_PERIODIC 0x00020000
+#define LVT_TIMER_ONE_SHOT 0x00000000
 
 static volatile uint32_t *lapic;
 static uintptr_t lapic_phy_addr;
@@ -111,11 +121,11 @@ void lapic_init(void)
   lapic_write(LAPIC_ESR, 0);
   lapic_write(LAPIC_ESR, 0);
 
-  /* mask LVT entries */
+  /* program LVT entries */
   lapic_write(LAPIC_LVT_LINT0, LVT_MASKED);
   lapic_write(LAPIC_LVT_LINT1, LVT_MASKED);
   lapic_write(LAPIC_LVT_TIMER, LVT_MASKED);
-  lapic_write(LAPIC_LVT_ERROR, LVT_MASKED);
+  lapic_write(LAPIC_LVT_ERROR, LVT_TYPE_FIXED | LVT_ERROR);
 
   /* reset the priority so we accept all interrupts */
   lapic_write(LAPIC_TPR, 0);
