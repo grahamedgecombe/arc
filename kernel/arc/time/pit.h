@@ -19,6 +19,7 @@
 
 #include <arc/intr/route.h>
 
+void pit_oneshot(int ms, intr_handler_t handler);
 void pit_monotonic(int freq, intr_handler_t handler);
 void pit_mdelay(int ms);
 
