@@ -17,12 +17,13 @@
 #ifndef ARC_PROC_THREAD_H
 #define ARC_PROC_THREAD_H
 
+#include <arc/util/list.h>
 #include <stdlib.h>
 
-typedef struct thread
+typedef struct
 {
-  /* pointers to the next/prev thread in the proc_t linked list */
-  struct thread *next, *prev;
+  /* node used by proc_t's thread_list */
+  list_node_t proc_node;
 } thread_t;
 
 #endif

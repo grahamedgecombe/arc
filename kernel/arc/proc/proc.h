@@ -19,9 +19,10 @@
 
 #include <arc/proc/thread.h>
 #include <arc/lock/spinlock.h>
+#include <arc/util/list.h>
 #include <stdint.h>
 
-typedef struct proc
+typedef struct
 {
   /* physical address of the pml4 table of this process */
   uintptr_t pml4_table;
@@ -29,8 +30,8 @@ typedef struct proc
   /* vmm address space lock */
   spinlock_t vmm_lock;
 
-  /* head and tail nodes of threads within this process */
-  thread_t *thread_head, *thread_tail;
+  /* list of threads in this process */
+  list_t thread_list;
 } proc_t;
 
 proc_t *proc_create(void);

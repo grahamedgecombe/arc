@@ -33,8 +33,7 @@ proc_t *proc_create(void)
   }
 
   proc->vmm_lock = SPIN_UNLOCKED;
-  proc->thread_head = 0;
-  proc->thread_tail = 0;
+  list_init(&proc->thread_list);
   return proc;
 }
 
@@ -46,6 +45,7 @@ proc_t *proc_get(void)
 
 void proc_destroy(proc_t *proc)
 {
+  // TODO: destroy threads within the process
   pmm_free(proc->pml4_table);
   free(proc);
 }
