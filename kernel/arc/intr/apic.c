@@ -30,7 +30,7 @@ typedef enum
 static apic_mode_t apic_mode;
 static volatile uint32_t *apic_mmio;
 
-static uint64_t read(size_t reg)
+static uint64_t apic_read(size_t reg)
 {
   if (apic_mode == MODE_X2APIC)
     return msr_read(APIC_MSR_BASE + reg);
