@@ -1,0 +1,68 @@
+/*
+ * Copyright (c) 2011-2012 Graham Edgecombe <graham@grahamedgecombe.com>
+ *
+ * Permission to use, copy, modify, and/or distribute this software for any
+ * purpose with or without fee is hereby granted, provided that the above
+ * copyright notice and this permission notice appear in all copies.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ */
+
+#include <arc/intr/apic.h>
+#include <arc/cpu/msr.h>
+#include <arc/mm/common.h>
+#include <arc/mm/mmio.h>
+
+#define APIC_MSR_BASE 0x800
+
+typedef enum
+{
+  MODE_XAPIC,
+  MODE_X2APIC
+} apic_mode_t;
+
+static apic_mode_t apic_mode;
+static volatile uint32_t *apic_mmio;
+
+static uint64_t read(size_t reg)
+{
+  if (apic_mode == MODE_X2APIC)
+    return msr_read(APIC_MSR_BASE + reg);
+  else
+    return apic_mmio[reg * 4];
+}
+
+static void apic_write(size_t reg, uint64_t val)
+{
+  if (apic_mode == MODE_X2APIC)
+    msr_write(APIC_MSR_BASE, val);
+  else
+    apic_mmio[reg * 4] = val;
+}
+
+bool xapic_init(uintptr_t addr)
+{
+  apic_mmio = (volatile uint32_t *) mmio_map(addr, FRAME_SIZE, MMIO_R | MMIO_W);
+  if (!apic_mmio)
+    return false;
+
+  apic_mode = MODE_XAPIC;
+  return true;
+}
+
+void x2apic_init(void)
+{
+  apic_mode = MODE_X2APIC;
+}
+
+void apic_init(void)
+{
+  /* TODO */
+}
+
