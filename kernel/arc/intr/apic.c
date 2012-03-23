@@ -59,6 +59,23 @@
 #define LVT_TIMER_PERIODIC 0x00020000
 #define LVT_TIMER_ONE_SHOT 0x00000000
 
+/* ICR flags */
+#define ICR_TYPE_FIXED        0x00000000
+#define ICR_TYPE_SMI          0x00000200
+#define ICR_TYPE_NMI          0x00000400
+#define ICR_TYPE_INIT         0x00000500
+#define ICR_TYPE_STARTUP      0x00000600
+#define ICR_PHYSICAL          0x00000000
+#define ICR_LOGICAL           0x00000800
+#define ICR_DELIVS            0x00001000
+#define ICR_DEASSERT          0x00000000
+#define ICR_ASSERT            0x00004000
+#define ICR_TRIGGER_EDGE      0x00000000
+#define ICR_TRIGGER_LEVEL     0x00008000
+#define ICR_DEST_SELF         0x00040000
+#define ICR_DEST_ALL          0x00080000
+#define ICR_DEST_ALL_EXC_SELF 0x000C0000
+
 typedef enum
 {
   MODE_XAPIC,
