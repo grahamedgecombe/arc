@@ -16,7 +16,7 @@
 
 #include <arc/acpi/madt.h>
 #include <arc/bus/isa.h>
-#include <arc/intr/ic.h>
+#include <arc/intr/apic.h>
 #include <arc/intr/pic.h>
 #include <arc/intr/ioapic.h>
 #include <arc/smp/cpu.h>
@@ -118,7 +118,7 @@ void madt_scan(madt_t *madt)
   if (madt->flags & MADT_FLAGS_PCAT)
     pic_init();
 
-  /* initialise the IC */
-  ic_bsp_init(IC_TYPE_LAPIC, lapic_addr);
+  /* initialise the local (x)APIC */
+  xapic_init(lapic_addr);
 }
 

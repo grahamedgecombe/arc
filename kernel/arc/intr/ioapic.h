@@ -37,9 +37,6 @@ typedef struct ioapic
 
   /* the number of IRQs this I/O APIC routes */
   irq_t irqs;
-
-  /* used to print debug info */
-  uint64_t _phy_addr;
 } ioapic_t;
 
 bool ioapic_init(ioapic_id_t id, uintptr_t addr, irq_t irq_base);

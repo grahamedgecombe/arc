@@ -19,7 +19,7 @@
 #include <arc/cpu/intr.h>
 #include <arc/intr/common.h>
 #include <arc/intr/route.h>
-#include <arc/intr/ic.h>
+#include <arc/intr/apic.h>
 #include <arc/lock/intr.h>
 #include <arc/lock/spinlock.h>
 #include <arc/smp/cpu.h>
@@ -118,7 +118,7 @@ void tlb_transaction_init(void)
       panic("TLB shootdown in SMP mode before IPI routed");
 
     /* send the IPIs to all CPUs but this one */
-    ic_ipi_all_exc_self(IPI_TLB);
+    apic_ipi_all_exc_self(IPI_TLB);
 
     /* wait for all CPUs to respond to the IPI */
     int wait_cpus;

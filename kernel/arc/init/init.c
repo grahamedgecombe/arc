@@ -28,7 +28,8 @@
 #include <arc/cpu/tss.h>
 #include <arc/cpu/idt.h>
 #include <arc/cpu/halt.h>
-#include <arc/intr/ic.h>
+#include <arc/intr/apic.h>
+#include <arc/intr/pic.h>
 #include <arc/intr/route.h>
 #include <arc/panic.h>
 #include <arc/smp/cpu.h>
@@ -125,22 +126,17 @@ void init(uint32_t magic, multiboot_t *multiboot)
     {
       /* fall back to non-SMP mode using the PIC */
       tty_puts("Falling back to single processor mode...\n");
-      ic_bsp_init(IC_TYPE_PIC);
+      pic_init();
       up_fallback = true;
     }
   }
 
-  /* set up the interrupt controller */
-  ic_ap_init();
+  /* set up the local APIC on the BSP if we are in SMP mode */
+  if (!up_fallback)
+    apic_init();
 
   /* set up interrupt routing */
-  tty_puts("Setting up interrupt routing...\n");
-  intr_route_init();
-
-  /* set up TLB shootdown (needs intr router) */
-  tlb_init();
-
-  /* set up panic to work with multiple processors (needs intr router) */
+  tlb_init();   /* both these calls route interrupts */
   panic_init();
 
   /* set up symmetric multi-processing */

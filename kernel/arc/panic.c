@@ -20,7 +20,7 @@
 #include <arc/cpu/intr.h>
 #include <arc/cpu/halt.h>
 #include <arc/intr/route.h>
-#include <arc/intr/ic.h>
+#include <arc/intr/apic.h>
 
 void panic_init(void)
 {
@@ -45,7 +45,7 @@ void panic(const char *message, ...)
 void vpanic(const char *message, va_list args)
 {
   if (smp_mode == MODE_SMP)
-    ic_ipi_all_exc_self(IPI_PANIC);
+    apic_ipi_all_exc_self(IPI_PANIC);
 
   tty_puts("PANIC: ");
   tty_vprintf(message, args);

@@ -25,7 +25,7 @@
 #include <arc/cpu/tlb.h>
 #include <arc/lock/intr.h>
 #include <arc/lock/spinlock.h>
-#include <arc/intr/ic.h>
+#include <arc/intr/apic.h>
 #include <arc/mm/vmm.h>
 #include <arc/time/pit.h>
 #include <arc/proc/syscall.h>
@@ -82,18 +82,18 @@ static void smp_boot(cpu_t *cpu)
   ack_sipi = false;
  
   /* send INIT IPI */
-  ic_ipi_init(cpu->lapic_id);
+  apic_ipi_init(cpu->lapic_id);
   pit_mdelay(10);
 
   /* send STARTUP IPI */
   uint8_t vector = TRAMPOLINE_BASE / FRAME_SIZE;
-  ic_ipi_startup(cpu->lapic_id, vector);
+  apic_ipi_startup(cpu->lapic_id, vector);
   pit_mdelay(1);
 
   /* send STARTUP IPI again */
   if (!ack_sipi)
   {
-    ic_ipi_startup(cpu->lapic_id, vector);
+    apic_ipi_startup(cpu->lapic_id, vector);
     pit_mdelay(1);
   }
 
@@ -147,8 +147,8 @@ void smp_ap_init(void)
   idt_ap_init(); /* we re-use the same IDT for every CPU */
   syscall_init();
 
-  /* set up the interrupt controller on this CPU */
-  ic_ap_init();
+  /* set up the local APIC on this CPU */
+  apic_init();
 
   /* flush the TLB (as up until this point we won't have received TLB shootdowns) */
   tlb_flush();

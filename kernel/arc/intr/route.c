@@ -16,7 +16,7 @@
 
 #include <arc/intr/route.h>
 #include <arc/intr/pic.h>
-#include <arc/intr/ic.h>
+#include <arc/intr/apic.h>
 #include <arc/intr/ioapic.h>
 #include <arc/lock/rwlock.h>
 #include <arc/lock/intr.h>
@@ -36,10 +36,18 @@ static intr_handler_node_t *intr_handlers[INTERRUPTS];
 
 void intr_dispatch(intr_state_t *state)
 {
-  /* acknowledge we received this interrupt if it isn't a fault and spurious */
+  /* acknowledge we received this interrupt if it came from the APIC or PIC */
   intr_t intr = state->id;
-  if (intr > FAULT31 && intr != SPURIOUS)
-    ic_ack(intr);
+  if (smp_mode == MODE_SMP)
+  {
+    if (intr > FAULT31 && intr != SPURIOUS)
+      apic_ack();
+  }
+  else
+  {
+    if (intr >= IRQ0 && intr <= IRQ15)
+      pic_ack(intr - IRQ0);
+  }
 
   /* if there is no handler panic (this is for debugging purposes) */
   rw_rlock(&intr_route_lock);
@@ -54,20 +62,6 @@ void intr_dispatch(intr_state_t *state)
     (*handler)(state);
   }
   rw_runlock(&intr_route_lock);
-}
-
-void intr_route_init(void)
-{
-  ic_print_info();
-
-  for (ioapic_t *apic = ioapic_iter(); apic; apic = apic->next)
-  {
-    uint64_t addr = apic->_phy_addr;
-    ioapic_id_t id = apic->id;
-    irq_t irq_first = apic->irq_base;
-    irq_t irq_last = apic->irq_base + apic->irqs - 1;
-    tty_printf(" => Using I/O APIC (at %0#18x, id %0#4x, irqs %d-%d)\n", addr, id, irq_first, irq_last);
-  }
 }
 
 static bool _intr_route_intr(intr_t intr, intr_handler_t handler)
