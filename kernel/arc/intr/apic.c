@@ -121,14 +121,14 @@ void x2apic_init(void)
 void apic_init(void)
 {
   /* program the APIC base register on this CPU */
-  if (apic_mode == MODE_XAPIC)
+  if (apic_mode == MODE_X2APIC)
   {
-    uint64_t apic_base = (msr_read(MSR_APIC_BASE) & APIC_BASE_BSP) | apic_phy_addr | APIC_BASE_ENABLED;
+    uint64_t apic_base = (msr_read(MSR_APIC_BASE) & APIC_BASE_BSP) | APIC_BASE_ENABLED | APIC_BASE_X2_MODE;
     msr_write(MSR_APIC_BASE, apic_base);
   }
   else
   {
-    uint64_t apic_base = (msr_read(MSR_APIC_BASE) & APIC_BASE_BSP) | APIC_BASE_ENABLED | APIC_BASE_X2_MODE;
+    uint64_t apic_base = (msr_read(MSR_APIC_BASE) & APIC_BASE_BSP) | apic_phy_addr | APIC_BASE_ENABLED;
     msr_write(MSR_APIC_BASE, apic_base);
   }
 
@@ -155,5 +155,69 @@ void apic_init(void)
 void apic_ack(void)
 {
   apic_write(APIC_EOI, 0);
+}
+
+static void apic_ipi(uint64_t icr)
+{
+  if (apic_mode == MODE_X2APIC)
+  {
+    /* in x2APIC mode the ICRL and ICRH are combined */
+    apic_write(X2APIC_ICR, icr);
+  }
+  else
+  {
+    /* write the high (must be first!) and low parts of the ICR */
+    apic_write(XAPIC_ICRH, (icr >> 32) & 0xFFFFFFFF);
+    apic_write(XAPIC_ICRL, icr & 0xFFFFFFFF);
+  }
+}
+
+void apic_ipi_init(cpu_lapic_id_t id)
+{
+  uint64_t icr = ICR_TYPE_INIT;
+
+  if (apic_mode == MODE_X2APIC)
+    icr |= ((uint64_t) id) << 32;
+  else
+    icr |= ((uint64_t) id) << 56;
+
+  apic_ipi(icr);
+}
+
+void apic_ipi_startup(cpu_lapic_id_t id, uint8_t trampoline_addr)
+{
+  uint64_t icr = ICR_TYPE_STARTUP | trampoline_addr;
+
+  if (apic_mode == MODE_X2APIC)
+    icr |= ((uint64_t) id) << 32;
+  else
+    icr |= ((uint64_t) id) << 56;
+
+  apic_ipi(icr);
+}
+
+void apic_ipi_all(intr_t intr)
+{
+  uint64_t icr = ICR_TYPE_FIXED | ICR_DEST_ALL | intr;
+  apic_ipi(icr);
+}
+
+void apic_ipi_all_exc_self(intr_t intr)
+{
+  uint64_t icr = ICR_TYPE_FIXED | ICR_DEST_ALL_EXC_SELF | intr;
+  apic_ipi(icr);
+}
+
+void apic_ipi_self(intr_t intr)
+{
+  if (apic_mode == MODE_X2APIC)
+  {
+    apic_write(X2APIC_SELF_IPI, intr);
+  }
+  else
+  {
+    uint64_t icr = ICR_TYPE_FIXED | ICR_DEST_SELF | intr;
+    apic_ipi(icr);
+  }
 }
 

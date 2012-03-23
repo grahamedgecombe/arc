@@ -17,6 +17,7 @@
 #ifndef ARC_INTR_APIC_H
 #define ARC_INTR_APIC_H
 
+#include <arc/types.h>
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -29,6 +30,13 @@ void apic_init(void);
 
 /* acknowledge an interrupt */
 void apic_ack(void);
+
+/* IPIs */
+void apic_ipi_init(cpu_lapic_id_t id);
+void apic_ipi_startup(cpu_lapic_id_t id, uint8_t trampoline_addr);
+void apic_ipi_all(intr_t intr);
+void apic_ipi_all_exc_self(intr_t intr);
+void apic_ipi_self(intr_t intr);
 
 #endif
 
