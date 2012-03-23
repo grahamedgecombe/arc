@@ -27,5 +27,8 @@ void x2apic_init(void);          /* init in x2APIC mode using MSRs */
 /* enable this CPU's APIC */
 void apic_init(void);
 
+/* acknowledge an interrupt */
+void apic_ack(void);
+
 #endif
 
