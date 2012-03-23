@@ -13,6 +13,3 @@
 * I/O APIC interrupts don't seem to work at all in Bochs, keyboard IRQ (IRQ1)
   doesn't seem to work in QEMU
 
-* merge APIC and x2APIC code into a single apic.h/c module, get rid or rewrite
-  the ic.h/c module
-
