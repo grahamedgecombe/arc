@@ -14,11 +14,13 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <arc/panic.h>
+#ifndef ARC_INTR_FAULT_H
+#define ARC_INTR_FAULT_H
 
-#ifdef NDEBUG
-#define assert(expr) ((void) 0)
-#else
-#define assert(expr) ((expr) ? ((void) 0) : panic("%s:%d: %s: Assertion `%s' failed", __FILE__, __LINE__, __func__, #expr))
+#include <arc/intr/common.h>
+
+void fault_init(void);
+void fault_handle(intr_state_t *state);
+
 #endif
 

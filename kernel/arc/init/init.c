@@ -31,6 +31,7 @@
 #include <arc/intr/apic.h>
 #include <arc/intr/pic.h>
 #include <arc/intr/route.h>
+#include <arc/intr/fault.h>
 #include <arc/panic.h>
 #include <arc/smp/cpu.h>
 #include <arc/acpi/scan.h>
@@ -75,7 +76,7 @@ void init(uint32_t magic, multiboot_t *multiboot)
 
   /* check the multiboot magic number */
   if (magic != MULTIBOOT_MAGIC)
-    panic("invalid multiboot magic (expected 0x%x, got 0x%x)", MULTIBOOT_MAGIC,
+    panic("invalid multiboot magic (expected %0#10x, got %0#10x)", MULTIBOOT_MAGIC,
       magic);
 
   /* convert physical 32-bit multiboot address to virtual address */
@@ -136,8 +137,9 @@ void init(uint32_t magic, multiboot_t *multiboot)
     apic_init();
 
   /* set up interrupt routing */
-  tlb_init();   /* both these calls route interrupts */
-  panic_init();
+  panic_init(); /* all of these calls route interrupts */
+  fault_init();
+  tlb_init();
 
   /* set up symmetric multi-processing */
   if (!up_fallback)
