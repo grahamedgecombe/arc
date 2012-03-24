@@ -17,8 +17,10 @@
 #include <arc/intr/apic.h>
 #include <arc/cpu/msr.h>
 #include <arc/intr/common.h>
+#include <arc/lock/spinlock.h>
 #include <arc/mm/common.h>
 #include <arc/mm/mmio.h>
+#include <arc/time/pit.h>
 
 #define MSR_X2APIC_MMIO 0x800
 
@@ -102,6 +104,21 @@ static void apic_write(size_t reg, uint64_t val)
     apic_mmio[reg * 4] = val;
 }
 
+static void apic_timer_calibrate(void)
+{
+  static spinlock_t apic_calibrate_lock = SPIN_UNLOCKED;
+  spin_lock(&apic_calibrate_lock);
+
+  apic_write(APIC_TIMER_ICR, 0xFFFFFFFF);
+  apic_write(APIC_TIMER_DCR, 0x00000003);
+  pit_mdelay(10);
+  uint32_t ticks = 0xFFFFFFFF - apic_read(APIC_TIMER_CCR);
+
+  tty_printf("APIC timer frequency: %d MHz\n", ((ticks * 16 * 100) / 1000000));
+
+  spin_unlock(&apic_calibrate_lock);
+}
+
 bool xapic_init(uintptr_t addr)
 {
   apic_phy_addr = addr;
@@ -150,6 +167,9 @@ void apic_init(void)
 
   /* ack any outstounding interrupts */
   apic_ack();
+
+  /* calibrate this APIC's timer */
+  apic_timer_calibrate();
 }
 
 void apic_ack(void)
