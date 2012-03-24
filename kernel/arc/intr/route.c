@@ -21,6 +21,7 @@
 #include <arc/lock/rwlock.h>
 #include <arc/lock/intr.h>
 #include <arc/smp/mode.h>
+#include <arc/util/list.h>
 #include <arc/tty.h>
 #include <arc/panic.h>
 #include <stdlib.h>
@@ -28,11 +29,11 @@
 typedef struct intr_handler_node
 {
   intr_handler_t handler;
-  struct intr_handler_node *next;
-} intr_handler_node_t;
+  list_node_t node;
+} intr_handler_pair_t;
 
 static rwlock_t intr_route_lock = RWLOCK_UNLOCKED;
-static intr_handler_node_t *intr_handlers[INTERRUPTS];
+static list_t intr_handlers[INTERRUPTS];
 
 void intr_dispatch(intr_state_t *state)
 {
@@ -51,14 +52,16 @@ void intr_dispatch(intr_state_t *state)
 
   /* if there is no handler panic (this is for debugging purposes) */
   rw_rlock(&intr_route_lock);
-  intr_handler_node_t *head = intr_handlers[state->id];
-  if (!head)
+  list_t *handler_list = &intr_handlers[state->id];
+  if (handler_list->size == 0)
     panic("unhandled interrupt %d", state->id);
 
   /* call all the handlers */
-  for (intr_handler_node_t *node = head; node; node = node->next)
+  list_for_each(handler_list, node)
   {
-    intr_handler_t handler = node->handler;
+    intr_handler_pair_t *pair = container_of(node, intr_handler_pair_t, node);
+
+    intr_handler_t handler = pair->handler;
     (*handler)(state);
   }
   rw_runlock(&intr_route_lock);
@@ -66,39 +69,32 @@ void intr_dispatch(intr_state_t *state)
 
 static bool _intr_route_intr(intr_t intr, intr_handler_t handler)
 {
-  /* allocate the handler node */
-  intr_handler_node_t *tail_node = malloc(sizeof(*tail_node));
-  if (!tail_node)
+  /* allocate the handler pair */
+  intr_handler_pair_t *pair = malloc(sizeof(*pair));
+  if (!pair)
     return false;
 
   /* fill it out */
-  tail_node->handler = handler;
+  pair->handler = handler;
 
-  /* cons it onto the handler list */
-  tail_node->next = intr_handlers[intr];
-  intr_handlers[intr] = tail_node;
-
-  /* all done! */
+  /* adds it to the handler list */
+  list_add_tail(&intr_handlers[intr], &pair->node);
   return true;
 }
 
 static void _intr_unroute_intr(intr_t intr, intr_handler_t handler)
 {
-  /* find the handler node corresponding to the given handler */
-  for (intr_handler_node_t *prev = 0, *node = intr_handlers[intr]; node; prev = node, node = node->next)
+  /* find the handler pair */
+  list_for_each(&intr_handlers[intr], node)
   {
-    if (node->handler == handler)
+    intr_handler_pair_t *pair = container_of(node, intr_handler_pair_t, node);
+    if (pair->handler == handler)
     {
       /* unlink it from the list */
-      if (prev == 0)
-        intr_handlers[intr] = node->next;
-      else
-        prev->next = node->next;
+      list_remove(&intr_handlers[intr], &pair->node);
 
-      /* free the memory used by the list node */
-      free(node);
-
-      /* all done! */
+      /* free it */
+      free(pair);
       return;
     }
   }
@@ -205,7 +201,7 @@ void intr_unroute_irq(irq_tuple_t *tuple, intr_handler_t handler)
       _intr_unroute_intr(intr, handler);
 
       /* mask the interrupt in the PIC if it is no longer used */
-      if (!intr_handlers[intr])
+      if (intr_handlers[intr].size == 0)
         pic_mask(irq);
     }
   }
