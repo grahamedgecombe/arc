@@ -19,12 +19,13 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <arc/util/list.h>
 #include <arc/types.h>
 
 typedef struct ioapic
 {
-  /* a pointer to the next I/O APIC */
-  struct ioapic *next;
+  /* global I/O APIC list node */
+  list_node_t node;
 
   /* the id of this I/O APIC */
   ioapic_id_t id;
@@ -39,8 +40,9 @@ typedef struct ioapic
   irq_t irqs;
 } ioapic_t;
 
+extern list_t ioapic_list;
+
 bool ioapic_init(ioapic_id_t id, uintptr_t addr, irq_t irq_base);
-ioapic_t *ioapic_iter(void);
 void ioapic_route(ioapic_t *apic, irq_tuple_t *tuple, intr_t intr);
 void ioapic_mask(ioapic_t *apic, irq_tuple_t *tuple);
 

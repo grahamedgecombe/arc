@@ -157,8 +157,10 @@ bool intr_route_irq(irq_tuple_t *tuple, intr_handler_t handler)
     intr_t intr = (irq % IRQS) + IRQ0;
 
     /* iterate through the I/O APICs */
-    for (ioapic_t *apic = ioapic_iter(); apic; apic = apic->next)
+    list_for_each(&ioapic_list, node)
     {
+      ioapic_t *apic = container_of(node, ioapic_t, node);
+
       /* check if the IRQ belongs to this I/O APIC */
       irq_t irq_first = apic->irq_base;
       irq_t irq_last = apic->irq_base + apic->irqs - 1;
@@ -214,8 +216,10 @@ void intr_unroute_irq(irq_tuple_t *tuple, intr_handler_t handler)
     intr_t intr = (irq % IRQS) + IRQ0;
 
     /* iterate through the I/O APICs */
-    for (ioapic_t *apic = ioapic_iter(); apic; apic = apic->next)
+    list_for_each(&ioapic_list, node)
     {
+      ioapic_t *apic = container_of(node, ioapic_t, node);
+
       /* check if the IRQ belongs to this I/O APIC */
       irq_t irq_first = apic->irq_base;
       irq_t irq_last = apic->irq_base + apic->irqs - 1;

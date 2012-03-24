@@ -41,7 +41,7 @@
 #define REDTBL_DELMOD_INIT      0x0000000000000500
 #define REDTBL_DELMOD_EXTINT    0x0000000000000700
 
-static ioapic_t *ioapic_head; /* a pointer to the first I/O APIC in the system */
+list_t ioapic_list = LIST_EMPTY;
 
 static uint32_t ioapic_read(ioapic_t *apic, uint32_t reg)
 {
@@ -68,29 +68,14 @@ bool ioapic_init(ioapic_id_t id, uintptr_t addr, irq_t irq_base)
     return false;
   }
 
-  static ioapic_t *ioapic_tail = 0;
-  if (ioapic_tail)
-  {
-    ioapic_tail->next = apic;
-    ioapic_tail = apic;
-  }
-  else
-  {
-    ioapic_head = ioapic_tail = apic;
-  }
-
-  apic->next = 0;
   apic->id = id;
   apic->irq_base = irq_base;
   apic->reg = (volatile uint32_t *) virt_addr;
   apic->val = (volatile uint32_t *) (virt_addr + 16);
   apic->irqs = ((ioapic_read(apic, IOAPIC_VER) >> 16) & 0xFF) + 1;
-  return true;
-}
 
-ioapic_t *ioapic_iter(void)
-{
-  return ioapic_head;
+  list_add_tail(&ioapic_list, &apic->node);
+  return true;
 }
 
 void ioapic_route(ioapic_t *apic, irq_tuple_t *tuple, intr_t intr)
