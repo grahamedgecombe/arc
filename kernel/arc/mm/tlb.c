@@ -109,7 +109,7 @@ void tlb_transaction_init(void)
 
   /* reset some values */
   tlb_commit = false;
-  tlb_wait_cpus = cpu_count() - 1;
+  tlb_wait_cpus = cpu_list.size - 1;
 
   /* if we're in SMP mode, stop all the other CPUs */
   if (smp_mode == MODE_SMP)
@@ -161,7 +161,7 @@ void tlb_transaction_rollback(void)
 void tlb_transaction_commit(void)
 {
   /* reset cpu waiting counter */
-  tlb_wait_cpus = cpu_count() - 1;
+  tlb_wait_cpus = cpu_list.size - 1;
 
   /* set the commit flag to make other processors handle the op queue */
   if (smp_mode == MODE_SMP)

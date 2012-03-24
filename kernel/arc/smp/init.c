@@ -108,8 +108,10 @@ static void smp_boot(cpu_t *cpu)
 void smp_init(void)
 {
   /* bring up all of the APs */
-  for (cpu_t *cpu = cpu_iter(); cpu; cpu = cpu->next)
+  list_for_each(&cpu_list, node)
   {
+    cpu_t *cpu = container_of(node, cpu_t, node);
+
     if (!cpu->bsp)
       smp_boot(cpu);
     else
@@ -123,7 +125,7 @@ void smp_init(void)
     spin_lock(&ready_cpus_lock);
     ready = ready_cpus;
     spin_unlock(&ready_cpus_lock);
-  } while (ready != cpu_count());
+  } while (ready != cpu_list.size);
 
   /* switch to SMP mode */
   smp_mode = MODE_SMP;

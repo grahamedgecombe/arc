@@ -21,6 +21,7 @@
 #include <arc/cpu/tss.h>
 #include <arc/proc/proc.h>
 #include <arc/proc/thread.h>
+#include <arc/util/list.h>
 #include <arc/types.h>
 #include <stdbool.h>
 
@@ -32,8 +33,8 @@ typedef struct cpu
    */
   struct cpu *self;
 
-  /* a pointer to the next CPU such that they form a singly-linked list */
-  struct cpu *next;
+  /* global CPU list node */
+  list_node_t node;
 
   /* BSP flag */
   bool bsp;
@@ -57,12 +58,12 @@ typedef struct cpu
   thread_t *thread;
 } cpu_t;
 
+extern list_t cpu_list;
+
 void cpu_bsp_init(void);
 bool cpu_ap_init(cpu_lapic_id_t lapic_id, cpu_acpi_id_t acpi_id);
 void cpu_ap_install(cpu_t *cpu);
-cpu_t *cpu_iter(void);
 cpu_t *cpu_get(void);
-int cpu_count(void);
 
 #endif
 

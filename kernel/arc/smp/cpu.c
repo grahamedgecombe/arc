@@ -19,8 +19,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+list_t cpu_list = LIST_EMPTY;
+
 static cpu_t cpu_bsp;
-static int cpu_cnt = 1;
 
 void cpu_bsp_init(void)
 {
@@ -31,21 +32,15 @@ void cpu_bsp_init(void)
   cpu_bsp.proc = 0;
   cpu_bsp.thread = 0;
   msr_write(MSR_GS_BASE, (uint64_t) &cpu_bsp);
+
+  list_add_tail(&cpu_list, &cpu_bsp.node);
 }
 
 bool cpu_ap_init(cpu_lapic_id_t lapic_id, cpu_acpi_id_t acpi_id)
 {
-  static cpu_t *cpu = &cpu_bsp;
+  cpu_t *cpu = malloc(sizeof(*cpu));
   if (!cpu)
     return false;
-
-  cpu_t *prev_cpu = cpu;
-
-  cpu = malloc(sizeof(*cpu));
-  if (!cpu)
-    return false;
-
-  prev_cpu->next = cpu;
 
   memset(cpu, 0, sizeof(*cpu));
 
@@ -55,23 +50,13 @@ bool cpu_ap_init(cpu_lapic_id_t lapic_id, cpu_acpi_id_t acpi_id)
   cpu->intr_depth = 1;
   cpu->proc = 0;
   cpu->thread = 0;
-  cpu_cnt++;
 
+  list_add_tail(&cpu_list, &cpu->node);
   return true;
 }
 
 void cpu_ap_install(cpu_t *cpu)
 {
   msr_write(MSR_GS_BASE, (uint64_t) cpu);
-}
-
-cpu_t *cpu_iter(void)
-{
-  return &cpu_bsp;
-}
-
-int cpu_count(void)
-{
-  return cpu_cnt;
 }
 

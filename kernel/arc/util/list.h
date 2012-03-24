@@ -25,9 +25,10 @@ typedef struct list_node
 typedef struct
 {
   list_node_t *head, *tail;
+  int size;
 } list_t;
 
-#define LIST_EMPTY { .head = 0, .tail = 0 }
+#define LIST_EMPTY { .head = 0, .tail = 0, .size = 0 }
 
 #define container_of(ptr, type, member) ((type *) (((char *) (ptr)) - offsetof(type, member)))
 #define list_for_each(list, node) for (list_node_t *node = (list)->head; node; node = node->next)

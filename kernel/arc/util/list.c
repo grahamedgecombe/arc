@@ -21,6 +21,7 @@ void list_init(list_t *list)
 {
   list->head = 0;
   list->tail = 0;
+  list->size = 0;
 }
 
 void list_add_head(list_t *list, list_node_t *node)
@@ -39,6 +40,8 @@ void list_add_head(list_t *list, list_node_t *node)
     list->head->prev = node;
     list->head = node;
   }
+
+  list->size++;
 }
 
 void list_add_tail(list_t *list, list_node_t *node)
@@ -57,6 +60,8 @@ void list_add_tail(list_t *list, list_node_t *node)
     list->tail->next = node;
     list->tail = node;
   }
+
+  list->size++;
 }
 
 void list_remove(list_t *list, list_node_t *node)
@@ -70,5 +75,7 @@ void list_remove(list_t *list, list_node_t *node)
     list->tail = node->prev;
   else
     node->next->prev = node->prev;
+
+  list->size--;
 }
 
