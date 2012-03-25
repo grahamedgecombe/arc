@@ -18,6 +18,7 @@
 #include <arc/smp/mode.h>
 #include <arc/time/apic.h>
 #include <arc/time/pit.h>
+#include <arc/tty.h>
 
 #define SCHED_TIMESLICE 50 /* 10ms = 100Hz */
 
@@ -31,6 +32,6 @@ void sched_init(void)
 
 void sched_tick(intr_state_t *state)
 {
-
+  tty_putch('.');
 }
 
