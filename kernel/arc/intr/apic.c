@@ -78,6 +78,16 @@
 #define ICR_DEST_ALL          0x00080000
 #define ICR_DEST_ALL_EXC_SELF 0x000C0000
 
+/* DCR values */
+#define DCR_1   0xB
+#define DCR_2   0x0
+#define DCR_4   0x1
+#define DCR_8   0x2
+#define DCR_16  0x3
+#define DCR_32  0x8
+#define DCR_64  0x9
+#define DCR_128 0xA
+
 typedef enum
 {
   MODE_XAPIC,
@@ -110,7 +120,7 @@ static void apic_timer_calibrate(void)
   spin_lock(&apic_calibrate_lock);
 
   apic_write(APIC_TIMER_ICR, 0xFFFFFFFF);
-  apic_write(APIC_TIMER_DCR, 0x00000003);
+  apic_write(APIC_TIMER_DCR, DCR_16);
   pit_mdelay(10);
   uint32_t ticks = 0xFFFFFFFF - apic_read(APIC_TIMER_CCR);
 
