@@ -24,6 +24,7 @@
 #include <arc/util/list.h>
 #include <arc/types.h>
 #include <stdbool.h>
+#include <stdint.h>
 
 typedef struct cpu
 {
@@ -56,6 +57,9 @@ typedef struct cpu
   /* current process/thread running on this cpu */
   proc_t *proc;
   thread_t *thread;
+
+  /* number of APIC ticks per millisecond */
+  uint32_t apic_ticks_per_ms;
 } cpu_t;
 
 extern list_t cpu_list;

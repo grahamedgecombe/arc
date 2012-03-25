@@ -28,6 +28,7 @@
 #include <arc/intr/apic.h>
 #include <arc/mm/vmm.h>
 #include <arc/time/pit.h>
+#include <arc/proc/sched.h>
 #include <arc/proc/syscall.h>
 #include <arc/tty.h>
 #include <arc/panic.h>
@@ -45,6 +46,10 @@ static cpu_t * volatile booted_cpu;
 /* a counter of ready CPUs, smp_init() blocks until all APs are ready */
 static int ready_cpus = 1;
 static spinlock_t ready_cpus_lock = SPIN_UNLOCKED;
+
+/* a flag used to indicate that the system is now in SMP mode */
+static bool mode_switched = false;
+static spinlock_t mode_switch_lock = SPIN_UNLOCKED;
 
 static void print_cpu_info(cpu_t *cpu)
 {
@@ -129,6 +134,11 @@ void smp_init(void)
 
   /* switch to SMP mode */
   smp_mode = MODE_SMP;
+
+  /* now let the APs carry on */
+  spin_lock(&mode_switch_lock);
+  mode_switched = true;
+  spin_unlock(&mode_switch_lock);
 }
 
 void smp_ap_init(void)
@@ -159,6 +169,18 @@ void smp_ap_init(void)
   spin_lock(&ready_cpus_lock);
   ready_cpus++;
   spin_unlock(&ready_cpus_lock);
+
+  /* wait for the switch to SMP mode */
+  bool ready;
+  do
+  {
+    spin_lock(&mode_switch_lock);
+    ready = mode_switched;
+    spin_unlock(&mode_switch_lock);
+  } while (!ready);
+
+  /* set up the scheduler */
+  sched_init();
 
   /* enable interrupts and halt forever */
   intr_unlock();

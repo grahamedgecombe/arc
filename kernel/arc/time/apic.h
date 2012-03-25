@@ -14,13 +14,12 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef ARC_TIME_PIT_H
-#define ARC_TIME_PIT_H
+#ifndef ARC_TIME_APIC_H
+#define ARC_TIME_APIC_H
 
 #include <arc/intr/route.h>
 
-void pit_monotonic(int ms, intr_handler_t handler);
-void pit_mdelay(int ms);
+void apic_monotonic(int ms, intr_handler_t handler);
 
 #endif
 

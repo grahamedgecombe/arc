@@ -15,13 +15,15 @@
  */
 
 #include <arc/intr/apic.h>
+#include <arc/time/apic.h>
+#include <arc/time/pit.h>
 #include <arc/cpu/msr.h>
 #include <arc/intr/common.h>
 #include <arc/lock/spinlock.h>
 #include <arc/lock/intr.h>
 #include <arc/mm/common.h>
 #include <arc/mm/mmio.h>
-#include <arc/time/pit.h>
+#include <arc/smp/cpu.h>
 
 #define MSR_X2APIC_MMIO 0x800
 
@@ -117,6 +119,8 @@ static void apic_write(size_t reg, uint64_t val)
 
 static void apic_timer_calibrate(void)
 {
+  cpu_t *cpu = cpu_get();
+
   static spinlock_t apic_calibrate_lock = SPIN_UNLOCKED;
   spin_lock(&apic_calibrate_lock);
   intr_lock();
@@ -126,10 +130,20 @@ static void apic_timer_calibrate(void)
   pit_mdelay(10);
   uint32_t ticks = 0xFFFFFFFF - apic_read(APIC_TIMER_CCR);
 
-  tty_printf("APIC timer frequency: %d MHz\n", ((ticks * 16 * 100) / 1000000));
+  cpu->apic_ticks_per_ms = ticks * 16 / 10;
 
   intr_unlock();
   spin_unlock(&apic_calibrate_lock);
+}
+
+void apic_monotonic(int ms, intr_handler_t handler)
+{
+  cpu_t *cpu = cpu_get();
+
+  intr_route_intr(LVT_TIMER, handler);
+  apic_write(APIC_TIMER_ICR, cpu->apic_ticks_per_ms * ms / 16);
+  apic_write(APIC_TIMER_DCR, DCR_16);
+  apic_write(APIC_LVT_TIMER, LVT_TIMER_PERIODIC | LVT_TYPE_FIXED | LVT_TIMER);
 }
 
 bool xapic_init(uintptr_t addr)

@@ -14,13 +14,23 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef ARC_TIME_PIT_H
-#define ARC_TIME_PIT_H
+#include <arc/proc/sched.h>
+#include <arc/smp/mode.h>
+#include <arc/time/apic.h>
+#include <arc/time/pit.h>
 
-#include <arc/intr/route.h>
+#define SCHED_TIMESLICE 50 /* 10ms = 100Hz */
 
-void pit_monotonic(int ms, intr_handler_t handler);
-void pit_mdelay(int ms);
+void sched_init(void)
+{
+  if (smp_mode == MODE_SMP)
+    apic_monotonic(SCHED_TIMESLICE, &sched_tick);
+  else
+    pit_monotonic(SCHED_TIMESLICE, &sched_tick);
+}
 
-#endif
+void sched_tick(intr_state_t *state)
+{
+
+}
 

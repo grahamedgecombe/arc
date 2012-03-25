@@ -37,7 +37,7 @@
 #include <arc/acpi/scan.h>
 #include <arc/mp/scan.h>
 #include <arc/smp/init.h>
-#include <arc/time/pit.h>
+#include <arc/proc/sched.h>
 #include <arc/proc/syscall.h>
 #include <arc/lock/intr.h>
 #include <string.h>
@@ -59,11 +59,6 @@ static void print_banner(void)
   gap[gap_len] = 0;
 
   tty_printf("%s%s%s%s%s", dashes, gap, banner, gap, dashes);
-}
-
-void tick(intr_state_t *state)
-{
-  tty_putch('.');
 }
 
 void init(uint32_t magic, multiboot_t *multiboot)
@@ -148,8 +143,8 @@ void init(uint32_t magic, multiboot_t *multiboot)
     smp_init();
   }
 
-  /* test interrupts using the PIT */
-  pit_monotonic(20, &tick);
+  /* set up the scheduler */
+  sched_init();
 
   intr_unlock();
   halt_forever();
