@@ -18,6 +18,7 @@
 #include <arc/cpu/msr.h>
 #include <arc/intr/common.h>
 #include <arc/lock/spinlock.h>
+#include <arc/lock/intr.h>
 #include <arc/mm/common.h>
 #include <arc/mm/mmio.h>
 #include <arc/time/pit.h>
@@ -118,6 +119,7 @@ static void apic_timer_calibrate(void)
 {
   static spinlock_t apic_calibrate_lock = SPIN_UNLOCKED;
   spin_lock(&apic_calibrate_lock);
+  intr_lock();
 
   apic_write(APIC_TIMER_ICR, 0xFFFFFFFF);
   apic_write(APIC_TIMER_DCR, DCR_16);
@@ -126,6 +128,7 @@ static void apic_timer_calibrate(void)
 
   tty_printf("APIC timer frequency: %d MHz\n", ((ticks * 16 * 100) / 1000000));
 
+  intr_unlock();
   spin_unlock(&apic_calibrate_lock);
 }
 
