@@ -19,11 +19,16 @@
 
 #include <arc/util/list.h>
 #include <stdlib.h>
+#include <stdint.h>
 
 typedef struct
 {
   /* node used by proc_t's thread_list */
   list_node_t proc_node;
+
+  /* register file for this thread */
+  uint64_t regs[15];
+  uint64_t rip, rsp, rflags;
 } thread_t;
 
 #endif
