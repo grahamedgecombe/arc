@@ -15,6 +15,7 @@
  */
 
 #include <arc/mp/mpct.h>
+#include <arc/intr/apic.h>
 
 bool mpct_valid(mpct_t *mpct)
 {
@@ -64,5 +65,7 @@ void mpct_scan(mpct_t *mpct)
 
     entry_addr += sizeof(entry->type);
   }
+
+  xapic_init(mpct->lapic_phy_addr);
 }
 

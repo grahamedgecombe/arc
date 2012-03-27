@@ -31,6 +31,14 @@ bool mp_scan(void)
     return false;
   }
 
+  /* if features[0] is nonzero, the system uses the default config */
+  if (mpfp->features[0] != 0)
+  {
+    // TODO: add support for default config
+    tty_puts(" => MP default configuration not supported\n");
+    return false;
+  }
+
   /* get a pointer to where the MPFP is in virtual memory */
   mpct_t *mpct = (mpct_t *) aphy32_to_virt(mpfp->phy_addr);
   if (!mpct_valid(mpct))
