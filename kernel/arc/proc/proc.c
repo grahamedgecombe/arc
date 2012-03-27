@@ -17,6 +17,7 @@
 #include <arc/proc/proc.h>
 #include <arc/smp/cpu.h>
 #include <arc/mm/pmm.h>
+#include <arc/mm/vmm.h>
 #include <stdlib.h>
 
 proc_t *proc_create(void)
