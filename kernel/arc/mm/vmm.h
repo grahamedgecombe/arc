@@ -23,6 +23,7 @@
 #include <stdint.h>
 
 void vmm_init(void);
+bool vmm_init_pml4(uintptr_t pml4_table_addr);
 
 bool vmm_touch(uintptr_t virt, int size);
 

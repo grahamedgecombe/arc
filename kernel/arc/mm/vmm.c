@@ -20,6 +20,7 @@
 #include <arc/mm/tlb.h>
 #include <arc/mm/align.h>
 #include <arc/mm/pmm.h>
+#include <arc/mm/mmio.h>
 #include <arc/panic.h>
 #include <arc/cpu/tlb.h>
 #include <arc/cpu/features.h>
@@ -123,6 +124,24 @@ void vmm_init(void)
     if (!_vmm_touch(VM_OFFSET + (pml4_index - (TABLE_SIZE / 2)) * FRAME_SIZE_512G, SIZE_1G))
       panic("failed to touch pml4 entry %d", pml4_index);
   }
+}
+
+bool vmm_init_pml4(uintptr_t pml4_table_addr)
+{
+  // TODO: pre-allocate this MMIO area so this call always succeeds
+  uint64_t *pml4_table = mmio_map(pml4_table_addr, FRAME_SIZE, MMIO_R | MMIO_W);
+  if (!pml4_table)
+    return false;
+
+  uint64_t *master_pml4_table = (uint64_t *) PML4_OFFSET;
+  memset(pml4_table, 0, FRAME_SIZE / 2);
+  for (int pml4e = TABLE_SIZE / 2; pml4e < TABLE_SIZE; pml4e++)
+  {
+    pml4_table[pml4e] = master_pml4_table[pml4e];
+  }
+
+  mmio_unmap(pml4_table, FRAME_SIZE);
+  return true;
 }
 
 static int _vmm_size(uintptr_t virt)

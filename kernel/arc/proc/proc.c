@@ -32,6 +32,12 @@ proc_t *proc_create(void)
     return 0;
   }
 
+  if (!vmm_init_pml4(proc->pml4_table))
+  {
+    free(proc);
+    pmm_free(proc->pml4_table);
+  }
+
   proc->vmm_lock = SPIN_UNLOCKED;
   list_init(&proc->thread_list);
   return proc;
