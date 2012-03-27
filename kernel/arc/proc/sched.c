@@ -20,7 +20,7 @@
 #include <arc/time/pit.h>
 #include <arc/tty.h>
 
-#define SCHED_TIMESLICE 50 /* 10ms = 100Hz */
+#define SCHED_TIMESLICE 10 /* 10ms = 100Hz */
 
 void sched_init(void)
 {
