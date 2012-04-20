@@ -15,6 +15,8 @@
  */
 
 #include <arc/proc/module.h>
+#include <arc/cpu/cr.h>
+#include <arc/proc/proc.h>
 #include <arc/proc/elf64.h>
 #include <arc/mm/phy32.h>
 #include <arc/panic.h>
@@ -23,13 +25,25 @@
 
 static void module_load(multiboot_tag_t *tag)
 {
+  /* calculate size and phy32 pointer */
   size_t size = tag->module.mod_end - tag->module.mod_start;
   elf64_ehdr_t *elf = (elf64_ehdr_t *) aphy32_to_virt(tag->module.mod_start);
 
-  // TODO: switch to new process
+  /* make a new process */
+  proc_t *proc = proc_create();
+  if (!proc)
+    panic("couldn't create process for module");
 
+  /* switch our address space */
+  uint64_t cr3 = cr3_read();
+  cr3_write(proc->pml4_table);
+
+  /* load the ELF file */
   if (!elf64_load(elf, size))
-    panic("couldn't load elf64 module");
+    panic("couldn't load elf64 file");
+
+  /* switch back to the kernel's address space */
+  cr3_write(cr3);
 }
 
 void module_init(multiboot_t *multiboot)

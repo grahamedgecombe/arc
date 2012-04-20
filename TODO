@@ -15,3 +15,5 @@
 
 * elf64 size checks
 
+* free module pmm frames when they are loaded
+

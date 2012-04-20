@@ -15,6 +15,8 @@
  */
 
 #include <arc/proc/elf64.h>
+#include <arc/mm/uheap.h>
+#include <string.h>
 
 static bool elf64_ehdr_valid(elf64_ehdr_t *ehdr)
 {
@@ -57,14 +59,34 @@ bool elf64_load(elf64_ehdr_t *elf, size_t size)
     return false;
 
   elf64_phdr_t *phdrs = (elf64_phdr_t *) ((uintptr_t) elf + elf->e_phoff);
-  for (size_t i = 0; i < elf->e_phnum; i++) {
+  size_t i;
+  for (i = 0; i < elf->e_phnum; i++) {
     elf64_phdr_t *phdr = &phdrs[i];
     if (phdr->p_type != PT_LOAD)
       continue;
 
+    int flags = 0;
+    if (phdr->p_flags & PF_R)
+      flags |= UHEAP_R;
+    if (phdr->p_flags & PF_W)
+      flags |= UHEAP_W;
+    if (phdr->p_flags & PF_X)
+      flags |= UHEAP_X;
 
+    if (!uheap_alloc_at((void *) phdr->p_vaddr, phdr->p_memsz, flags))
+      goto rollback;
+
+    uintptr_t file_base = (uintptr_t) elf + phdr->p_offset;
+    memcpy((void *) phdr->p_vaddr, (void *) file_base, phdr->p_filesz);
+    memclr((void *) (phdr->p_vaddr + phdr->p_filesz), phdr->p_memsz - phdr->p_filesz);
   }
-
   return true;
+
+rollback:
+  for (size_t j = 0; j < i; j++) {
+    elf64_phdr_t *phdr = &phdrs[j];
+    uheap_free((void *) phdr->p_vaddr);
+  }
+  return false;
 }
 
