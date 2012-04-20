@@ -14,22 +14,12 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <arc/proc/sched.h>
-#include <arc/smp/mode.h>
-#include <arc/time/apic.h>
-#include <arc/time/pit.h>
+#ifndef ARC_PROC_MODULE_H
+#define ARC_PROC_MODULE_H
 
-#define SCHED_TIMESLICE 10 /* 10ms = 100Hz */
+#include <arc/multiboot.h>
 
-void sched_init(void)
-{
-  if (smp_mode == MODE_SMP)
-    apic_monotonic(SCHED_TIMESLICE, &sched_tick);
-  else
-    pit_monotonic(SCHED_TIMESLICE, &sched_tick);
-}
+void module_init(multiboot_t *multiboot);
 
-void sched_tick(intr_state_t *state)
-{
-}
+#endif
 

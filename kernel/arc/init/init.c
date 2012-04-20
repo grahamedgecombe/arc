@@ -39,6 +39,7 @@
 #include <arc/smp/init.h>
 #include <arc/proc/sched.h>
 #include <arc/proc/syscall.h>
+#include <arc/proc/module.h>
 #include <arc/lock/intr.h>
 #include <string.h>
 #include <stdbool.h>
@@ -145,6 +146,9 @@ void init(uint32_t magic, multiboot_t *multiboot)
 
   /* set up the scheduler */
   sched_init();
+
+  /* set up modules */
+  module_init(multiboot);
 
   intr_unlock();
   halt_forever();

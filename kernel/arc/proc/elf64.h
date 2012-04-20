@@ -19,6 +19,7 @@
 
 #include <arc/pack.h>
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
 
 /* ehdr ident indexes */
@@ -114,7 +115,7 @@ typedef PACK(struct
   elf64_xword_t p_align;
 }) elf64_phdr_t;
 
-bool elf64_ehdr_valid(elf64_ehdr_t *ehdr);
+bool elf64_load(elf64_ehdr_t *elf, size_t size);
 
 #endif
 

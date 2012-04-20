@@ -16,7 +16,7 @@
 
 #include <arc/proc/elf64.h>
 
-bool elf64_ehdr_valid(elf64_ehdr_t *ehdr)
+static bool elf64_ehdr_valid(elf64_ehdr_t *ehdr)
 {
   if (ehdr->e_ident[EI_MAG0] != ELFMAG0)
     return false;
@@ -39,11 +39,31 @@ bool elf64_ehdr_valid(elf64_ehdr_t *ehdr)
   if (ehdr->e_ident[EI_OSABI] != ELFOSABI_SYSV)
     return false;
 
+  if (ehdr->e_type != ET_EXEC)
+    return false;
+
   if (ehdr->e_machine != EM_X86_64)
     return false;
 
   if (ehdr->e_version != 1)
     return false;
+
+  return true;
+}
+
+bool elf64_load(elf64_ehdr_t *elf, size_t size)
+{
+  if (!elf64_ehdr_valid(elf))
+    return false;
+
+  elf64_phdr_t *phdrs = (elf64_phdr_t *) ((uintptr_t) elf + elf->e_phoff);
+  for (size_t i = 0; i < elf->e_phnum; i++) {
+    elf64_phdr_t *phdr = &phdrs[i];
+    if (phdr->p_type != PT_LOAD)
+      continue;
+
+
+  }
 
   return true;
 }

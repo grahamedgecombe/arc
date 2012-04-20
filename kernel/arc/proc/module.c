@@ -14,22 +14,31 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <arc/proc/sched.h>
-#include <arc/smp/mode.h>
-#include <arc/time/apic.h>
-#include <arc/time/pit.h>
+#include <arc/proc/module.h>
+#include <arc/proc/elf64.h>
+#include <arc/mm/phy32.h>
+#include <arc/panic.h>
+#include <arc/tty.h>
+#include <stddef.h>
 
-#define SCHED_TIMESLICE 10 /* 10ms = 100Hz */
-
-void sched_init(void)
+static void module_load(multiboot_tag_t *tag)
 {
-  if (smp_mode == MODE_SMP)
-    apic_monotonic(SCHED_TIMESLICE, &sched_tick);
-  else
-    pit_monotonic(SCHED_TIMESLICE, &sched_tick);
+  size_t size = tag->module.mod_end - tag->module.mod_start;
+  elf64_ehdr_t *elf = (elf64_ehdr_t *) aphy32_to_virt(tag->module.mod_start);
+
+  // TODO: switch to new process
+
+  if (!elf64_load(elf, size))
+    panic("couldn't load elf64 module");
 }
 
-void sched_tick(intr_state_t *state)
+void module_init(multiboot_t *multiboot)
 {
+  multiboot_tag_t *tag = multiboot_get(multiboot, MULTIBOOT_TAG_MODULE);
+  while (tag)
+  {
+    module_load(tag);
+    tag = multiboot_get_after(multiboot, tag, MULTIBOOT_TAG_MODULE);
+  }
 }
 

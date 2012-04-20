@@ -14,16 +14,24 @@
 #  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-MODULES := kernel hello
+include ../template.mk
 
-.PHONY: all clean $(MODULES)
+TARGET := hello
+SOURCES := $(shell find -name "*.s" -type f)
+OBJECTS := $(addsuffix .o, $(basename $(SOURCES)))
 
-all: $(MODULES)
+.PHONY: all clean
 
-$(MODULES):
-	@ echo " MAKE   $@"
-	@ $(MAKE) -sC $@
+all: $(TARGET)
 
 clean:
-	@ $(foreach module,$(MODULES),$(MAKE) -sC $(module) clean;)
+	@ $(RM) $(TARGET) $(OBJECTS)
+
+$(TARGET): $(OBJECTS)
+	@ echo " LD     $@"
+	@ $(LD) $(LDFLAGS) -o $@ $^
+
+.s.o:
+	@ echo " AS     $<"
+	@ $(AS) $(ASFLAGS) -o $@ $<
 
