@@ -15,6 +15,22 @@
  */
 
 #include <arc/mm/uheap.h>
+#include <arc/proc/proc.h>
+
+static bool _uheap_alloc_at(uheap_t *heap, void *ptr, size_t size, int flags)
+{
+  return false;
+}
+
+static void *_uheap_alloc(uheap_t *heap, size_t size, int flags)
+{
+  return 0;
+}
+
+static void _uheap_free(uheap_t *heap, void *ptr)
+{
+
+}
 
 bool uheap_init(uheap_t *heap)
 {
@@ -24,16 +40,44 @@ bool uheap_init(uheap_t *heap)
 
 bool uheap_alloc_at(void *ptr, size_t size, int flags)
 {
-  return false;
+  proc_t *proc = proc_get();
+  if (!proc)
+    return false;
+
+  uheap_t *heap = &proc->heap;
+
+  spin_lock(&heap->lock);
+  bool ok = _uheap_alloc_at(heap, ptr, size, flags);
+  spin_unlock(&heap->lock);
+
+  return ok;
 }
 
 void *uheap_alloc(size_t size, int flags)
 {
-  return 0;
+  proc_t *proc = proc_get();
+  if (!proc)
+    return 0;
+
+  uheap_t *heap = &proc->heap;
+
+  spin_lock(&heap->lock);
+  void *ptr = _uheap_alloc(heap, size, flags);
+  spin_unlock(&heap->lock);
+
+  return ptr;
 }
 
 void uheap_free(void *ptr)
 {
+  proc_t *proc = proc_get();
+  if (!proc)
+    return;
 
+  uheap_t *heap = &proc->heap;
+
+  spin_lock(&heap->lock);
+  _uheap_free(heap, ptr);
+  spin_unlock(&heap->lock);
 }
 
