@@ -41,6 +41,14 @@ proc_t *proc_create(void)
   }
 
   proc->vmm_lock = SPIN_UNLOCKED;
+
+  if (!uheap_init(&proc->heap))
+  {
+    pmm_free(proc->pml4_table);
+    free(proc);
+    return 0;
+  }
+
   list_init(&proc->thread_list);
   return proc;
 }

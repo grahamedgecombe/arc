@@ -16,9 +16,10 @@
 
 #include <arc/mm/uheap.h>
 
-bool uheap_init(void)
+bool uheap_init(uheap_t *heap)
 {
-  return false;
+  heap->lock = SPIN_UNLOCKED;
+  return true;
 }
 
 bool uheap_alloc_at(void *ptr, size_t size, int flags)

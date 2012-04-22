@@ -14,9 +14,10 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef ARC_MM_HEAP_H
-#define ARC_MM_HEAP_H
+#ifndef ARC_MM_UHEAP_H
+#define ARC_MM_UHEAP_H
 
+#include <arc/lock/spinlock.h>
 #include <stdbool.h>
 #include <stddef.h>
 
@@ -24,7 +25,12 @@
 #define UHEAP_W 0x2
 #define UHEAP_X 0x4
 
-bool uheap_init(void);
+typedef struct
+{
+  spinlock_t lock;
+} uheap_t;
+
+bool uheap_init(uheap_t *heap);
 bool uheap_alloc_at(void *ptr, size_t size, int flags);
 void *uheap_alloc(size_t size, int flags);
 void uheap_free(void *ptr);
