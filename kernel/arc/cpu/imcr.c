@@ -14,26 +14,12 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef ARC_MP_MPFP_H
-#define ARC_MP_MPFP_H
+#include <arc/cpu/imcr.h>
+#include <arc/cpu/port.h>
 
-#include <arc/pack.h>
-#include <stdint.h>
-
-#define MPFP_SIGNATURE 0x5F504D5F /* '_MP_' */
-#define MPFP_IMCRP     0x80
-
-typedef PACK(struct
+void imcr_write(uint8_t value)
 {
-  uint32_t signature;
-  uint32_t phy_addr;
-  uint8_t len;
-  uint8_t spec_rev;
-  uint8_t checksum;
-  uint8_t features[5];
-}) mpfp_t;
-
-mpfp_t *mpfp_scan(void);
-
-#endif
+  outb_p(0x22, 0x70);
+  outb_p(0x23, value);
+}
 

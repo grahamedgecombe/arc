@@ -58,14 +58,14 @@ void madt_scan(madt_t *madt)
             irq_tuple_t *tuple = isa_irq(line);
             tuple->irq = gsi;
 
-            if (flags & MADT_INTR_POLARITY_HIGH)
+            if ((flags & MADT_INTR_POLARITY_HIGH) == MADT_INTR_POLARITY_HIGH)
               tuple->active_polarity = POLARITY_HIGH;
-            else if (flags & MADT_INTR_POLARITY_LOW)
+            else if ((flags & MADT_INTR_POLARITY_LOW) == MADT_INTR_POLARITY_LOW)
               tuple->active_polarity = POLARITY_LOW;
 
-            if (flags & MADT_INTR_TRIGGER_EDGE)
+            if ((flags & MADT_INTR_TRIGGER_EDGE) == MADT_INTR_TRIGGER_EDGE)
               tuple->trigger = TRIGGER_EDGE;
-            else if (flags & MADT_INTR_TRIGGER_LEVEL)
+            else if ((flags & MADT_INTR_TRIGGER_LEVEL) == MADT_INTR_TRIGGER_LEVEL)
               tuple->trigger = TRIGGER_LEVEL;
           }
         }
@@ -118,7 +118,7 @@ void madt_scan(madt_t *madt)
   if (madt->flags & MADT_FLAGS_PCAT)
     pic_init();
 
-  /* initialise the local (x)APIC */
+  /* initialise the local APIC */
   xapic_init(lapic_addr);
 }
 

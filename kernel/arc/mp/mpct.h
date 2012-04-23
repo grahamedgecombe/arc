@@ -25,7 +25,7 @@
 
 #define MPCT_TYPE_PROC       0
 #define MPCT_TYPE_BUS        1
-#define MPCT_TYPE_IO_APIC    2
+#define MPCT_TYPE_IOAPIC     2
 #define MPCT_TYPE_IO_INTR    3
 #define MPCT_TYPE_LOCAL_INTR 4
 
@@ -33,6 +33,19 @@
 #define MPCT_TYPE_ADDR_MAPPING     128
 #define MPCT_TYPE_BUS_HIERARCHY    129
 #define MPCT_TYPE_BUS_ADDR_MAPPING 130
+
+#define MPCT_PROC_FLAGS_ENABLED 0x1
+#define MPCT_PROC_FLAGS_BSP     0x2
+
+#define MPCT_IO_INTR_TYPE_INT    0
+#define MPCT_IO_INTR_TYPE_NMI    1
+#define MPCT_IO_INTR_TYPE_SMI    2
+#define MPCT_IO_INTR_TYPE_EXTINT 3
+
+#define MPCT_IO_INTR_POLARITY_HIGH 0x01
+#define MPCT_IO_INTR_POLARITY_LOW  0x03
+#define MPCT_IO_INTR_TRIGGER_EDGE  0x04
+#define MPCT_IO_INTR_TRIGGER_LEVEL 0x0C
 
 typedef PACK(struct
 {
@@ -61,7 +74,7 @@ typedef PACK(struct
       uint8_t ver;
       uint8_t flags;
       uint32_t addr;
-    }) io_apic;
+    }) ioapic;
 
     PACK(struct
     {

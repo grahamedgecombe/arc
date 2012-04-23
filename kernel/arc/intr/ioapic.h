@@ -22,6 +22,8 @@
 #include <arc/util/list.h>
 #include <arc/types.h>
 
+#define IOAPIC_MAX_IRQS 240
+
 typedef struct ioapic
 {
   /* global I/O APIC list node */

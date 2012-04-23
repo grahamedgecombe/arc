@@ -15,6 +15,7 @@
  */
 
 #include <arc/mp/scan.h>
+#include <arc/cpu/imcr.h>
 #include <arc/mp/mpfp.h>
 #include <arc/mp/mpct.h>
 #include <arc/mm/phy32.h>
@@ -46,6 +47,11 @@ bool mp_scan(void)
 
   /* scan the mpct */
   mpct_scan(mpct);
+
+  /* switch to symmetric I/O mode */
+  if (mpfp->features[1] & MPFP_IMCRP)
+    imcr_write(1);
+
   return true;
 }
 
