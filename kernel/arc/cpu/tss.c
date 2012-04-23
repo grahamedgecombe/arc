@@ -28,6 +28,9 @@ void tss_init(void)
   memset(tss, 0, sizeof(*tss));
   tss->iomap_base = sizeof(*tss);
 
+  /* set the stack pointer for this CPU */
+  tss->rsp0 = (uint64_t) cpu->stack;
+
   /* install it using the LTR instruction */
   tss_install(SLTR_TSS);
 }

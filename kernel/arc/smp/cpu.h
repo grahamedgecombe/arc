@@ -54,6 +54,9 @@ typedef struct cpu
   /* current 'depth' of the interrupt lock */
   int intr_depth;
 
+  /* the kernel stack for this cpu (used in interrupt & syscalls) */
+  void *stack;
+
   /* current process/thread running on this cpu */
   proc_t *proc;
   thread_t *thread;

@@ -36,8 +36,8 @@
 #include <string.h>
 
 #define TRAMPOLINE_BASE 0x1000
-#define AP_STACK_SIZE  8192
-#define AP_STACK_ALIGN 16
+#define IDLE_STACK_SIZE  8192
+#define IDLE_STACK_ALIGN 16
 
 /* some variables used to exchange data between the BSP and APs */
 static volatile bool ack_sipi = false;
@@ -69,13 +69,13 @@ static void smp_boot(cpu_t *cpu)
     panic("couldn't map SMP trampoline code");
 
   /* allocate a stack for this AP */
-  void *ap_stack = memalign(AP_STACK_ALIGN, AP_STACK_SIZE);
-  if (!ap_stack)
+  void *idle_stack = memalign(IDLE_STACK_ALIGN, IDLE_STACK_SIZE);
+  if (!idle_stack)
     panic("couldn't allocate AP stack");
 
   /* set up this cpu's bootstrap stack */
   uint64_t *rsp = (uint64_t *) &trampoline_stack;
-  *rsp = (uint64_t) ap_stack + AP_STACK_SIZE;
+  *rsp = (uint64_t) idle_stack + IDLE_STACK_SIZE;
 
   /* set the pointer to the cpu struct of the cpu we are booting */
   booted_cpu = cpu;
