@@ -17,3 +17,6 @@
 
 * free module pmm frames when they are loaded
 
+* don't use PIT channel 2 for pit_mdelay(), using the KBC to check if the
+  countdown has finished seems to be unreliable on modern hardware
+
