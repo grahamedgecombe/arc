@@ -30,6 +30,7 @@
 #include <arc/time/pit.h>
 #include <arc/proc/sched.h>
 #include <arc/proc/syscall.h>
+#include <arc/util/container.h>
 #include <arc/tty.h>
 #include <arc/panic.h>
 #include <stdlib.h>

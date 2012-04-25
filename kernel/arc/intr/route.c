@@ -21,6 +21,7 @@
 #include <arc/lock/rwlock.h>
 #include <arc/lock/intr.h>
 #include <arc/smp/mode.h>
+#include <arc/util/container.h>
 #include <arc/util/list.h>
 #include <arc/tty.h>
 #include <arc/panic.h>

@@ -14,30 +14,10 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef ARC_UTIL_LIST_H
-#define ARC_UTIL_LIST_H
+#ifndef ARC_UTIL_CONTAINER_H
+#define ARC_UTIL_CONTAINER_H
 
-typedef struct list_node
-{
-  struct list_node *next, *prev;
-} list_node_t;
-
-typedef struct
-{
-  list_node_t *head, *tail;
-  int size;
-} list_t;
-
-#define LIST_EMPTY { .head = 0, .tail = 0, .size = 0 }
-
-#define list_for_each(list, node) for (list_node_t *node = (list)->head; node; node = node->next)
-
-void list_init(list_t *list);
-void list_add_head(list_t *list, list_node_t *node);
-void list_add_tail(list_t *list, list_node_t *node);
-void list_insert_before(list_t *list, list_node_t *node, list_node_t *new_node);
-void list_insert_after(list_t *list, list_node_t *node, list_node_t *new_node);
-void list_remove(list_t *list, list_node_t *node);
+#define container_of(ptr, type, member) ((type *) (((char *) (ptr)) - offsetof(type, member)))
 
 #endif
 
