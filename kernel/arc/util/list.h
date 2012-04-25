@@ -36,6 +36,8 @@ typedef struct
 void list_init(list_t *list);
 void list_add_head(list_t *list, list_node_t *node);
 void list_add_tail(list_t *list, list_node_t *node);
+void list_insert_before(list_t *list, list_node_t *node, list_node_t *new_node);
+void list_insert_after(list_t *list, list_node_t *node, list_node_t *new_node);
 void list_remove(list_t *list, list_node_t *node);
 
 #endif

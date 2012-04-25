@@ -32,34 +32,47 @@ void list_add_head(list_t *list, list_node_t *node)
 
     list->head = list->tail = node;
     node->next = node->prev = 0;
+
+    list->size++;
   }
   else
-  {
-    node->prev = 0;
-    node->next = list->head;
-    list->head->prev = node;
-    list->head = node;
-  }
-
-  list->size++;
+    list_insert_before(list, list->head, node);
 }
 
 void list_add_tail(list_t *list, list_node_t *node)
 {
   if (!list->tail)
-  {
-    assert(list->head == 0);
-
-    list->head = list->tail = node;
-    node->next = node->prev = 0;
-  }
+    list_add_head(list, node);
   else
-  {
-    node->next = 0;
-    node->prev = list->tail;
-    list->tail->next = node;
-    list->tail = node;
-  }
+    list_insert_after(list, list->tail, node);
+}
+
+void list_insert_before(list_t *list, list_node_t *node, list_node_t *new_node)
+{
+  new_node->prev = node->prev;
+  new_node->next = node;
+
+  if (!node->prev)
+    list->head = new_node;
+  else
+    node->prev->next = new_node;
+
+  node->prev = new_node;
+
+  list->size++;
+}
+
+void list_insert_after(list_t *list, list_node_t *node, list_node_t *new_node)
+{
+  new_node->prev = node;
+  new_node->next = node->next;
+
+  if (!node->next)
+    list->tail = new_node;
+  else
+    node->next->prev = new_node;
+
+  node->next = new_node;
 
   list->size++;
 }
