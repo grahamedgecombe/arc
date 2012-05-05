@@ -15,6 +15,7 @@
  */
 
 #include <arc/proc/proc.h>
+#include <arc/cpu/cr.h>
 #include <arc/smp/cpu.h>
 #include <arc/mm/pmm.h>
 #include <arc/mm/vmm.h>
@@ -57,6 +58,13 @@ proc_t *proc_get(void)
 {
   cpu_t *cpu = cpu_get();
   return cpu->proc;
+}
+
+void proc_switch(proc_t *proc)
+{
+  cpu_t *cpu = cpu_get();
+  cpu->proc = proc;
+  cr3_write(proc->pml4_table);
 }
 
 void proc_destroy(proc_t *proc)

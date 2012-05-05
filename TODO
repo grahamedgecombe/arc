@@ -20,3 +20,7 @@
 * don't use PIT channel 2 for pit_mdelay(), using the KBC to check if the
   countdown has finished seems to be unreliable on modern hardware
 
+* uniform memory flags (r,w,x (and user?)) type, and a way to convert it to
+  page flags, so this is not duplicated in mmio, heap, uheap, etc. also use
+  enums more (e.g. in the heap for the node state.)
+

@@ -35,15 +35,11 @@ static void module_load(multiboot_tag_t *tag)
     panic("couldn't create process for module");
 
   /* switch our address space */
-  uint64_t cr3 = cr3_read();
-  cr3_write(proc->pml4_table);
+  proc_switch(proc);
 
   /* load the ELF file */
   if (!elf64_load(elf, size))
     panic("couldn't load elf64 file");
-
-  /* switch back to the kernel's address space */
-  cr3_write(cr3);
 }
 
 void module_init(multiboot_t *multiboot)

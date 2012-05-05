@@ -14,34 +14,15 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef ARC_PROC_PROC_H
-#define ARC_PROC_PROC_H
+#ifndef ARC_MM_RANGE_H
+#define ARC_MM_RANGE_H
 
-#include <arc/mm/uheap.h>
-#include <arc/proc/thread.h>
-#include <arc/lock/spinlock.h>
-#include <arc/util/list.h>
+#include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
 
-typedef struct
-{
-  /* physical address of the pml4 table of this process */
-  uintptr_t pml4_table;
-
-  /* vmm address space lock */
-  spinlock_t vmm_lock;
-
-  /* list of threads in this process */
-  list_t thread_list;
-
-  /* user-space heap */
-  uheap_t heap;
-} proc_t;
-
-proc_t *proc_create(void);
-proc_t *proc_get(void);
-void proc_switch(proc_t *proc);
-void proc_destroy(proc_t *proc);
+bool range_alloc(uintptr_t addr, size_t len, uint64_t flags);
+void range_free(uintptr_t addr, size_t len);
 
 #endif
 

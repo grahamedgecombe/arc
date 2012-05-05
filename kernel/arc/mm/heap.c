@@ -19,6 +19,7 @@
 #include <arc/mm/pmm.h>
 #include <arc/mm/vmm.h>
 #include <arc/mm/align.h>
+#include <arc/mm/range.h>
 #include <arc/pack.h>
 #include <arc/panic.h>
 #include <assert.h>
@@ -38,8 +39,8 @@ typedef PACK(struct heap_node
   struct heap_node *next;
   struct heap_node *prev;
   int state;
-  uintptr_t start; /* the address of the first page, inclusive */
-  uintptr_t end;   /* the address of the last page, exclusive */
+  uintptr_t start; /* the address of the first byte, inclusive */
+  uintptr_t end;   /* the address of the last byte, exclusive */
   uint64_t magic;
 }) heap_node_t;
 
@@ -145,23 +146,9 @@ static void _heap_free(void *ptr)
   assert(node->magic == (node->start ^ HEAP_MAGIC));
 
   /* free the physical frames if heap_alloc allocated them */
+  size_t size = node->end - node->start;
   if (node->state == HEAP_NODE_ALLOCATED)
-  {
-    for (uintptr_t page = node->start; page < node->end;)
-    {
-      int size = vmm_size(page);
-      if (size != -1)
-        pmm_frees(size, vmm_unmaps(size, page));
-
-      /* add on the extra space to get to the next actual page */
-      if (size == SIZE_1G)
-        page += FRAME_SIZE_1G;
-      else if (size == SIZE_2M)
-        page += FRAME_SIZE_2M;
-      else
-        page += FRAME_SIZE;
-    }
-  }
+    range_free(node->start, size);
 
   /* set the node's state to free */
   node->state = HEAP_NODE_FREE;
@@ -215,79 +202,17 @@ static void *_heap_alloc(size_t size, int flags, bool phy_alloc)
     node->state = HEAP_NODE_ALLOCATED;
 
     /* translate HEAP_W and HEAP_X flags to PG_WRITABLE and PG_NO_EXEC flags */
-    uint64_t map_flags = 0;
+    uint64_t vmm_flags = 0;
 
     if (flags & HEAP_W)
-      map_flags |= PG_WRITABLE;
+      vmm_flags |= PG_WRITABLE;
 
     if (!(flags & HEAP_X))
-      map_flags |= PG_NO_EXEC;
+      vmm_flags |= PG_NO_EXEC;
 
     /* allocate physical frames and map them into memory */
-    uintptr_t end = node->start + size;
-    for (uintptr_t page = node->start; page < end;)
-    {
-      uintptr_t remaining = end - page;
-
-      /* try to use a 1 gigabyte frame first */
-      if (PAGE_ALIGN_1G(page) == page && remaining >= FRAME_SIZE_1G)
-      {
-        uintptr_t phy = pmm_allocs(SIZE_1G);
-        if (phy)
-        {
-          if (!vmm_maps(page, phy, map_flags, SIZE_1G))
-          {
-            pmm_frees(phy, SIZE_1G);
-          }
-          else
-          {
-            page += FRAME_SIZE_1G;
-            continue;
-          }
-        }
-      }
-
-      /* then try to use a 2 megabyte frame */
-      if (PAGE_ALIGN_2M(page) == page && remaining >= FRAME_SIZE_2M)
-      {
-        uintptr_t phy = pmm_allocs(SIZE_2M);
-        if (phy)
-        {
-          if (!vmm_maps(page, phy, map_flags, SIZE_2M))
-          {
-            pmm_frees(phy, SIZE_2M);
-          }
-          else
-          {
-            page += FRAME_SIZE_2M;
-            continue;
-          }
-        }
-      }
-
-      /* allocate a physical frame */
-      uintptr_t phy = pmm_alloc();
-
-      /* if the physical allocation fails, roll back our changes */
-      if (!phy)
-      {
-        _heap_free((void *) node->start);
-        return 0;
-      }
-
-      /*
-       * otherwise map the physical frame into the virtual address space, roll
-       * back our changes if this fails
-       */
-      if (!vmm_map(page, phy, map_flags))
-      {
-        pmm_free(phy);
-        _heap_free((void *) node->start);
-        return 0;
-      }
-
-      page += FRAME_SIZE;
-    }
+    if (!range_alloc(node->start, size, vmm_flags))
+      _heap_free((void *) node->start);
   }
 
   return (void *) ((uintptr_t) node + FRAME_SIZE);

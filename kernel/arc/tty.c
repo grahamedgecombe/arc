@@ -234,41 +234,41 @@ static void _tty_putch(char c)
   /* process the character */
   switch (c)
   {
-  case '\0':
-  case '\f':
-  case '\v':
-  case '\a':
-    /* don't even bother with these */
-    break;
-  case '\n':
-    row++;
-    /* fall through */
-  case '\r':
-    col = 0;
-    dirty_cursor = true;
-    break;
-  case '\t':
-    tmp = col % TAB_WIDTH;
-    if (tmp != 0)
-    {
-      col += (TAB_WIDTH - tmp);
+    case '\0':
+    case '\f':
+    case '\v':
+    case '\a':
+      /* don't even bother with these */
+      break;
+    case '\n':
+      row++;
+      /* fall through */
+    case '\r':
+      col = 0;
       dirty_cursor = true;
-    }
-    break;
-  case '\b':
-    if (col > 0)
-    {
-      col--;
+      break;
+    case '\t':
+      tmp = col % TAB_WIDTH;
+      if (tmp != 0)
+      {
+        col += (TAB_WIDTH - tmp);
+        dirty_cursor = true;
+      }
+      break;
+    case '\b':
+      if (col > 0)
+      {
+        col--;
+        dirty_cursor = true;
+      }
+      shadow_video_buf[TTY_POS(row, col)] = (attrib << 8);
+      dirty_text = true;
+      break;
+    default:
+      shadow_video_buf[TTY_POS(row, col++)] = (attrib << 8) | c;
+      dirty_text = true;
       dirty_cursor = true;
-    }
-    shadow_video_buf[TTY_POS(row, col)] = (attrib << 8);
-    dirty_text = true;
-    break;
-  default:
-    shadow_video_buf[TTY_POS(row, col++)] = (attrib << 8) | c;
-    dirty_text = true;
-    dirty_cursor = true;
-    break;
+      break;
   }
 
   /* perform wrapping */
@@ -329,25 +329,25 @@ void tty_vprintf(const char *fmt, va_list args)
       {
         switch (*fmt++)
         {
-        case '-':
-          flags |= FLAG_JUSTIFY;
-          break;
-        case '+':
-          flags |= FLAG_PLUS;
-          break;
-        case ' ':
-          flags |= FLAG_SPACE;
-          break;
-        case '#':
-          flags |= FLAG_HASH;
-          break;
-        case '0':
-          flags |= FLAG_ZERO;
-          break;
-        default:
-          fmt--;
-          more_flags = false;
-          break;
+          case '-':
+            flags |= FLAG_JUSTIFY;
+            break;
+          case '+':
+            flags |= FLAG_PLUS;
+            break;
+          case ' ':
+            flags |= FLAG_SPACE;
+            break;
+          case '#':
+            flags |= FLAG_HASH;
+            break;
+          case '0':
+            flags |= FLAG_ZERO;
+            break;
+          default:
+            fmt--;
+            more_flags = false;
+            break;
         }
       }
 
@@ -390,87 +390,87 @@ void tty_vprintf(const char *fmt, va_list args)
       c = *fmt++;
       switch (c)
       {
-      case '%':
-        _tty_putch('%');
-        break;
-      case 'c':
-        _tty_putch((char) va_arg(args, int));
-        break;
-      case 's':
-        _tty_puts(va_arg(args, const char *));
-        break;
-      case 'u':
-      case 'd':
-      case 'i':
-      case 'x':
-      case 'X':
-        {
-          /* check if we are dealing with a signed value */
-          int base = (c == 'x' || c == 'X') ? 16 : 10;
-          bool sign = base != 16 && c != 'u';
-
-          /* grab the value */
-          int64_t value = va_arg(args, int64_t);
-
-          /* cast the value to a smaller one if the qualifier is specified */
-          if (qualifier == 'h')
+        case '%':
+          _tty_putch('%');
+          break;
+        case 'c':
+          _tty_putch((char) va_arg(args, int));
+          break;
+        case 's':
+          _tty_puts(va_arg(args, const char *));
+          break;
+        case 'u':
+        case 'd':
+        case 'i':
+        case 'x':
+        case 'X':
           {
+            /* check if we are dealing with a signed value */
+            int base = (c == 'x' || c == 'X') ? 16 : 10;
+            bool sign = base != 16 && c != 'u';
+
+            /* grab the value */
+            int64_t value = va_arg(args, int64_t);
+
+            /* cast the value to a smaller one if the qualifier is specified */
+            if (qualifier == 'h')
+            {
+              if (sign)
+                value = (signed short int) value;
+              else
+                value = (unsigned short int) value;
+            }
+            else if (qualifier == 'l')
+            {
+              if (sign)
+                value = (signed long int) value;
+              else
+                value = (unsigned long int) value;
+            }
+
+            /* convert the value to a string */
+            char buf[64];
             if (sign)
-              value = (signed short int) value;
+              itoa_64(value, buf, base);
             else
-              value = (unsigned short int) value;
-          }
-          else if (qualifier == 'l')
-          {
-            if (sign)
-              value = (signed long int) value;
-            else
-              value = (unsigned long int) value;
-          }
+              uitoa_64(value, buf, base);
+            int len = strlen(buf);
 
-          /* convert the value to a string */
-          char buf[64];
-          if (sign)
-            itoa_64(value, buf, base);
-          else
-            uitoa_64(value, buf, base);
-          int len = strlen(buf);
+            /* add the 0x prefix */
+            if (flags & FLAG_HASH && base == 16)
+            {
+              _tty_puts("0x");
+              len += 2;
+            }
 
-          /* add the 0x prefix */
-          if (flags & FLAG_HASH && base == 16)
-          {
-            _tty_puts("0x");
-            len += 2;
+            /* add a plus or a space if the number is not negative */
+            if (((flags & FLAG_PLUS) || (flags & FLAG_SPACE)) && buf[0] != '-' && c != 'u' && base != 6)
+            {
+              _tty_putch((flags & FLAG_PLUS) ? '+' : ' ');
+              len++;
+            }
+
+            /* perform left justification / zero padding */
+            if (width > len && ((flags & FLAG_JUSTIFY) || (flags & FLAG_ZERO)))
+            {
+              int pad = width - len;
+              for (int i = 0; i < pad; i++)
+                _tty_putch((flags & FLAG_ZERO) ? '0' : ' ');
+              len += pad;
+            }
+
+            /* print the actual buffer */
+            _tty_puts(buf);
+
+            /* perform right justification */
+            if (width > len && !((flags & FLAG_JUSTIFY) || (flags & FLAG_ZERO)))
+            {
+              int pad = width - len;
+              for (int i = 0; i < pad; i++)
+                _tty_putch(' ');
+              len += pad;
+            }
           }
-
-          /* add a plus or a space if the number is not negative */
-          if (((flags & FLAG_PLUS) || (flags & FLAG_SPACE)) && buf[0] != '-' && c != 'u' && base != 6)
-          {
-            _tty_putch((flags & FLAG_PLUS) ? '+' : ' ');
-            len++;
-          }
-
-          /* perform left justification / zero padding */
-          if (width > len && ((flags & FLAG_JUSTIFY) || (flags & FLAG_ZERO)))
-          {
-            int pad = width - len;
-            for (int i = 0; i < pad; i++)
-              _tty_putch((flags & FLAG_ZERO) ? '0' : ' ');
-            len += pad;
-          }
-
-          /* print the actual buffer */
-          _tty_puts(buf);
-
-          /* perform right justification */
-          if (width > len && !((flags & FLAG_JUSTIFY) || (flags & FLAG_ZERO)))
-          {
-            int pad = width - len;
-            for (int i = 0; i < pad; i++)
-              _tty_putch(' ');
-            len += pad;
-          }
-        }
       }
     }
   }

@@ -18,6 +18,7 @@
 #define ARC_MM_UHEAP_H
 
 #include <arc/lock/spinlock.h>
+#include <arc/util/list.h>
 #include <stdbool.h>
 #include <stddef.h>
 
@@ -25,12 +26,22 @@
 #define UHEAP_W 0x2
 #define UHEAP_X 0x4
 
+typedef struct uheap_block
+{
+  list_node_t node;
+  uintptr_t start;
+  uintptr_t end;
+  bool allocated;
+} uheap_block_t;
+
 typedef struct
 {
   spinlock_t lock;
+  list_t block_list;
 } uheap_t;
 
 bool uheap_init(uheap_t *heap);
+void uheap_destroy(uheap_t *uheap);
 bool uheap_alloc_at(void *ptr, size_t size, int flags);
 void *uheap_alloc(size_t size, int flags);
 void uheap_free(void *ptr);

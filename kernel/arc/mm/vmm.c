@@ -71,7 +71,7 @@ static void vmm_unlock(uintptr_t addr)
 }
 
 static void addr_to_index(page_index_t *index, uintptr_t addr)
-{
+{uintptr_t t = addr;
   /* calculate pml4 pointer */
   index->pml4 = (uint64_t *) PML4_OFFSET;
 
@@ -134,11 +134,18 @@ bool vmm_init_pml4(uintptr_t pml4_table_addr)
     return false;
 
   uint64_t *master_pml4_table = (uint64_t *) PML4_OFFSET;
+
+  /* reset the lower half PML4 entries */
   memset(pml4_table, 0, FRAME_SIZE / 2);
-  for (int pml4e = TABLE_SIZE / 2; pml4e < TABLE_SIZE; pml4e++)
+
+  /* copy the higher half PML4 entries from the master table */
+  for (int pml4e = TABLE_SIZE / 2; pml4e < TABLE_SIZE - 1; pml4e++)
   {
     pml4_table[pml4e] = master_pml4_table[pml4e];
   }
+
+  /* map PML4 into itself */
+  pml4_table[TABLE_SIZE - 1] = pml4_table_addr | PG_PRESENT | PG_WRITABLE;
 
   mmio_unmap(pml4_table, FRAME_SIZE);
   return true;
