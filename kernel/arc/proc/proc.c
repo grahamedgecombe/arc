@@ -70,6 +70,8 @@ void proc_switch(proc_t *proc)
 void proc_destroy(proc_t *proc)
 {
   // TODO: destroy threads within the process
+  uheap_destroy();
+  // TODO: switch to a new process before destroying it
   pmm_free(proc->pml4_table);
   free(proc);
 }
