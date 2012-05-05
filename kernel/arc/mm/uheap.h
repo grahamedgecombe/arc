@@ -41,7 +41,7 @@ typedef struct
 } uheap_t;
 
 bool uheap_init(uheap_t *heap);
-void uheap_destroy(uheap_t *uheap);
+void uheap_destroy(void);
 bool uheap_alloc_at(void *ptr, size_t size, int flags);
 void *uheap_alloc(size_t size, int flags);
 void uheap_free(void *ptr);

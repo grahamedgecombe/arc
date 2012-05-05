@@ -226,7 +226,7 @@ bool uheap_init(uheap_t *heap)
   return true;
 }
 
-void uheap_destroy(uheap_t *uheap)
+void uheap_destroy(void)
 {
   /* TODO destroy the heap */
 }
