@@ -41,6 +41,7 @@ typedef struct
 proc_t *proc_create(void);
 proc_t *proc_get(void);
 void proc_switch(proc_t *proc);
+void proc_thread_add(proc_t *proc, thread_t *thread);
 void proc_destroy(proc_t *proc);
 
 #endif

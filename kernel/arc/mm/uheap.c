@@ -35,10 +35,10 @@ static bool _uheap_alloc_at(uheap_t *heap, void *ptr, size_t size, int flags)
       uheap_block_t *left_block = 0, *right_block = 0;
 
       /* turn the flags into vmm flags */
-      uint64_t vmm_flags = PG_USER;
-      if (vmm_flags & UHEAP_W)
+      uint64_t vmm_flags = 0;
+      if (flags & UHEAP_W)
         vmm_flags |= PG_WRITABLE;
-      if (!(vmm_flags & UHEAP_X))
+      if (!(flags & UHEAP_X))
         vmm_flags |= PG_NO_EXEC;
 
       /* allocate underlying page frames and map the region into memory */
@@ -86,9 +86,9 @@ static bool _uheap_alloc_at(uheap_t *heap, void *ptr, size_t size, int flags)
       /* split the right side of the block away */
       if (right_split)
       {
-        block->end = addr + size - 1;
         right_block->start = addr + size;
         right_block->end = block->end;
+        block->end = addr + size - 1;
 
         list_insert_after(&heap->block_list, &block->node, &right_block->node);
       }
@@ -115,10 +115,10 @@ static void *_uheap_alloc(uheap_t *heap, size_t size, int flags)
       uintptr_t addr = (uintptr_t) block->start;
 
       /* turn the flags into vmm flags */
-      uint64_t vmm_flags = PG_USER;
-      if (vmm_flags & UHEAP_W)
+      uint64_t vmm_flags = 0;
+      if (flags & UHEAP_W)
         vmm_flags |= PG_WRITABLE;
-      if (!(vmm_flags & UHEAP_X))
+      if (!(flags & UHEAP_X))
         vmm_flags |= PG_NO_EXEC;
 
       /* allocate underlying page frames and map the region into memory */
@@ -135,9 +135,9 @@ static void *_uheap_alloc(uheap_t *heap, size_t size, int flags)
           return 0;
         }
 
-        block->end = addr + size - 1;
         right_block->start = addr + size;
         right_block->end = block->end;
+        block->end = addr + size - 1;
 
         list_insert_after(&heap->block_list, &block->node, &right_block->node);
       }
@@ -214,7 +214,8 @@ bool uheap_init(uheap_t *heap)
   if (!block)
     return false;
 
-  /* set the last user-space address */
+  /* set the first last user-space address */
+  block->start = 0x1000; /* so NULL pointer isn't included */
   block->end = 0x00007FFFFFFFFFFF;
 
   /* init the spinlock */

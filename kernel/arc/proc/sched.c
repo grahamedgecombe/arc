@@ -15,9 +15,13 @@
  */
 
 #include <arc/proc/sched.h>
+#include <arc/cpu/gdt.h>
+#include <arc/proc/proc.h>
 #include <arc/smp/mode.h>
 #include <arc/time/apic.h>
 #include <arc/time/pit.h>
+#include <arc/util/container.h>
+#include <string.h>
 
 #define SCHED_TIMESLICE 10 /* 10ms = 100Hz */
 
@@ -31,5 +35,22 @@ void sched_init(void)
 
 void sched_tick(intr_state_t *state)
 {
+  proc_t *proc = proc_get();
+
+  if (proc)
+  {
+    list_node_t *node = proc->thread_list.head;
+    if (node)
+    {
+      thread_t *thread = container_of(node, thread_t, proc_node);
+
+      memcpy(state->regs, thread->regs, sizeof(thread->regs));
+      state->rip = thread->rip;
+      state->rsp = thread->rsp;
+      state->rflags = thread->rflags;
+      state->cs = SLTR_USER_CODE | RPL3;
+      state->ss = SLTR_USER_DATA | RPL3;
+    }
+  }
 }
 

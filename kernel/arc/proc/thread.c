@@ -15,4 +15,25 @@
  */
 
 #include <arc/proc/thread.h>
+#include <arc/mm/uheap.h>
+#include <stdlib.h>
+
+#define THREAD_STACK_SIZE 8192
+
+thread_t *thread_create(void)
+{
+  thread_t *thread = malloc(sizeof(*thread));
+  if (!thread)
+    return 0;
+
+  void *stack = uheap_alloc(THREAD_STACK_SIZE, UHEAP_R | UHEAP_W);
+  if (!stack)
+  {
+    free(thread);
+    return 0;
+  }
+
+  thread->rsp = (uintptr_t) stack + THREAD_STACK_SIZE;
+  return thread;
+}
 

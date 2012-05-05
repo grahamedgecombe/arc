@@ -31,5 +31,7 @@ typedef struct
   uint64_t rip, rsp, rflags;
 } thread_t;
 
+thread_t *thread_create(void);
+
 #endif
 

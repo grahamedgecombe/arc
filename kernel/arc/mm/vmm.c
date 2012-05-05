@@ -145,7 +145,7 @@ bool vmm_init_pml4(uintptr_t pml4_table_addr)
   }
 
   /* map PML4 into itself */
-  pml4_table[TABLE_SIZE - 1] = pml4_table_addr | PG_PRESENT | PG_WRITABLE;
+  pml4_table[TABLE_SIZE - 1] = pml4_table_addr | PG_PRESENT | PG_WRITABLE | PG_NO_EXEC;
 
   mmio_unmap(pml4_table, FRAME_SIZE);
   return true;
@@ -193,6 +193,9 @@ static bool _vmm_touch(uintptr_t virt, int size)
       return false;
 
     pml4 = frame3 | PG_WRITABLE | PG_PRESENT;
+    if (index.pml4e < (TABLE_SIZE / 2))
+      pml4 |= PG_USER;
+
     index.pml4[index.pml4e] = pml4;
     tlb_transaction_queue_invlpg((uintptr_t) index.pml3);
     memset(index.pml3, 0, FRAME_SIZE);
@@ -212,6 +215,9 @@ static bool _vmm_touch(uintptr_t virt, int size)
       goto rollback_pml4;
 
     pml3 = frame2 | PG_WRITABLE | PG_PRESENT;
+    if (index.pml4e < (TABLE_SIZE / 2))
+      pml3 |= PG_USER;
+
     index.pml3[index.pml3e] = pml3;
     tlb_transaction_queue_invlpg((uintptr_t) index.pml2);
     memset(index.pml2, 0, FRAME_SIZE);
@@ -230,6 +236,9 @@ static bool _vmm_touch(uintptr_t virt, int size)
       goto rollback_pml3;
 
     pml2 = frame1 | PG_WRITABLE | PG_PRESENT;
+    if (index.pml4e < (TABLE_SIZE / 2))
+      pml2 |= PG_USER;
+
     index.pml2[index.pml2e] = pml2;
     tlb_transaction_queue_invlpg((uintptr_t) index.pml1);
     memset(index.pml1, 0, FRAME_SIZE);
@@ -269,6 +278,9 @@ static bool _vmm_maps(uintptr_t virt, uintptr_t phy, uint64_t flags, int size)
 
   page_index_t index;
   addr_to_index(&index, virt);
+
+  if (index.pml4e < (TABLE_SIZE / 2))
+    flags |= PG_USER;
 
   switch (size)
   {

@@ -40,6 +40,11 @@ static void module_load(multiboot_tag_t *tag)
   /* load the ELF file */
   if (!elf64_load(elf, size))
     panic("couldn't load elf64 file");
+
+  /* make a new thread */
+  thread_t *thread = thread_create();
+  thread->rip = elf->e_entry;
+  proc_thread_add(proc, thread);
 }
 
 void module_init(multiboot_t *multiboot)

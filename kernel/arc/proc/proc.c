@@ -67,6 +67,11 @@ void proc_switch(proc_t *proc)
   cr3_write(proc->pml4_table);
 }
 
+void proc_thread_add(proc_t *proc, thread_t *thread)
+{
+  list_add_tail(&proc->thread_list, &thread->proc_node);
+}
+
 void proc_destroy(proc_t *proc)
 {
   // TODO: destroy threads within the process
