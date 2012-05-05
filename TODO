@@ -13,7 +13,7 @@
 * I/O APIC interrupts don't seem to work at all in Bochs, keyboard IRQ (IRQ1)
   doesn't seem to work in QEMU
 
-* elf64 size checks
+* elf64 size checks to check we don't read outside the bounds of the elf64 file
 
 * free module pmm frames when they are loaded
 
@@ -28,4 +28,6 @@
   to be used elsewhere in the code
 
 * add idle process and threads (one per cpu)
+
+* use a more efficient user-space heap structure (red black tree?)
 
