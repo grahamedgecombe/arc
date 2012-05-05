@@ -31,3 +31,5 @@
 
 * use a more efficient user-space heap structure (red black tree?)
 
+* check how to save/register the GS base MSR during interrupt/syscall (SWAPGS?)
+

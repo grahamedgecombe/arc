@@ -14,7 +14,18 @@
 ;  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ;
 
+[section .text]
 [global _start]
 _start:
+  mov rdi, hello_str
+  push rcx
+  push r11
+  syscall
+  pop r11
+  pop rcx
   jmp $
+
+[section .data]
+hello_str:
+  db `hello, world!\n`
 

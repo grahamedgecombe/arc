@@ -14,7 +14,39 @@
 ;  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ;
 
+[extern tty_puts]
+
 [global syscall_stub]
 syscall_stub:
-  sysret
+  ; preserve RCX and R11, these are used by SYSCALL/SYSRET
+  push rcx
+  push r11
+
+  ; preserve registers that may be used by the function
+  push r10
+  push r9
+  push r8
+  push rdi
+  push rsi
+  push rdx
+  push rax
+
+  ; print the trace information
+  call tty_puts
+
+  ; restore the registers that were used by the function
+  pop rax
+  pop rdx
+  pop rsi
+  pop rdi
+  pop r8
+  pop r9
+  pop r10
+
+  ; restore the RCX and R11 registers
+  pop r11
+  pop rcx
+
+  ; return to user long mode
+  o64 sysret
 
