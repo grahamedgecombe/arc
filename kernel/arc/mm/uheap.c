@@ -54,7 +54,10 @@ static bool _uheap_alloc_at(uheap_t *heap, void *ptr, size_t size, int flags)
       {
         left_block = malloc(sizeof(*left_block));
         if (!left_block)
+        {
+          range_free(addr, size);
           return false;
+        }
       }
 
       /* allocate block node for the right side */
@@ -63,6 +66,7 @@ static bool _uheap_alloc_at(uheap_t *heap, void *ptr, size_t size, int flags)
         right_block = malloc(sizeof(*right_block));
         if (!right_block)
         {
+          range_free(addr, size);
           if (left_split)
             free(left_block);
           return false;
@@ -74,7 +78,6 @@ static bool _uheap_alloc_at(uheap_t *heap, void *ptr, size_t size, int flags)
       {
         left_block->start = block->start;
         left_block->end = addr - 1;
-
         block->start = addr;
 
         list_insert_before(&heap->block_list, &block->node, &left_block->node);
@@ -83,10 +86,9 @@ static bool _uheap_alloc_at(uheap_t *heap, void *ptr, size_t size, int flags)
       /* split the right side of the block away */
       if (right_split)
       {
+        block->end = addr + size - 1;
         right_block->start = addr + size;
         right_block->end = block->end;
-
-        block->end = addr + size - 1;
 
         list_insert_after(&heap->block_list, &block->node, &right_block->node);
       }
@@ -102,12 +104,98 @@ static bool _uheap_alloc_at(uheap_t *heap, void *ptr, size_t size, int flags)
 
 static void *_uheap_alloc(uheap_t *heap, size_t size, int flags)
 {
+  size = PAGE_ALIGN(size);
+
+  list_for_each(&heap->block_list, node)
+  {
+    uheap_block_t *block = container_of(node, uheap_block_t, node);
+    size_t block_size = block->end - block->start + 1;
+    if (!block->allocated && block_size >= size)
+    {
+      uintptr_t addr = (uintptr_t) block->start;
+
+      /* turn the flags into vmm flags */
+      uint64_t vmm_flags = PG_USER;
+      if (vmm_flags & UHEAP_W)
+        vmm_flags |= PG_WRITABLE;
+      if (!(vmm_flags & UHEAP_X))
+        vmm_flags |= PG_NO_EXEC;
+
+      /* allocate underlying page frames and map the region into memory */
+      if (!range_alloc(addr, size, vmm_flags))
+        return 0;
+
+      /* split the right part of the block away */
+      if (block_size != size)
+      {
+        uheap_block_t *right_block = malloc(sizeof(*block));
+        if (!right_block)
+        {
+          range_free(addr, size);
+          return 0;
+        }
+
+        block->end = addr + size - 1;
+        right_block->start = addr + size;
+        right_block->end = block->end;
+
+        list_insert_after(&heap->block_list, &block->node, &right_block->node);
+      }
+
+      /* mark this block as allocated and return a pointer to it */
+      block->allocated = true;
+      return (void *) block->start;
+    }
+  }
+
   return 0;
 }
 
 static void _uheap_free(uheap_t *heap, void *ptr)
 {
+  uintptr_t addr = (uintptr_t) ptr;
 
+  list_for_each(&heap->block_list, node)
+  {
+    uheap_block_t *block = container_of(node, uheap_block_t, node);
+    if (block->allocated && block->start == addr)
+    {
+      /* free the underlying page frames and unmap the virtual memory */
+      size_t block_size = block->end - block->start + 1;
+      range_free(addr, block_size);
+
+      /* unmark this block as being allocated */
+      block->allocated = false;
+
+      /* try to merge with the left block */
+      if (block->node.prev)
+      {
+        uheap_block_t *left_block = container_of(block->node.prev, uheap_block_t, node);
+        if (!left_block->allocated)
+        {
+          block->start = left_block->start;
+
+          list_remove(&heap->block_list, &left_block->node);
+          free(left_block);
+        }
+      }
+
+      /* try to merge with the right block */
+      if (block->node.next)
+      {
+        uheap_block_t *right_block = container_of(block->node.next, uheap_block_t, node);
+        if (!right_block->allocated)
+        {
+          block->end = right_block->end;
+
+          list_remove(&heap->block_list, &right_block->node);
+          free(right_block);
+        }
+      }
+
+      return;
+    }
+  }
 }
 
 static uheap_t *uheap_get(void)
