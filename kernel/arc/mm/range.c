@@ -29,7 +29,7 @@ bool range_alloc(uintptr_t addr_start, size_t len, uint64_t flags)
     size_t remaining = addr_end - addr;
 
     /* try to use a 1G frame */
-    if (remaining >= FRAME_SIZE_1G)
+    if ((addr % FRAME_SIZE_1G) == 0 && remaining >= FRAME_SIZE_1G)
     {
       uintptr_t frame = pmm_allocs(SIZE_1G);
       if (frame)
@@ -47,7 +47,7 @@ bool range_alloc(uintptr_t addr_start, size_t len, uint64_t flags)
     }
 
     /* try to use a 2M frame */
-    if (remaining >= FRAME_SIZE_2M)
+    if ((addr % FRAME_SIZE_2M) == 0 && remaining >= FRAME_SIZE_2M)
     {
       uintptr_t frame = pmm_allocs(SIZE_2M);
       if (frame)
