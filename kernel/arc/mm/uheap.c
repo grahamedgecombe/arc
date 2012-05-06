@@ -20,12 +20,14 @@
 #include <arc/mm/range.h>
 #include <arc/proc/proc.h>
 #include <arc/util/container.h>
+#include <arc/tty.h>
+#include <assert.h>
 #include <stdlib.h>
 
 static bool _uheap_alloc_at(uheap_t *heap, void *ptr, size_t size, vm_acc_t flags)
 {
   uintptr_t addr = (uintptr_t) ptr;
-  size = PAGE_ALIGN(size);
+  assert((size % FRAME_SIZE) == 0);
 
   list_for_each(&heap->block_list, node)
   {
@@ -97,7 +99,7 @@ static bool _uheap_alloc_at(uheap_t *heap, void *ptr, size_t size, vm_acc_t flag
 
 static void *_uheap_alloc(uheap_t *heap, size_t size, vm_acc_t flags)
 {
-  size = PAGE_ALIGN(size);
+  assert((size % FRAME_SIZE) == 0);
 
   list_for_each(&heap->block_list, node)
   {
@@ -251,6 +253,25 @@ void uheap_free(void *ptr)
   {
     spin_lock(&heap->lock);
     _uheap_free(heap, ptr);
+    spin_unlock(&heap->lock);
+  }
+}
+
+void uheap_trace(void)
+{
+  uheap_t *heap = uheap_get();
+  if (heap)
+  {
+    spin_lock(&heap->lock);
+
+    tty_printf("Tracing user heap...\n");
+    list_for_each(&heap->block_list, node)
+    {
+      uheap_block_t *block = container_of(node, uheap_block_t, node);
+      const char *state = block->allocated ? "allocated" : "free";
+      tty_printf(" => %0#18x -> %0#18x (%s)\n", block->start, block->end, state);
+    }
+
     spin_unlock(&heap->lock);
   }
 }

@@ -28,6 +28,7 @@ void heap_init(void);
 void *heap_reserve(size_t size);
 void *heap_alloc(size_t size, vm_acc_t flags);
 void heap_free(void *ptr);
+void heap_trace(void);
 
 #endif
 

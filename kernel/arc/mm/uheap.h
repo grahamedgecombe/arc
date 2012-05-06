@@ -46,6 +46,7 @@ void uheap_destroy(void);
 bool uheap_alloc_at(void *ptr, size_t size, vm_acc_t flags);
 void *uheap_alloc(size_t size, vm_acc_t flags);
 void uheap_free(void *ptr);
+void uheap_trace(void);
 
 #endif
 

@@ -22,6 +22,7 @@
 #include <arc/mm/range.h>
 #include <arc/pack.h>
 #include <arc/panic.h>
+#include <arc/tty.h>
 #include <assert.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -229,6 +230,25 @@ void heap_free(void *ptr)
 {
   spin_lock(&heap_lock);
   _heap_free(ptr);
+  spin_unlock(&heap_lock);
+}
+
+void heap_trace(void)
+{
+  spin_lock(&heap_lock);
+
+  tty_printf("Tracing kernel heap...\n");
+  for (heap_node_t *node = heap_root; node; node = node->next)
+  {
+    const char *state = "free";
+    if (node->state == HEAP_NODE_RESERVED)
+      state = "reserved";
+    else if (node->state == HEAP_NODE_ALLOCATED)
+      state = "allocated";
+
+    tty_printf(" => %0#18x -> %0#18x (%s)\n", node->start, node->end - 1, state);
+  }
+
   spin_unlock(&heap_lock);
 }
 

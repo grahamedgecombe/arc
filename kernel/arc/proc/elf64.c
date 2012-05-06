@@ -15,6 +15,7 @@
  */
 
 #include <arc/proc/elf64.h>
+#include <arc/mm/align.h>
 #include <arc/mm/uheap.h>
 #include <string.h>
 
@@ -73,7 +74,7 @@ bool elf64_load(elf64_ehdr_t *elf, size_t size)
     if (phdr->p_flags & PF_X)
       flags |= UHEAP_X;
 
-    if (!uheap_alloc_at((void *) phdr->p_vaddr, phdr->p_memsz, flags))
+    if (!uheap_alloc_at((void *) PAGE_ALIGN_REVERSE(phdr->p_vaddr), PAGE_ALIGN(phdr->p_memsz), flags))
       goto rollback;
 
     uintptr_t file_base = (uintptr_t) elf + phdr->p_offset;
