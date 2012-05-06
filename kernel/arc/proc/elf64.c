@@ -74,6 +74,7 @@ bool elf64_load(elf64_ehdr_t *elf, size_t size)
     if (phdr->p_flags & PF_X)
       flags |= UHEAP_X;
 
+    // TODO: check if page alignment is done properly
     if (!uheap_alloc_at((void *) PAGE_ALIGN_REVERSE(phdr->p_vaddr), PAGE_ALIGN(phdr->p_memsz), flags))
       goto rollback;
 
