@@ -43,6 +43,9 @@ static void module_load(multiboot_tag_t *tag)
 
   /* make a new thread */
   thread_t *thread = thread_create();
+  if (!thread)
+    panic("couldn't create thread for module");
+
   thread->rip = elf->e_entry;
   proc_thread_add(proc, thread);
 }
