@@ -30,5 +30,7 @@
 
 * check how to save/register the GS base MSR during interrupt/syscall (SWAPGS?)
 
+* don't worry about setting ES, FS, GS segments as they are unused in long mode
+
 * when there are >2 cpus in qemu, there seems to be some sort of deadlock
 
