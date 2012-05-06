@@ -20,7 +20,7 @@
 #include <arc/mm/vmm.h>
 #include <assert.h>
 
-bool range_alloc(uintptr_t addr_start, size_t len, uint64_t flags)
+bool range_alloc(uintptr_t addr_start, size_t len, vm_acc_t flags)
 {
   assert((len % FRAME_SIZE) == 0);
 

@@ -43,12 +43,12 @@ static spinlock_t kernel_vmm_lock = SPIN_UNLOCKED;
 
 /* forward declarations of internal vmm functions with no locking */
 static bool _vmm_touch(uintptr_t virt, int size);
-static bool _vmm_map(uintptr_t virt, uintptr_t phy, uint64_t flags);
-static bool _vmm_maps(uintptr_t virt, uintptr_t phy, uint64_t flags, int size);
+static bool _vmm_map(uintptr_t virt, uintptr_t phy, vm_acc_t flags);
+static bool _vmm_maps(uintptr_t virt, uintptr_t phy, vm_acc_t flags, int size);
 static uintptr_t _vmm_unmap(uintptr_t virt);
 static uintptr_t _vmm_unmaps(uintptr_t virt, int size);
 static void _vmm_untouch(uintptr_t virt, int size);
-static bool _vmm_map_range(uintptr_t virt, uintptr_t phy, size_t len, uint64_t flags);
+static bool _vmm_map_range(uintptr_t virt, uintptr_t phy, size_t len, vm_acc_t flags);
 static void _vmm_unmap_range(uintptr_t virt, size_t len);
 static int _vmm_size(uintptr_t virt);
 
@@ -129,7 +129,7 @@ void vmm_init(void)
 bool vmm_init_pml4(uintptr_t pml4_table_addr)
 {
   // TODO: pre-allocate this MMIO area so this call always succeeds
-  uint64_t *pml4_table = mmio_map(pml4_table_addr, FRAME_SIZE, MMIO_R | MMIO_W);
+  uint64_t *pml4_table = mmio_map(pml4_table_addr, FRAME_SIZE, VM_R | VM_W);
   if (!pml4_table)
     return false;
 
@@ -263,12 +263,12 @@ rollback_pml4:
   return false;
 }
 
-static bool _vmm_map(uintptr_t virt, uintptr_t phy, uint64_t flags)
+static bool _vmm_map(uintptr_t virt, uintptr_t phy, vm_acc_t flags)
 {
   return _vmm_maps(virt, phy, flags, SIZE_4K);
 }
 
-static bool _vmm_maps(uintptr_t virt, uintptr_t phy, uint64_t flags, int size)
+static bool _vmm_maps(uintptr_t virt, uintptr_t phy, vm_acc_t flags, int size)
 {
   if (size == SIZE_1G && !vmm_1g_pages)
     return false;
@@ -279,21 +279,26 @@ static bool _vmm_maps(uintptr_t virt, uintptr_t phy, uint64_t flags, int size)
   page_index_t index;
   addr_to_index(&index, virt);
 
+  uint64_t pg_flags = 0;
+  if (flags & VM_W)
+    pg_flags |= PG_WRITABLE;
+  if (!(flags & VM_X))
+    pg_flags |= PG_NO_EXEC;
   if (index.pml4e < (TABLE_SIZE / 2))
-    flags |= PG_USER;
+    pg_flags |= PG_USER;
 
   switch (size)
   {
     case SIZE_4K:
-      index.pml1[index.pml1e] = phy | PG_PRESENT | flags;
+      index.pml1[index.pml1e] = phy | PG_PRESENT | pg_flags;
       break;
 
     case SIZE_2M:
-      index.pml2[index.pml2e] = phy | PG_PRESENT | PG_BIG | flags;
+      index.pml2[index.pml2e] = phy | PG_PRESENT | PG_BIG | pg_flags;
       break;
 
     case SIZE_1G:
-      index.pml3[index.pml3e] = phy | PG_PRESENT | PG_BIG | flags;
+      index.pml3[index.pml3e] = phy | PG_PRESENT | PG_BIG | pg_flags;
       break;
   }
 
@@ -404,7 +409,7 @@ static void _vmm_untouch(uintptr_t virt, int size)
   }
 }
 
-static bool _vmm_map_range(uintptr_t virt, uintptr_t phy, size_t len, uint64_t flags)
+static bool _vmm_map_range(uintptr_t virt, uintptr_t phy, size_t len, vm_acc_t flags)
 {
   len = PAGE_ALIGN(len);
   for (size_t off = 0; off < len;)
@@ -472,7 +477,7 @@ bool vmm_touch(uintptr_t virt, int size)
   return ok;
 }
 
-bool vmm_map(uintptr_t virt, uintptr_t phy, uint64_t flags)
+bool vmm_map(uintptr_t virt, uintptr_t phy, vm_acc_t flags)
 {
   vmm_lock(virt);
 
@@ -487,7 +492,7 @@ bool vmm_map(uintptr_t virt, uintptr_t phy, uint64_t flags)
   return ok;
 }
 
-bool vmm_maps(uintptr_t virt, uintptr_t phy, uint64_t flags, int size)
+bool vmm_maps(uintptr_t virt, uintptr_t phy, vm_acc_t flags, int size)
 {
   vmm_lock(virt);
 
@@ -531,7 +536,7 @@ void vmm_untouch(uintptr_t virt, int size)
   vmm_unlock(virt);
 }
 
-bool vmm_map_range(uintptr_t virt, uintptr_t phy, size_t len, uint64_t flags)
+bool vmm_map_range(uintptr_t virt, uintptr_t phy, size_t len, vm_acc_t flags)
 {
   vmm_lock(virt);
 

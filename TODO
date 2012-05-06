@@ -20,12 +20,7 @@
 * don't use PIT channel 2 for pit_mdelay(), using the KBC to check if the
   countdown has finished seems to be unreliable on modern hardware
 
-* uniform memory flags (r,w,x (and user?)) type, and a way to convert it to
-  page flags, so this is not duplicated in mmio, heap, uheap, vmm, etc. also use
-  enums more (e.g. in the heap for the node state.)
-
-* vmm should accept this uniform flag argument, so PG_* constants do not need
-  to be used elsewhere in the code
+* use enums in more places (e.g. heap node state)
 
 * add idle process and threads (one per cpu)
 

@@ -67,7 +67,7 @@ void heap_init(void)
 
   /* the root node will take the first virtual address */
   heap_root = (heap_node_t *) heap_start;
-  if (!vmm_map(heap_start, root_phy, PG_WRITABLE | PG_NO_EXEC))
+  if (!vmm_map(heap_start, root_phy, VM_R | VM_W))
     panic("couldn't map heap root node into the virtual memory");
 
   /* fill out the root node */
@@ -103,7 +103,7 @@ static heap_node_t *find_node(size_t size)
       {
         /* map the new heap_node_t into virtual memory, only split if it works */
         heap_node_t *next = (heap_node_t *) ((uintptr_t) node + size + FRAME_SIZE);
-        if (vmm_map((uintptr_t) next, phy, PG_WRITABLE | PG_NO_EXEC))
+        if (vmm_map((uintptr_t) next, phy, VM_R | VM_W))
         {
           /* fill in the new heap_node_t */
           next->start = (uintptr_t) node + size + FRAME_SIZE * 2;
@@ -186,7 +186,7 @@ static void _heap_free(void *ptr)
   }
 }
 
-static void *_heap_alloc(size_t size, int flags, bool phy_alloc)
+static void *_heap_alloc(size_t size, vm_acc_t flags, bool phy_alloc)
 {
   /* round up the size such that it is a multiple of the page size */
   size = PAGE_ALIGN(size);
@@ -201,17 +201,8 @@ static void *_heap_alloc(size_t size, int flags, bool phy_alloc)
     /* change the state to allocated so heap_free releases the frames */
     node->state = HEAP_NODE_ALLOCATED;
 
-    /* translate HEAP_W and HEAP_X flags to PG_WRITABLE and PG_NO_EXEC flags */
-    uint64_t vmm_flags = 0;
-
-    if (flags & HEAP_W)
-      vmm_flags |= PG_WRITABLE;
-
-    if (!(flags & HEAP_X))
-      vmm_flags |= PG_NO_EXEC;
-
     /* allocate physical frames and map them into memory */
-    if (!range_alloc(node->start, size, vmm_flags))
+    if (!range_alloc(node->start, size, flags))
       _heap_free((void *) node->start);
   }
 
@@ -226,7 +217,7 @@ void *heap_reserve(size_t size)
   return ptr;
 }
 
-void *heap_alloc(size_t size, int flags)
+void *heap_alloc(size_t size, vm_acc_t flags)
 {
   spin_lock(&heap_lock);
   void *ptr = _heap_alloc(size, flags, true);

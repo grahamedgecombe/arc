@@ -17,6 +17,7 @@
 #ifndef ARC_MM_HEAP_H
 #define ARC_MM_HEAP_H
 
+#include <arc/mm/common.h>
 #include <stddef.h>
 
 #define HEAP_R 0x1
@@ -25,7 +26,7 @@
 
 void heap_init(void);
 void *heap_reserve(size_t size);
-void *heap_alloc(size_t size, int flags);
+void *heap_alloc(size_t size, vm_acc_t flags);
 void heap_free(void *ptr);
 
 #endif

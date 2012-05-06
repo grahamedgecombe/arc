@@ -66,7 +66,7 @@ static void smp_boot(cpu_t *cpu)
   size_t trampoline_len = (uintptr_t) &trampoline_end - (uintptr_t) &trampoline_start;
 
   /* map the trampoline into low memory */
-  if (!vmm_map_range(TRAMPOLINE_BASE, TRAMPOLINE_BASE, trampoline_len, PG_WRITABLE))
+  if (!vmm_map_range(TRAMPOLINE_BASE, TRAMPOLINE_BASE, trampoline_len, VM_R | VM_W | VM_X))
     panic("couldn't map SMP trampoline code");
 
   /* allocate a stack for this AP */

@@ -17,14 +17,11 @@
 #ifndef ARC_MM_MMIO_H
 #define ARC_MM_MMIO_H
 
+#include <arc/mm/common.h>
 #include <stddef.h>
 #include <stdint.h>
 
-#define MMIO_R 0x1
-#define MMIO_W 0x2
-#define MMIO_X 0x4
-
-void *mmio_map(uintptr_t phy, size_t len, int flags);
+void *mmio_map(uintptr_t phy, size_t len, vm_acc_t flags);
 void mmio_unmap(void *virt, size_t len);
 
 #endif

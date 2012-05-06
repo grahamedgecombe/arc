@@ -149,7 +149,7 @@ void apic_monotonic(int ms, intr_handler_t handler)
 bool xapic_init(uintptr_t addr)
 {
   apic_phy_addr = addr;
-  apic_mmio = (volatile uint32_t *) mmio_map(addr, FRAME_SIZE, MMIO_R | MMIO_W);
+  apic_mmio = (volatile uint32_t *) mmio_map(addr, FRAME_SIZE, VM_R | VM_W);
   if (!apic_mmio)
     return false;
 

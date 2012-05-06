@@ -61,7 +61,7 @@ bool ioapic_init(ioapic_id_t id, uintptr_t addr, irq_t irq_base)
   if (!apic)
     return false;
 
-  uintptr_t virt_addr = (uintptr_t) mmio_map(addr, 32, MMIO_R | MMIO_W);
+  uintptr_t virt_addr = (uintptr_t) mmio_map(addr, 32, VM_R | VM_W);
   if (!virt_addr)
   {
     free(apic);

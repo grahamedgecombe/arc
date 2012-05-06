@@ -19,7 +19,7 @@
 #include <arc/mm/heap.h>
 #include <arc/mm/vmm.h>
 
-void *mmio_map(uintptr_t phy, size_t len, int flags)
+void *mmio_map(uintptr_t phy, size_t len, vm_acc_t flags)
 {
   /* align the address and pad with extra length */
   uintptr_t aligned_phy = PAGE_ALIGN_REVERSE(phy);
@@ -31,15 +31,8 @@ void *mmio_map(uintptr_t phy, size_t len, int flags)
   if (!aligned_virt)
     return 0;
 
-  /* translate the MMIO_* flags to PG_* flags */
-  uint64_t map_flags = 0;
-  if (flags & MMIO_W)
-    map_flags |= PG_WRITABLE;
-  if (!(flags & MMIO_X))
-    map_flags |= PG_NO_EXEC;
-
   /* map the physical memory into virtual memory */
-  if (!vmm_map_range(aligned_virt, aligned_phy, len, map_flags))
+  if (!vmm_map_range(aligned_virt, aligned_phy, len, flags))
   {
     heap_free((void *) aligned_virt);
     return 0;

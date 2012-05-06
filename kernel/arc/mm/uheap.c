@@ -22,7 +22,7 @@
 #include <arc/util/container.h>
 #include <stdlib.h>
 
-static bool _uheap_alloc_at(uheap_t *heap, void *ptr, size_t size, int flags)
+static bool _uheap_alloc_at(uheap_t *heap, void *ptr, size_t size, vm_acc_t flags)
 {
   uintptr_t addr = (uintptr_t) ptr;
   size = PAGE_ALIGN(size);
@@ -34,15 +34,8 @@ static bool _uheap_alloc_at(uheap_t *heap, void *ptr, size_t size, int flags)
     {
       uheap_block_t *left_block = 0, *right_block = 0;
 
-      /* turn the flags into vmm flags */
-      uint64_t vmm_flags = 0;
-      if (flags & UHEAP_W)
-        vmm_flags |= PG_WRITABLE;
-      if (!(flags & UHEAP_X))
-        vmm_flags |= PG_NO_EXEC;
-
       /* allocate underlying page frames and map the region into memory */
-      if (!range_alloc(addr, size, vmm_flags))
+      if (!range_alloc(addr, size, flags))
         return false;
 
       /* determine if left and right parts of the block can be split away */
@@ -102,7 +95,7 @@ static bool _uheap_alloc_at(uheap_t *heap, void *ptr, size_t size, int flags)
   return false;
 }
 
-static void *_uheap_alloc(uheap_t *heap, size_t size, int flags)
+static void *_uheap_alloc(uheap_t *heap, size_t size, vm_acc_t flags)
 {
   size = PAGE_ALIGN(size);
 
@@ -114,15 +107,8 @@ static void *_uheap_alloc(uheap_t *heap, size_t size, int flags)
     {
       uintptr_t addr = (uintptr_t) block->start;
 
-      /* turn the flags into vmm flags */
-      uint64_t vmm_flags = 0;
-      if (flags & UHEAP_W)
-        vmm_flags |= PG_WRITABLE;
-      if (!(flags & UHEAP_X))
-        vmm_flags |= PG_NO_EXEC;
-
       /* allocate underlying page frames and map the region into memory */
-      if (!range_alloc(addr, size, vmm_flags))
+      if (!range_alloc(addr, size, flags))
         return 0;
 
       /* split the right part of the block away */
@@ -232,7 +218,7 @@ void uheap_destroy(void)
   /* TODO destroy the heap */
 }
 
-bool uheap_alloc_at(void *ptr, size_t size, int flags)
+bool uheap_alloc_at(void *ptr, size_t size, vm_acc_t flags)
 {
   uheap_t *heap = uheap_get();
   if (!heap)
@@ -245,7 +231,7 @@ bool uheap_alloc_at(void *ptr, size_t size, int flags)
   return ok;
 }
 
-void *uheap_alloc(size_t size, int flags)
+void *uheap_alloc(size_t size, vm_acc_t flags)
 {
   uheap_t *heap = uheap_get();
   if (!heap)

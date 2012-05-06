@@ -39,6 +39,14 @@
 #define SIZE_1G    2
 #define SIZE_COUNT 3
 
+/* memory access flags */
+typedef enum
+{
+  VM_R = 0x1, /* readable (on x86 it is not possible to deny read access) */
+  VM_W = 0x2, /* writable */
+  VM_X = 0x4  /* executable (on x86 lack of this flag sets the NX bit) */
+} vm_acc_t;
+
 /* page table flags */
 #define PG_PRESENT   0x1
 #define PG_WRITABLE  0x2

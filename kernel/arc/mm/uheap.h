@@ -17,6 +17,7 @@
 #ifndef ARC_MM_UHEAP_H
 #define ARC_MM_UHEAP_H
 
+#include <arc/mm/common.h>
 #include <arc/lock/spinlock.h>
 #include <arc/util/list.h>
 #include <stdbool.h>
@@ -42,8 +43,8 @@ typedef struct
 
 bool uheap_init(uheap_t *heap);
 void uheap_destroy(void);
-bool uheap_alloc_at(void *ptr, size_t size, int flags);
-void *uheap_alloc(size_t size, int flags);
+bool uheap_alloc_at(void *ptr, size_t size, vm_acc_t flags);
+void *uheap_alloc(size_t size, vm_acc_t flags);
 void uheap_free(void *ptr);
 
 #endif

@@ -24,15 +24,15 @@
 
 void *mmap(void *addr, size_t len, int prot, int flags, int fd, off_t off)
 {
-  int heap_flags = 0;
+  vm_acc_t vm_flags = 0;
   if (prot & PROT_READ)
-    heap_flags |= HEAP_R;
+    vm_flags |= VM_R;
   if (prot & PROT_WRITE)
-    heap_flags |= HEAP_W;
+    vm_flags |= VM_W;
   if (prot & PROT_EXEC)
-    heap_flags |= HEAP_X;
+    vm_flags |= VM_X;
 
-  void *ptr = heap_alloc(len, heap_flags);
+  void *ptr = heap_alloc(len, vm_flags);
   if (!ptr)
     return MAP_FAILED;
 
