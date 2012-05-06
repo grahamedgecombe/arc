@@ -95,11 +95,29 @@ intr_stub:
   push rbx
   push rax
 
+  ; check if we are switching from user mode to supervisor mode
+  mov rax, [rsp + 152]
+  and rax, 0x3000
+  jz .supervisor_enter
+
+  ; restore the kernel's GS base if we are going from user to supervisor mode
+  swapgs
+
+.supervisor_enter:
   ; call the C routine for dispatching an interrupt
   cld          ; amd64 SysV ABI states the DF must be cleared by the caller
   mov rdi, rsp ; first argument points to the processor state
   call intr_dispatch
 
+  ; check if we are switching from supervisor to user mode
+  mov rax, [rsp + 152]
+  and rax, 0x3000
+  jz .supervisor_exit
+
+  ; switch back to the user's GS base if we are going from supervisor to user mode
+  swapgs
+
+.supervisor_exit:
   ; restore the register file
   pop rax
   pop rbx

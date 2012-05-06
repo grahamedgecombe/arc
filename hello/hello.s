@@ -20,7 +20,9 @@ _start:
   mov rdi, hello_str
   push rcx
   push r11
+  push r15
   syscall
+  pop r15
   pop r11
   pop rcx
   jmp $

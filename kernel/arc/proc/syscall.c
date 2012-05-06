@@ -23,7 +23,10 @@
 void syscall_init(void)
 {
   /* set the SYSCALL and SYSRET selectors */
-  msr_write(MSR_STAR, (((uint64_t) (SLTR_KERNEL_DATA | RPL3)) << 48) | (((uint64_t) SLTR_KERNEL_CODE) << 32));
+  uint64_t star = 0;
+  star |= ((uint64_t) (SLTR_KERNEL_DATA | RPL3)) << 48;
+  star |=  (uint64_t) SLTR_KERNEL_CODE           << 32;
+  msr_write(MSR_STAR, star);// (((uint64_t) SLTR_KERNEL_DATA | RPL3) << 48) | (((uint64_t) SLTR_KERNEL_CODE) << 32));
 
   /*
    * how the selectors are determined:
@@ -49,8 +52,19 @@ void syscall_init(void)
   /* set the long mode SYSCALL target RIP */
   msr_write(MSR_LSTAR, (uint64_t) &syscall_stub);
 
-  /* set the flags to clear upon a SYSCALL */
-  msr_write(MSR_SFMASK, FLAGS_DF); /* AMD64 System V ABI states the DF must be clear */
+  /*
+   * set the flags to clear upon a SYSCALL:
+   *
+   *   - DF is cleared, the AMD64 System V ABI states this must be done before
+   *     a function call
+   *
+   *   - IF is cleared, this is to avoid a race condition where an interrupt
+   *     happens in supervisor mode before RSP and GS have been set (if an
+   *     interrupt did happen, RSP0 would not be loaded into RSP from the TSS
+   *     and the interrupt would run in the user stack, and the GS stuff would
+   *     get messy)
+   */
+  msr_write(MSR_SFMASK, FLAGS_DF | FLAGS_IF);
 
   /* enable the SCE flag in the EFER register */
   efer_write(efer_read() | EFER_SCE);

@@ -31,13 +31,14 @@ static ALIGN(uint8_t bsp_stack[KERNEL_STACK_SIZE], KERNEL_STACK_ALIGN);
 void cpu_bsp_init(void)
 {
   memset(&cpu_bsp, 0, sizeof(cpu_bsp));
-  cpu_bsp.stack = bsp_stack;
+  cpu_bsp.stack = (uintptr_t) bsp_stack + KERNEL_STACK_SIZE;
   cpu_bsp.self = &cpu_bsp;
   cpu_bsp.bsp = true;
   cpu_bsp.intr_depth = 1;
   cpu_bsp.proc = 0;
   cpu_bsp.thread = 0;
   msr_write(MSR_GS_BASE, (uint64_t) &cpu_bsp);
+  msr_write(MSR_GS_KERNEL_BASE, (uint64_t) &cpu_bsp);
 
   list_add_tail(&cpu_list, &cpu_bsp.node);
 }
@@ -50,12 +51,13 @@ bool cpu_ap_init(cpu_lapic_id_t lapic_id, cpu_acpi_id_t acpi_id)
 
   memclr(cpu, sizeof(*cpu));
 
-  cpu->stack = memalign(KERNEL_STACK_ALIGN, KERNEL_STACK_SIZE);
-  if (!cpu->stack)
+  void *stack = memalign(KERNEL_STACK_ALIGN, KERNEL_STACK_SIZE);
+  if (!stack)
   {
     free(cpu);
     return false;
   }
+  cpu->stack = (uintptr_t) stack + KERNEL_STACK_SIZE;
   cpu->self = cpu;
   cpu->lapic_id = lapic_id;
   cpu->acpi_id = acpi_id;
@@ -70,5 +72,6 @@ bool cpu_ap_init(cpu_lapic_id_t lapic_id, cpu_acpi_id_t acpi_id)
 void cpu_ap_install(cpu_t *cpu)
 {
   msr_write(MSR_GS_BASE, (uint64_t) cpu);
+  msr_write(MSR_GS_KERNEL_BASE, (uint64_t) cpu);
 }
 

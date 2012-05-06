@@ -34,6 +34,13 @@ typedef struct cpu
    */
   struct cpu *self;
 
+  /*
+   * the kernel stack for this cpu (used in interrupt & syscalls), do not move
+   * as the syscall entry point relies on the fact that the second 8 bytes in
+   * the structure point to a valid kernel stack
+   */
+  uintptr_t stack;
+
   /* global CPU list node */
   list_node_t node;
 
@@ -53,9 +60,6 @@ typedef struct cpu
 
   /* current 'depth' of the interrupt lock */
   int intr_depth;
-
-  /* the kernel stack for this cpu (used in interrupt & syscalls) */
-  void *stack;
 
   /* current process/thread running on this cpu */
   proc_t *proc;

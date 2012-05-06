@@ -18,6 +18,18 @@
 
 [global syscall_stub]
 syscall_stub:
+  ; switch the GS base to the kernel's
+  swapgs
+
+  ; switch to the kernel stack (NB: when code calls SYSCALL, it must save R15
+  ; somewhere along with RCX/R11)
+  mov r15, rsp
+  mov rsp, [gs:8]
+
+  ; it is safe for to re-enable interrupts now, for information about the
+  ; race condition see syscall.c where the SYSCALL flags mask is set
+  sti
+
   ; preserve RCX and R11, these are used by SYSCALL/SYSRET
   push rcx
   push r11
@@ -46,6 +58,15 @@ syscall_stub:
   ; restore the RCX and R11 registers
   pop r11
   pop rcx
+
+  ; mask interrupts again, for the same race condition reasons
+  cli
+
+  ; switch back to the user stack
+  mov rsp, r15
+
+  ; switch the GS base to the user's
+  swapgs
 
   ; return to user long mode
   o64 sysret

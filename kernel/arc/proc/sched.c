@@ -15,6 +15,7 @@
  */
 
 #include <arc/proc/sched.h>
+#include <arc/cpu/flags.h>
 #include <arc/cpu/gdt.h>
 #include <arc/proc/proc.h>
 #include <arc/smp/mode.h>
@@ -35,6 +36,10 @@ void sched_init(void)
 
 void sched_tick(intr_state_t *state)
 {
+  static bool done = false;
+  if (done)
+    return;
+
   proc_t *proc = proc_get();
 
   if (proc)
@@ -47,9 +52,11 @@ void sched_tick(intr_state_t *state)
       memcpy(state->regs, thread->regs, sizeof(thread->regs));
       state->rip = thread->rip;
       state->rsp = thread->rsp;
-      state->rflags = thread->rflags;
+      state->rflags = thread->rflags | FLAGS_IOPL3 | FLAGS_IF;
       state->cs = SLTR_USER_CODE | RPL3;
       state->ss = SLTR_USER_DATA | RPL3;
+
+      done = true;
     }
   }
 }

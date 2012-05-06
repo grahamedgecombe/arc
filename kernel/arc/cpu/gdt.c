@@ -75,8 +75,10 @@ void gdt_init(void)
   gdt_set_gate( gdt_gates, SLTR_USER_CODE,   GDT_PRESENT | GDT_CS | GDT_USER,                GDT_LM);
   gdt_set_xgate(gdt_gates, SLTR_TSS,         GDT_PRESENT | GDT_TSS,                          0, tss_base, tss_limit);
 
-  /* read the FS_BASE and GS_BASE MSRs so we can restore them later on */
-  uint64_t fs_base = msr_read(MSR_FS_BASE);
+  /*
+   * read the GS_BASE MSRs so we can restore it after updating the segment
+   * registers
+   */
   uint64_t gs_base = msr_read(MSR_GS_BASE);
 
   /* update the GDTR structure and install it */
@@ -84,8 +86,8 @@ void gdt_init(void)
   gdtr->len = sizeof(*gdt_gates) * GDT_GATES - 1;
   gdtr_install(gdtr, SLTR_KERNEL_CODE, SLTR_KERNEL_DATA);
 
-  /* restore the FS_BASE and GS_BASE MSRs */
-  msr_write(MSR_FS_BASE, fs_base);
+  /* restore the GS_BASE and GS_KERNEL_BASE MSR */
   msr_write(MSR_GS_BASE, gs_base);
+  msr_write(MSR_GS_KERNEL_BASE, gs_base);
 }
 
