@@ -21,9 +21,8 @@ syscall_stub:
   ; switch the GS base to the kernel's
   swapgs
 
-  ; switch to the kernel stack (NB: when code calls SYSCALL, it must save R15
-  ; somewhere along with RCX/R11)
-  mov r15, rsp
+  ; switch to the kernel stack
+  mov [gs:16], rsp
   mov rsp, [gs:8]
 
   ; it is safe for to re-enable interrupts now, for information about the
@@ -63,7 +62,7 @@ syscall_stub:
   cli
 
   ; switch back to the user stack
-  mov rsp, r15
+  mov rsp, [gs:16]
 
   ; switch the GS base to the user's
   swapgs

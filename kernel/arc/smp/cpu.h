@@ -41,6 +41,12 @@ typedef struct cpu
    */
   uintptr_t stack;
 
+  /*
+   * the user stack pointer is saved here during a SYSCALL, again, this must
+   * not be moved
+   */
+  uintptr_t user_stack;
+
   /* global CPU list node */
   list_node_t node;
 
