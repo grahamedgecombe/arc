@@ -32,3 +32,5 @@
   won't work for exceptions as they aren't masked, and locks which don't mask
   interrupts should be added to improve performance where it isn't required.)
 
+* make TLB flushes more efficient e.g. by batching together more VMM operations
+
