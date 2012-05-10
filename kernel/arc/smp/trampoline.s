@@ -66,10 +66,11 @@ code32:
   ; re-load segment selectors
   mov ax, 0x10
   mov ds, ax
+  mov ss, ax
+  mov ax, 0x0
   mov es, ax
   mov fs, ax
   mov gs, ax
-  mov ss, ax
 
   ; enable PAE and PSE
   mov eax, cr4
@@ -99,11 +100,12 @@ code32:
 code64:
   ; re-load segment selectors
   mov ax, 0x10
+  mov ss, ax
+  mov ax, 0x0
   mov ds, ax
   mov es, ax
   mov fs, ax
   mov gs, ax
-  mov ss, ax
 
   ; switch the RIP to use the higher half virtual address instead of the
   ; identity-mapped virtual address

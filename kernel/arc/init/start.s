@@ -205,11 +205,13 @@ start:
   ; leave compatibility mode
   lgdt [gdtr]
   mov ax, 0x10
+  mov ss, ax
+  mov ax, 0x0
   mov ds, ax
   mov es, ax
   mov fs, ax
   mov gs, ax
-  mov ss, ax
+
   jmp 0x08:.trampoline
 
 ; some 64-bit code in the lower half used to jump to the higher half

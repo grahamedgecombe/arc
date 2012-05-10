@@ -20,11 +20,12 @@ gdtr_install:
   mov rbp, rsp
   lgdt [rdi]
   mov ax, dx
+  mov ss, ax
+  mov ax, 0
   mov ds, ax
   mov es, ax
   mov fs, ax
   mov gs, ax
-  mov ss, ax
   mov rax, qword .trampoline
   push rsi
   push rax
