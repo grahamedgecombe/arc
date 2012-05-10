@@ -163,6 +163,9 @@ void smp_ap_init(void)
   /* set up the local APIC on this CPU */
   apic_init();
 
+  /* enable interrupts now the IDT and interrupt controllers are set up */
+  intr_unlock();
+
   /* flush the TLB (as up until this point we won't have received TLB shootdowns) */
   tlb_flush();
 
@@ -183,8 +186,7 @@ void smp_ap_init(void)
   /* set up the scheduler */
   sched_init();
 
-  /* enable interrupts and halt forever */
-  intr_unlock();
+  /* halt forever - the scheduler will take over from here */
   halt_forever();
 }
 

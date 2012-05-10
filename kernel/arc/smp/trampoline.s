@@ -125,12 +125,6 @@ vcode64:
   ; call the AP init C code
   call smp_ap_init
 
-  ; hang the CPU forever
-  cli
-  .hang:
-    hlt
-    jmp .hang
-
   ; long mode gdt and gdtr
 align 16
   lm_gdtr:

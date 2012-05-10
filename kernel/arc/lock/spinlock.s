@@ -14,6 +14,9 @@
 ;  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ;
 
+[extern intr_lock]
+[extern intr_unlock]
+
 [global spin_lock]
 spin_lock:
   push rbp
@@ -28,6 +31,7 @@ spin_lock:
     jmp .try
 
   .acquired:
+    call intr_lock
     pop rbp
     ret
 
@@ -44,6 +48,7 @@ spin_try_lock:
   jmp .exit
 
   .acquired:
+    call intr_lock
     mov rax, 1
 
   .exit:
@@ -57,6 +62,7 @@ spin_unlock:
 
   mov qword [rdi], 0
 
+  call intr_unlock
   pop rbp
   ret
 

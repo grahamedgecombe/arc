@@ -64,6 +64,9 @@ static void print_banner(void)
 
 void init(uint32_t magic, multiboot_t *multiboot)
 {
+  /* set up the BSP's percpu structure */
+  cpu_bsp_init();
+
   /* initialise tty driver */
   tty_init();
 
@@ -77,9 +80,6 @@ void init(uint32_t magic, multiboot_t *multiboot)
 
   /* convert physical 32-bit multiboot address to virtual address */
   multiboot = phy32_to_virt(multiboot);
-
-  /* set up the BSP's percpu structure */
-  cpu_bsp_init();
 
   /* set up the GDT, TSS, IDT and SYSCALL/RET */
   gdt_init();
@@ -132,6 +132,9 @@ void init(uint32_t magic, multiboot_t *multiboot)
   if (!up_fallback)
     apic_init();
 
+  /* enable interrupts now the IDT and interrupt controllers are set up */
+  intr_unlock();
+
   /* set up interrupt routing */
   panic_init(); /* all of these calls route interrupts */
   fault_init();
@@ -150,7 +153,7 @@ void init(uint32_t magic, multiboot_t *multiboot)
   /* set up modules */
   module_init(multiboot);
 
-  intr_unlock();
+  /* halt forever - the scheduler will take over from here */
   halt_forever();
 }
 

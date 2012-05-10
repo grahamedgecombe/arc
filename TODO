@@ -28,7 +28,7 @@
 
 * use a more efficient user-space heap structure (red black tree?)
 
-* don't worry about setting ES, FS, GS segments as they are unused in long mode
-
-* when there are >2 cpus in qemu, there seems to be some sort of deadlock
+* consider interupt masking more in relation to locks (e.g. current solution
+  won't work for exceptions as they aren't masked, and locks which don't mask
+  interrupts should be added to improve performance where it isn't required.)
 

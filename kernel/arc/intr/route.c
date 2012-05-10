@@ -19,7 +19,6 @@
 #include <arc/intr/apic.h>
 #include <arc/intr/ioapic.h>
 #include <arc/lock/rwlock.h>
-#include <arc/lock/intr.h>
 #include <arc/smp/mode.h>
 #include <arc/util/container.h>
 #include <arc/util/list.h>
@@ -103,27 +102,22 @@ static void _intr_unroute_intr(intr_t intr, intr_handler_t handler)
 
 bool intr_route_intr(intr_t intr, intr_handler_t handler)
 {
-  intr_lock();
   rw_wlock(&intr_route_lock);
   bool ok = _intr_route_intr(intr, handler);
   rw_wunlock(&intr_route_lock);
-  intr_unlock();
   return ok;
 }
 
 void intr_unroute_intr(intr_t intr, intr_handler_t handler)
 {
-  intr_lock();
   rw_wlock(&intr_route_lock);
   _intr_unroute_intr(intr, handler);
   rw_wunlock(&intr_route_lock);
-  intr_unlock();
 }
 
 bool intr_route_irq(irq_tuple_t *tuple, intr_handler_t handler)
 {
   /* obtain the write lock */
-  intr_lock();
   rw_wlock(&intr_route_lock);
 
   /* check if we are in uni-processor or SMP mode */
@@ -143,7 +137,6 @@ bool intr_route_irq(irq_tuple_t *tuple, intr_handler_t handler)
 
       /* release the write lock */
       rw_wunlock(&intr_route_lock);
-      intr_unlock();
       return ok;
     }
   }
@@ -171,7 +164,6 @@ bool intr_route_irq(irq_tuple_t *tuple, intr_handler_t handler)
 
         /* all done! */
         rw_wunlock(&intr_route_lock);
-        intr_unlock();
         return ok;
       }
     }
@@ -179,14 +171,12 @@ bool intr_route_irq(irq_tuple_t *tuple, intr_handler_t handler)
 
   /* release the write lock */
   rw_wunlock(&intr_route_lock);
-  intr_unlock();
   return false;
 }
 
 void intr_unroute_irq(irq_tuple_t *tuple, intr_handler_t handler)
 {
   /* obtain the write lock */
-  intr_lock();
   rw_wlock(&intr_route_lock);
 
   /* check if we are in uni-processor or SMP mode */
@@ -233,6 +223,5 @@ void intr_unroute_irq(irq_tuple_t *tuple, intr_handler_t handler)
 
   /* release the write lock */
   rw_wunlock(&intr_route_lock);
-  intr_unlock();
 }
 

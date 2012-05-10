@@ -20,7 +20,6 @@
 #include <arc/intr/common.h>
 #include <arc/intr/route.h>
 #include <arc/intr/apic.h>
-#include <arc/lock/intr.h>
 #include <arc/lock/spinlock.h>
 #include <arc/smp/cpu.h>
 #include <arc/smp/mode.h>
@@ -104,7 +103,6 @@ void tlb_init(void)
 
 void tlb_transaction_init(void)
 {
-  intr_lock();
   spin_lock(&tlb_transaction_lock);
 
   /* reset some values */
@@ -191,6 +189,5 @@ void tlb_transaction_commit(void)
 
   /* all done, we can release the master lock */
   spin_unlock(&tlb_transaction_lock);
-  intr_unlock();
 }
 

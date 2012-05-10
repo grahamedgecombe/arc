@@ -286,14 +286,6 @@ start:
   ; - the DF has been reset by the code above - no CLD is required
   call init
 
-  ; disable interrupts (when we return here the kernel might have enabled them)
-  cli 
-
-  ; hang the CPU (looped in case an NMI occurs)
-  .hang:
-    hlt
-    jmp .hang
-
 ; memory reserved for the kernel's stack
 [section .bss align=STACK_ALIGN]
 stack:
