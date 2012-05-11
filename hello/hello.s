@@ -27,6 +27,6 @@ _start:
 
 [section .data]
 hello_str:
-  db `hello, world!\n`
-  db 0
+  db "hello, world"
+  db 33, 10, 0
 

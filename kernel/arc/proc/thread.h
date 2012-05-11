@@ -21,8 +21,6 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-typedef struct proc proc_t;
-
 typedef struct
 {
   /* node used by proc_t's thread_list */
@@ -32,7 +30,7 @@ typedef struct
   list_node_t sched_node;
 
   /* process which 'owns' this thread */
-  proc_t *proc;
+  struct proc *proc;
 
   /* register file for this thread */
   uint64_t regs[15];
@@ -40,7 +38,7 @@ typedef struct
   uint64_t cs, ss;
 } thread_t;
 
-thread_t *thread_create(proc_t *proc);
+thread_t *thread_create(struct proc *proc);
 thread_t *thread_get(void);
 
 #endif
