@@ -28,7 +28,7 @@ bool mp_scan(void)
 {
   /* check if MP is enabled */
   const char *mp = cmdline_get("mp");
-  if (mp && (strcmp(mp, "off") == 0))
+  if (mp && strcmp(mp, "off") == 0)
   {
     tty_puts(" => MP disabled by kernel command line\n");
     return false;

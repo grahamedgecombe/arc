@@ -74,7 +74,7 @@ bool acpi_scan(void)
 {
   /* check if ACPI is enabled */
   const char *acpi = cmdline_get("acpi");
-  if (acpi && (strcmp(acpi, "off") == 0))
+  if (acpi && strcmp(acpi, "off") == 0)
   {
     tty_puts(" => ACPI disabled by kernel command line\n");
     return false;

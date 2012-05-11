@@ -49,7 +49,7 @@ void cmdline_init(multiboot_t *multiboot)
   if (tag)
   {
     const char *cmdline = tag->cmdline.string;
-    if (!*cmdline)
+    if (!(*cmdline))
       return;
 
     char *key = 0;
