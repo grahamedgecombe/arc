@@ -202,13 +202,14 @@ mm_map_t *mm_map_init(multiboot_t *multiboot)
   }
 
   /*
-   * reserve the IVT and BIOS data area - we can't allocate a page from this
-   * anyway as it conflicts with the null pointer value
+   * reserve the IVT and BIOS data area - it runs from 0x000-0x4FF inclusive,
+   * however, 0x000-0xFFF is reserved as we can't allocate a page from this
+   * area anyway as it conflicts with the null pointer value
    *
    * some values from the BDA are useful e.g. we need it to find the EBDA,
    * which can then be used to find the ACPI or MP tables
    */
-  mm_map_add(MULTIBOOT_MMAP_RESERVED, 0x000000, 0x0004FF);
+  mm_map_add(MULTIBOOT_MMAP_RESERVED, 0x000000, 0x000FFF);
 
   /* reserve kernel memory */
   extern int _start, _end;
