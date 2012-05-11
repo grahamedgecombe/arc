@@ -47,3 +47,6 @@
 * add command line support e.g. to disable ACPI and/or MP table scanning for
   testing purposes
 
+* during an interrupt, the intr_depth in cpu_t may have to be incremented and
+  decrement manually - check this
+
