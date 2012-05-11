@@ -73,6 +73,7 @@ static bool _uheap_alloc_at(uheap_t *heap, void *ptr, size_t size, vm_acc_t flag
       {
         left_block->start = block->start;
         left_block->end = addr - 1;
+        left_block->allocated = false;
         block->start = addr;
 
         list_insert_before(&heap->block_list, &block->node, &left_block->node);
@@ -83,6 +84,7 @@ static bool _uheap_alloc_at(uheap_t *heap, void *ptr, size_t size, vm_acc_t flag
       {
         right_block->start = addr + size;
         right_block->end = block->end;
+        right_block->allocated = false;
         block->end = addr + size - 1;
 
         list_insert_after(&heap->block_list, &block->node, &right_block->node);
@@ -125,6 +127,7 @@ static void *_uheap_alloc(uheap_t *heap, size_t size, vm_acc_t flags)
 
         right_block->start = addr + size;
         right_block->end = block->end;
+        right_block->allocated = false;
         block->end = addr + size - 1;
 
         list_insert_after(&heap->block_list, &block->node, &right_block->node);
@@ -205,6 +208,7 @@ bool uheap_init(uheap_t *heap)
   /* set the first last user-space address */
   block->start = 0x1000; /* so NULL pointer isn't included */
   block->end = 0x00007FFFFFFFFFFF;
+  block->allocated = false;
 
   /* init the spinlock */
   heap->lock = SPIN_UNLOCKED;

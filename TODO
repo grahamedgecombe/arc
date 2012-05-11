@@ -39,3 +39,6 @@
 
 * implement spinlocks mostly in C, with only the xchg being in assembly
 
+* check for anywhere malloc()/heap_alloc()/uheap_alloc() are assumed to return
+  zeroed out memory
+
