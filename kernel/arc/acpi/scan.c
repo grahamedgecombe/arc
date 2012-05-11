@@ -20,9 +20,11 @@
 #include <arc/acpi/xsdt.h>
 #include <arc/acpi/madt.h>
 #include <arc/mm/mmio.h>
+#include <arc/cmdline.h>
 #include <arc/panic.h>
 #include <arc/tty.h>
 #include <stddef.h>
+#include <string.h>
 
 static acpi_header_t *acpi_map(uintptr_t addr)
 {
@@ -70,6 +72,14 @@ static void acpi_scan_table(uintptr_t addr)
 
 bool acpi_scan(void)
 {
+  /* check if ACPI is enabled */
+  const char *acpi = cmdline_get("acpi");
+  if (acpi && (strcmp(acpi, "off") == 0))
+  {
+    tty_puts(" => ACPI disabled by kernel command line\n");
+    return false;
+  }
+
   /* try to find the RSDP structure */
   rsdp_t *rsdp = rsdp_scan();
   if (!rsdp)

@@ -14,17 +14,19 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef STRING_H
-#define STRING_H
+#include <string.h>
 
-#include <stddef.h>
+int strcmp(const char *str1, const char *str2)
+{
+  const unsigned char *s1 = (const unsigned char *) str1;
+  const unsigned char *s2 = (const unsigned char *) str2;
 
-int strcmp(const char *str1, const char *str2);
-size_t strlen(const char *str);
-void *memclr(void *ptr, size_t len);
-void *memset(void *ptr, int value, size_t len);
-void *memcpy(void *dst, const void *src, size_t len);
-void *memmove(void *dst, const void *src, size_t len);
+  while (*s1 && *s1 == *s2)
+  {
+    s1++;
+    s2++;
+  }
 
-#endif
+  return *s1 - *s2;
+}
 

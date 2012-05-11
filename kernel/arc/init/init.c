@@ -16,6 +16,7 @@
 
 #include <arc/init.h>
 #include <arc/tty.h>
+#include <arc/cmdline.h>
 #include <arc/mm/map.h>
 #include <arc/mm/phy32.h>
 #include <arc/mm/pmm.h>
@@ -105,6 +106,9 @@ void init(uint32_t magic, multiboot_t *multiboot)
   /* set up the heap */
   tty_puts("Setting up the heap...\n");
   heap_init();
+
+  /* parse command line arguments now we can malloc */
+  cmdline_init(multiboot);
 
   /* init ISA bus */
   isa_init();

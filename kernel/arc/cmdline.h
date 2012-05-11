@@ -14,17 +14,13 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef STRING_H
-#define STRING_H
+#ifndef ARC_CMDLINE_H
+#define ARC_CMDLINE_H
 
-#include <stddef.h>
+#include <arc/multiboot.h>
 
-int strcmp(const char *str1, const char *str2);
-size_t strlen(const char *str);
-void *memclr(void *ptr, size_t len);
-void *memset(void *ptr, int value, size_t len);
-void *memcpy(void *dst, const void *src, size_t len);
-void *memmove(void *dst, const void *src, size_t len);
+void cmdline_init(multiboot_t *multiboot);
+const char *cmdline_get(const char *key);
 
 #endif
 

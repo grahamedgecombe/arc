@@ -19,11 +19,21 @@
 #include <arc/mp/mpfp.h>
 #include <arc/mp/mpct.h>
 #include <arc/mm/phy32.h>
+#include <arc/cmdline.h>
 #include <arc/panic.h>
 #include <arc/tty.h>
+#include <string.h>
 
 bool mp_scan(void)
 {
+  /* check if MP is enabled */
+  const char *mp = cmdline_get("mp");
+  if (mp && (strcmp(mp, "off") == 0))
+  {
+    tty_puts(" => MP disabled by kernel command line\n");
+    return false;
+  }
+
   /* try to find the MPFP structure */
   mpfp_t *mpfp = mpfp_scan();
   if (!mpfp)

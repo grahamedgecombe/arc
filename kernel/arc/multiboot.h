@@ -25,7 +25,7 @@
 
 /* the multiboot info tag numbers */
 #define MULTIBOOT_TAG_TERMINATOR 0
-#define MULTIBOOT_TAG_CMD_LINE   1
+#define MULTIBOOT_TAG_CMDLINE    1
 #define MULTIBOOT_TAG_BOOT_LDR   2
 #define MULTIBOOT_TAG_MODULE     3
 #define MULTIBOOT_TAG_MEM        4
@@ -86,6 +86,12 @@ typedef PACK(struct
       uint32_t mod_end;
       char string[1];
     } module;
+
+    /* cmdline tag */
+    struct
+    {
+      char string[1];
+    } cmdline;
   };
 }) multiboot_tag_t;
 

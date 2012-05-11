@@ -44,12 +44,6 @@
   will be useful for debugging to see the whole log rather than just what fits
   into the 80x25 vga console
 
-* add command line support e.g. to disable ACPI and/or MP table scanning for
-  testing purposes
-
-* during an interrupt, the intr_depth in cpu_t may have to be incremented and
-  decrement manually - check this
-
 * consider issue that proc and thread in cpu_t might not be consistent - is
   this going to cause problems? do we need any locking there also?
 
