@@ -42,3 +42,7 @@
 * check for anywhere malloc()/heap_alloc()/uheap_alloc() are assumed to return
   zeroed out memory
 
+* change tty_* -> trace_*, then make it so it can be backed by tty or uart,
+  will be useful for debugging to see the whole log rather than just what fits
+  into the 80x25 vga console
+
