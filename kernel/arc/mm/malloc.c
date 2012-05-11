@@ -16,6 +16,7 @@
 
 #include <arc/mm/malloc.h>
 #include <arc/mm/heap.h>
+#include <string.h>
 
 /*
  * note: these are only functions required for dlmalloc to work, for the bulk
@@ -36,6 +37,7 @@ void *mmap(void *addr, size_t len, int prot, int flags, int fd, off_t off)
   if (!ptr)
     return MAP_FAILED;
 
+  memclr(ptr, len);
   return ptr;
 }
 
