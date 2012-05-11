@@ -28,4 +28,5 @@ _start:
 [section .data]
 hello_str:
   db `hello, world!\n`
+  db 0
 
