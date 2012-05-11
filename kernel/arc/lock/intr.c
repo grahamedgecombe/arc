@@ -17,10 +17,12 @@
 #include <arc/lock/intr.h>
 #include <arc/cpu/intr.h>
 #include <arc/smp/cpu.h>
+#include <assert.h>
 
 void intr_lock(void)
 {
   cpu_t *cpu = cpu_get();
+  assert(cpu->intr_depth != UINT64_MAX);
   if (cpu->intr_depth++ == 0)
     intr_disable();
 }
@@ -28,6 +30,7 @@ void intr_lock(void)
 void intr_unlock(void)
 {
   cpu_t *cpu = cpu_get();
+  assert(cpu->intr_depth != 0);
   if (--cpu->intr_depth == 0)
     intr_enable();
 }

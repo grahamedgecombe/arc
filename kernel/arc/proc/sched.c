@@ -16,9 +16,6 @@
 
 #include <arc/proc/sched.h>
 #include <arc/cpu/halt.h>
-#include <arc/cpu/flags.h>
-#include <arc/cpu/gdt.h>
-#include <arc/lock/intr.h>
 #include <arc/proc/proc.h>
 #include <arc/smp/cpu.h>
 #include <arc/smp/mode.h>
@@ -26,6 +23,7 @@
 #include <arc/time/pit.h>
 #include <arc/util/container.h>
 #include <arc/util/list.h>
+#include <arc/panic.h>
 #include <string.h>
 
 #define SCHED_TIMESLICE 10 /* 10ms = 100Hz */
@@ -86,6 +84,8 @@ void sched_tick(intr_state_t *state)
       cur_thread->rip = state->rip;
       cur_thread->rsp = state->rsp;
       cur_thread->rflags = state->rflags;
+      cur_thread->cs = state->cs;
+      cur_thread->ss = state->ss;
     }
 
     /* restore the register file for the new thread */
@@ -94,9 +94,9 @@ void sched_tick(intr_state_t *state)
       memcpy(state->regs, new_thread->regs, sizeof(state->regs));
       state->rip = new_thread->rip;
       state->rsp = new_thread->rsp;
-      state->rflags = new_thread->rflags | FLAGS_IOPL3 | FLAGS_IF;
-      state->cs = SLTR_USER_CODE | RPL3;
-      state->ss = SLTR_USER_DATA | RPL3;
+      state->rflags = new_thread->rflags;
+      state->cs = new_thread->cs;
+      state->ss = new_thread->ss;
 
       /* if we're switcing between processes, we need to switch address spaces */
       if (!cur_thread || cur_thread->proc != new_thread->proc)
@@ -104,9 +104,8 @@ void sched_tick(intr_state_t *state)
     }
     else
     {
-      /* no new threads to schedule, wait for the next interrupt */
-      intr_unlock();
-      halt_forever();
+      // TODO: switch to idle thread ?
+      panic("nothing to do!");
     }
   }
 }

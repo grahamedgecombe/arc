@@ -104,10 +104,16 @@ intr_stub:
   swapgs
 
 .supervisor_enter:
+  ; increment interrupt locking depth
+  inc qword [gs:24]
+
   ; call the C routine for dispatching an interrupt
   cld          ; amd64 SysV ABI states the DF must be cleared by the caller
   mov rdi, rsp ; first argument points to the processor state
   call intr_dispatch
+
+  ; decrement interrupt locking depth
+  dec qword [gs:24]
 
   ; check if we are switching from supervisor to user mode
   mov rax, [rsp + 152]

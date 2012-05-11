@@ -15,6 +15,8 @@
  */
 
 #include <arc/proc/thread.h>
+#include <arc/cpu/flags.h>
+#include <arc/cpu/gdt.h>
 #include <arc/smp/cpu.h>
 #include <arc/mm/uheap.h>
 #include <stdlib.h>
@@ -36,6 +38,9 @@ thread_t *thread_create(proc_t *proc)
 
   thread->proc = proc;
   thread->rsp = (uintptr_t) stack + THREAD_STACK_SIZE;
+  thread->rflags = FLAGS_IOPL3 | FLAGS_IF;
+  thread->cs = SLTR_USER_CODE | RPL3;
+  thread->ss = SLTR_USER_DATA | RPL3;
   return thread;
 }
 

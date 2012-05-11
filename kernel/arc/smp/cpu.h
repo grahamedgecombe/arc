@@ -47,6 +47,9 @@ typedef struct cpu
    */
   uintptr_t user_stack;
 
+  /* current 'depth' of the interrupt lock, also must not be moved */
+  uint64_t intr_depth;
+
   /* global CPU list node */
   list_node_t node;
 
@@ -63,9 +66,6 @@ typedef struct cpu
 
   /* the tss for this processor */
   tss_t tss;
-
-  /* current 'depth' of the interrupt lock */
-  int intr_depth;
 
   /* current process/thread running on this cpu */
   proc_t *proc;

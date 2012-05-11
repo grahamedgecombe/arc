@@ -37,6 +37,7 @@ typedef struct
   /* register file for this thread */
   uint64_t regs[15];
   uint64_t rip, rsp, rflags;
+  uint64_t cs, ss;
 } thread_t;
 
 thread_t *thread_create(proc_t *proc);

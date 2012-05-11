@@ -16,6 +16,7 @@
 
 #include <arc/proc/module.h>
 #include <arc/cpu/cr.h>
+#include <arc/lock/intr.h>
 #include <arc/proc/proc.h>
 #include <arc/proc/elf64.h>
 #include <arc/proc/sched.h>
@@ -56,11 +57,27 @@ static void module_load(multiboot_tag_t *tag)
 
 void module_init(multiboot_t *multiboot)
 {
+  /*
+   * disable interrupts, module loading messes around with address space
+   * switches so we don't want to confuse the scheduler
+   */
+  intr_lock();
+
+  /* keep a copy of the old process */
+  proc_t *old_proc = proc_get();
+
   multiboot_tag_t *tag = multiboot_get(multiboot, MULTIBOOT_TAG_MODULE);
   while (tag)
   {
     module_load(tag);
     tag = multiboot_get_after(multiboot, tag, MULTIBOOT_TAG_MODULE);
   }
+
+  /* switch back to the correct address space */
+  if (old_proc)
+    proc_switch(old_proc);
+
+  /* enable interrupts again */
+  intr_unlock();
 }
 
