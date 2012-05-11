@@ -19,6 +19,9 @@
 
 void *malloc(size_t size)
 {
-  return dlmalloc(size);
+  spin_lock(&malloc_lock);
+  void *ptr = dlmalloc(size);
+  spin_unlock(&malloc_lock);
+  return ptr;
 }
 

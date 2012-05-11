@@ -19,6 +19,9 @@
 
 void *realloc(void *ptr, size_t size)
 {
-  return dlrealloc(ptr, size);
+  spin_lock(&malloc_lock);
+  ptr = dlrealloc(ptr, size);
+  spin_unlock(&malloc_lock);
+  return ptr;
 }
 

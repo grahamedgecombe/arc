@@ -19,6 +19,7 @@
 
 #include <arc/panic.h>
 #include <arc/mm/common.h>
+#include <arc/lock/spinlock.h>
 #include <stddef.h>
 
 /* make it so when dlmalloc aborts a kernel panic is triggered */
@@ -42,9 +43,9 @@
 /* stats require stdio.h which we don't support */
 #define NO_MALLOC_STATS 1
 
-/* use spinlocks */
-#define USE_LOCKS           1
-#define USE_SPIN_LOCKS      1
+/* don't use built-in spinlocks */
+#define USE_LOCKS           0
+#define USE_SPIN_LOCKS      0
 
 /* prefix function names with dl */
 #define USE_DL_PREFIX 1
@@ -77,6 +78,8 @@
 #define PROT_EXEC  0x4
 
 typedef size_t off_t;
+
+extern spinlock_t malloc_lock;
 
 void *mmap(void *addr, size_t len, int prot, int flags, int fd, off_t off);
 int munmap(void *addr, size_t len);

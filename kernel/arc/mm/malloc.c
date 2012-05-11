@@ -18,6 +18,8 @@
 #include <arc/mm/heap.h>
 #include <string.h>
 
+spinlock_t malloc_lock = SPIN_UNLOCKED;
+
 /*
  * note: these are only functions required for dlmalloc to work, for the bulk
  * of the allocator see dlmalloc.c

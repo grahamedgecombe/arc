@@ -19,6 +19,9 @@
 
 void *calloc(size_t num, size_t size)
 {
-  return dlcalloc(num, size);
+  spin_lock(&malloc_lock);
+  void *ptr = dlcalloc(num, size);
+  spin_unlock(&malloc_lock);
+  return ptr;
 }
 
