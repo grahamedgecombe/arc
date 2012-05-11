@@ -14,57 +14,14 @@
 ;  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ;
 
-[extern intr_lock]
-[extern intr_unlock]
-
-[global spin_lock]
-spin_lock:
+[global exchange]
+exchange:
   push rbp
   mov rbp, rsp
 
-  .try:
-    mov rax, 1
-    call intr_lock
-    lock xchg [rdi], rax
-    test rax, rax
-    jz .acquired
-    call intr_unlock
-    pause
-    jmp .try
+  lock xchg [rsi], rdi
+  mov rax, rdi
 
-  .acquired:
-    pop rbp
-    ret
-
-[global spin_try_lock]
-spin_try_lock:
-  push rbp
-  mov rbp, rsp
-
-  mov rax, 1
-  call intr_lock
-  lock xchg [rdi], rax
-  test rax, rax
-  jz .acquired
-  call intr_unlock
-  mov rax, 0
-  jmp .exit
-
-  .acquired:
-    mov rax, 1
-
-  .exit:
-    pop rbp
-    ret
-
-[global spin_unlock]
-spin_unlock:
-  push rbp
-  mov rbp, rsp
-
-  mov qword [rdi], 0
-
-  call intr_unlock
   pop rbp
   ret
 
