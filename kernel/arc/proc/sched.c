@@ -15,16 +15,24 @@
  */
 
 #include <arc/proc/sched.h>
+#include <arc/cpu/halt.h>
 #include <arc/cpu/flags.h>
 #include <arc/cpu/gdt.h>
+#include <arc/lock/intr.h>
 #include <arc/proc/proc.h>
+#include <arc/smp/cpu.h>
 #include <arc/smp/mode.h>
 #include <arc/time/apic.h>
 #include <arc/time/pit.h>
 #include <arc/util/container.h>
+#include <arc/util/list.h>
 #include <string.h>
 
 #define SCHED_TIMESLICE 10 /* 10ms = 100Hz */
+
+/* a list of threads that are ready to run */
+static spinlock_t thread_queue_lock = SPIN_UNLOCKED;
+static list_t thread_queue = LIST_EMPTY;
 
 void sched_init(void)
 {
@@ -34,29 +42,71 @@ void sched_init(void)
     pit_monotonic(SCHED_TIMESLICE, &sched_tick);
 }
 
+void sched_thread_ready(thread_t *thread)
+{
+  spin_lock(&thread_queue_lock);
+  list_add_tail(&thread_queue, &thread->sched_node);
+  spin_unlock(&thread_queue_lock);
+}
+
 void sched_tick(intr_state_t *state)
 {
-  static bool done = false;
-  if (done)
-    return;
+  cpu_t *cpu = cpu_get();
 
-  proc_t *proc = proc_get();
+  /* figure out what thread is currently running on the CPU */
+  thread_t *cur_thread = cpu->thread;
+  thread_t *new_thread = 0;
 
-  if (proc)
+  spin_lock(&thread_queue_lock);
+
+  /* add the current thread to the queue */
+  if (cur_thread)
+    list_add_tail(&thread_queue, &cur_thread->sched_node);
+
+  /* pick the next thread to run */
+  list_node_t *head = thread_queue.head;
+  if (head)
   {
-    list_node_t *node = proc->thread_list.head;
-    if (node)
-    {
-      thread_t *thread = container_of(node, thread_t, proc_node);
+    new_thread = container_of(head, thread_t, sched_node);
+    list_remove(&thread_queue, head);
+  }
 
-      memcpy(state->regs, thread->regs, sizeof(thread->regs));
-      state->rip = thread->rip;
-      state->rsp = thread->rsp;
-      state->rflags = thread->rflags | FLAGS_IOPL3 | FLAGS_IF;
+  spin_unlock(&thread_queue_lock);
+
+  /* check if we're actually switching threads */
+  if (cur_thread != new_thread)
+  {
+    /* actually swap the pointers over */
+    cpu->thread = new_thread;
+
+    /* save the register file for the current thread */
+    if (cur_thread)
+    {
+      memcpy(cur_thread->regs, state->regs, sizeof(state->regs));
+      cur_thread->rip = state->rip;
+      cur_thread->rsp = state->rsp;
+      cur_thread->rflags = state->rflags;
+    }
+
+    /* restore the register file for the new thread */
+    if (new_thread)
+    {
+      memcpy(state->regs, new_thread->regs, sizeof(state->regs));
+      state->rip = new_thread->rip;
+      state->rsp = new_thread->rsp;
+      state->rflags = new_thread->rflags | FLAGS_IOPL3 | FLAGS_IF;
       state->cs = SLTR_USER_CODE | RPL3;
       state->ss = SLTR_USER_DATA | RPL3;
 
-      done = true;
+      /* if we're switcing between processes, we need to switch address spaces */
+      if (!cur_thread || cur_thread->proc != new_thread->proc)
+        proc_switch(new_thread->proc); /* (this also sets cpu->proc) */
+    }
+    else
+    {
+      /* no new threads to schedule, wait for the next interrupt */
+      intr_unlock();
+      halt_forever();
     }
   }
 }

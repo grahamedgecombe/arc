@@ -18,6 +18,7 @@
 #include <arc/cpu/cr.h>
 #include <arc/proc/proc.h>
 #include <arc/proc/elf64.h>
+#include <arc/proc/sched.h>
 #include <arc/mm/phy32.h>
 #include <arc/panic.h>
 #include <arc/tty.h>
@@ -42,12 +43,15 @@ static void module_load(multiboot_tag_t *tag)
     panic("couldn't load elf64 file");
 
   /* make a new thread */
-  thread_t *thread = thread_create();
+  thread_t *thread = thread_create(proc);
   if (!thread)
     panic("couldn't create thread for module");
 
   thread->rip = elf->e_entry;
   proc_thread_add(proc, thread);
+
+  /* add thread to the scheduler's ready queue */
+  sched_thread_ready(thread);
 }
 
 void module_init(multiboot_t *multiboot)

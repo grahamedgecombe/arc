@@ -18,8 +18,10 @@
 #define ARC_PROC_SCHED_H
 
 #include <arc/intr/common.h>
+#include <arc/proc/thread.h>
 
 void sched_init(void);
+void sched_thread_ready(thread_t *thread);
 void sched_tick(intr_state_t *state);
 
 #endif

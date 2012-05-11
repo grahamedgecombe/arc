@@ -21,17 +21,26 @@
 #include <stdlib.h>
 #include <stdint.h>
 
+typedef struct proc proc_t;
+
 typedef struct
 {
   /* node used by proc_t's thread_list */
   list_node_t proc_node;
+
+  /* node used by scheduler's queue */
+  list_node_t sched_node;
+
+  /* process which 'owns' this thread */
+  proc_t *proc;
 
   /* register file for this thread */
   uint64_t regs[15];
   uint64_t rip, rsp, rflags;
 } thread_t;
 
-thread_t *thread_create(void);
+thread_t *thread_create(proc_t *proc);
+thread_t *thread_get(void);
 
 #endif
 

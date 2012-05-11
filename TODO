@@ -50,3 +50,6 @@
 * during an interrupt, the intr_depth in cpu_t may have to be incremented and
   decrement manually - check this
 
+* consider issue that proc and thread in cpu_t might not be consistent - is
+  this going to cause problems? do we need any locking there also?
+

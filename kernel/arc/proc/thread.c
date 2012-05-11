@@ -15,12 +15,13 @@
  */
 
 #include <arc/proc/thread.h>
+#include <arc/smp/cpu.h>
 #include <arc/mm/uheap.h>
 #include <stdlib.h>
 
 #define THREAD_STACK_SIZE 8192
 
-thread_t *thread_create(void)
+thread_t *thread_create(proc_t *proc)
 {
   thread_t *thread = malloc(sizeof(*thread));
   if (!thread)
@@ -33,7 +34,14 @@ thread_t *thread_create(void)
     return 0;
   }
 
+  thread->proc = proc;
   thread->rsp = (uintptr_t) stack + THREAD_STACK_SIZE;
   return thread;
+}
+
+thread_t *thread_get(void)
+{
+  cpu_t *cpu = cpu_get();
+  return cpu->thread;
 }
 

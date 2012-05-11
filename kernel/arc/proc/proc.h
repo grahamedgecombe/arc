@@ -23,7 +23,7 @@
 #include <arc/util/list.h>
 #include <stdint.h>
 
-typedef struct
+typedef struct proc
 {
   /* physical address of the pml4 table of this process */
   uintptr_t pml4_table;
