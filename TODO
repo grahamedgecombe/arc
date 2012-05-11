@@ -44,3 +44,6 @@
   will be useful for debugging to see the whole log rather than just what fits
   into the 80x25 vga console
 
+* add command line support e.g. to disable ACPI and/or MP table scanning for
+  testing purposes
+
