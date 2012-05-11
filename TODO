@@ -37,3 +37,5 @@
 
 * make TLB flushes more efficient e.g. by batching together more VMM operations
 
+* implement spinlocks mostly in C, with only the xchg being in assembly
+

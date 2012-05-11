@@ -24,14 +24,15 @@ spin_lock:
 
   .try:
     mov rax, 1
+    call intr_lock
     lock xchg [rdi], rax
     test rax, rax
     jz .acquired
+    call intr_unlock
     pause
     jmp .try
 
   .acquired:
-    call intr_lock
     pop rbp
     ret
 
@@ -41,14 +42,15 @@ spin_try_lock:
   mov rbp, rsp
 
   mov rax, 1
+  call intr_lock
   lock xchg [rdi], rax
   test rax, rax
   jz .acquired
+  call intr_unlock
   mov rax, 0
   jmp .exit
 
   .acquired:
-    call intr_lock
     mov rax, 1
 
   .exit:
