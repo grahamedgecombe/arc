@@ -17,12 +17,9 @@
 [section .text]
 [global _start]
 _start:
+  mov rax, 0
   mov rdi, hello_str
-  push rcx
-  push r11
   syscall
-  pop r11
-  pop rcx
   jmp $
 
 [section .data]

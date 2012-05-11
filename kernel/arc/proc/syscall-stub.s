@@ -14,7 +14,8 @@
 ;  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ;
 
-[extern tty_puts]
+[extern syscall_table]
+[extern syscall_table_size]
 
 [global syscall_stub]
 syscall_stub:
@@ -33,26 +34,18 @@ syscall_stub:
   push rcx
   push r11
 
-  ; preserve registers that may be used by the function
-  push r10
-  push r9
-  push r8
-  push rdi
-  push rsi
-  push rdx
-  push rax
+  ; check if the syscall number is out of range
+  mov r11, qword syscall_table_size
+  cmp rax, [r11]
+  jge .invalid_syscall
 
-  ; print the trace information
-  call tty_puts
+  ; call the function in the syscall table
+  mov r11, qword syscall_table
+  mov rcx, r10 ; syscall ABI uses R10 instead of RCX, fix that for normal ABI
+  call [r11 + rax * 8]
 
-  ; restore the registers that were used by the function
-  pop rax
-  pop rdx
-  pop rsi
-  pop rdi
-  pop r8
-  pop r9
-  pop r10
+.invalid_syscall:
+  ; TODO: we probably want some sort of error upon an invalid syscall
 
   ; restore the RCX and R11 registers
   pop r11
