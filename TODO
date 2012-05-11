@@ -32,9 +32,6 @@
   won't work for exceptions as they aren't masked, and locks which don't mask
   interrupts should be added to improve performance where it isn't required.)
 
-* there still seem to be locking issues on real hardware or in qemu with very
-  high numbers of CPUs (in KVM mode)
-
 * make TLB flushes more efficient e.g. by batching together more VMM operations
 
 * check for anywhere malloc()/heap_alloc()/uheap_alloc() are assumed to return
