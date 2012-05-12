@@ -15,36 +15,24 @@
  */
 
 #include <arc/cmdline.h>
+#include <arc/util/hashtab.h>
+#include <arc/util/strhashtab.h>
 #include <arc/panic.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
 
-// TODO: switch to using a hash table
-typedef struct cmdline_pair
-{
-  struct cmdline_pair *next;
-  const char *key, *value;
-} cmdline_pair_t;
+#define CMDLINE_BUCKETS 8
 
-static cmdline_pair_t *cmdline_head = 0;
-
-static void cmdline_put(const char *key, const char *value)
-{
-  cmdline_pair_t *pair = malloc(sizeof(*pair));
-  if (!pair)
-    panic("allocating cmdline pair failed");
-
-  pair->key = key;
-  pair->value = value;
-  pair->next = cmdline_head;
-  cmdline_head = pair;
-}
+static hashtab_t cmdline_table;
 
 // TODO: more error checking for malformed command line
 void cmdline_init(multiboot_t *multiboot)
 {
+  if (!hashtab_init(&cmdline_table, &djb2, &strcmpbool, CMDLINE_BUCKETS))
+    panic("couldn't init cmdline hash table");
+
   multiboot_tag_t *tag = multiboot_get(multiboot, MULTIBOOT_TAG_CMDLINE);
   if (tag)
   {
@@ -73,13 +61,13 @@ void cmdline_init(multiboot_t *multiboot)
         if (key == 0)
         {
           if (c == ' ')
-            cmdline_put(token, "");
+            hashtab_put(&cmdline_table, token, "");
           else
             key = token;
         }
         else
         {
-          cmdline_put(key, token);
+          hashtab_put(&cmdline_table, key, token);
           key = 0;
         }
       }
@@ -94,12 +82,10 @@ void cmdline_init(multiboot_t *multiboot)
 
 const char *cmdline_get(const char *key)
 {
-  for (cmdline_pair_t *node = cmdline_head; node; node = node->next)
-  {
-    if (strcmp(key, node->key) == 0)
-      return node->value;
-  }
+  hashtab_node_t *node = hashtab_get(&cmdline_table, (void *) key);
+  if (!node)
+    return node;
 
-  return 0;
+  return node->value;
 }
 
