@@ -1,0 +1,18 @@
+Arc System Calls
+
+System calls are performed using the SYSCALL instruction.
+
+The following registers are used for parameters:
+
+RAX - system call number
+RDI - argument 1
+RSI - argument 2
+RDX - argument 3
+R10 - argument 4
+R8  - argument 5
+R9  - argument 6
+
+The kernel will trash the RCX and R11 registers. The result will be returned in
+the RAX register (and the RDX register, if a second return register is
+required.)
+
