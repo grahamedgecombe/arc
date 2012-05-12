@@ -41,7 +41,7 @@ typedef PACK(struct heap_node
   struct heap_node *prev;
   int state;
   uintptr_t start; /* the address of the first byte, inclusive */
-  uintptr_t end;   /* the address of the last byte, exclusive */
+  uintptr_t end;   /* the address of the last byte, inclusive */
   uint64_t magic;
 }) heap_node_t;
 
@@ -54,8 +54,8 @@ void heap_init(void)
   extern int _end;
   uintptr_t heap_start = PAGE_ALIGN_2M((uintptr_t) &_end);
 
-  /* hard coded end of the heap (exclusive) */
-  uintptr_t heap_end = VM_STACK_OFFSET;
+  /* hard coded end of the heap (inclusive) */
+  uintptr_t heap_end = VM_STACK_OFFSET - 1;
 
   /* allocate some space for the root node */
   uintptr_t root_phy = pmm_alloc();
@@ -63,7 +63,7 @@ void heap_init(void)
     panic("couldn't allocate physical frame for heap root node");
 
   /* sanity check which probably seems completely ridiculous */
-  if (heap_start >= heap_end)
+  if ((heap_start + FRAME_SIZE) >= heap_end)
     panic("no room for heap");
 
   /* the root node will take the first virtual address */
@@ -90,7 +90,7 @@ static heap_node_t *find_node(size_t size)
       continue;
 
     /* skip nodes that are too small */
-    size_t node_size = node->end - node->start;
+    size_t node_size = node->end - node->start + 1;
     if (node_size < size)
       continue;
 
@@ -115,7 +115,7 @@ static heap_node_t *find_node(size_t size)
           next->magic = next->start ^ HEAP_MAGIC;
 
           /* update the node that was split */
-          node->end = (uintptr_t) next;
+          node->end = (uintptr_t) next - 1;
 
           /* update the surrounding nodes */
           node->next = next;
@@ -147,7 +147,7 @@ static void _heap_free(void *ptr)
   assert(node->magic == (node->start ^ HEAP_MAGIC));
 
   /* free the physical frames if heap_alloc allocated them */
-  size_t size = node->end - node->start;
+  size_t size = node->end - node->start + 1;
   if (node->state == HEAP_NODE_ALLOCATED)
     range_free(node->start, size);
 
@@ -246,7 +246,7 @@ void heap_trace(void)
     else if (node->state == HEAP_NODE_ALLOCATED)
       state = "allocated";
 
-    tty_printf(" => %0#18x -> %0#18x (%s)\n", node->start, node->end - 1, state);
+    tty_printf(" => %0#18x -> %0#18x (%s)\n", node->start, node->end, state);
   }
 
   spin_unlock(&heap_lock);

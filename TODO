@@ -22,8 +22,6 @@
 
 * use enums in more places (e.g. heap node state)
 
-* kernel heap should store last byte inclusive like the user heap
-
 * add idle process and threads (one per cpu)
 
 * use a more efficient user-space heap structure (red black tree?)
