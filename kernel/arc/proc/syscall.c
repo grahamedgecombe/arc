@@ -21,10 +21,6 @@
 #include <arc/cpu/gdt.h>
 #include <arc/tty.h>
 
-// TODO: move to separate file and use real function pointer syntax
-uint64_t syscall_table_size = 1;
-uint64_t syscall_table[1] = { (uint64_t) &tty_puts };
-
 void syscall_init(void)
 {
   /* set the SYSCALL and SYSRET selectors */

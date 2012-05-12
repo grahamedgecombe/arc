@@ -14,16 +14,13 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef ARC_PROC_SYSCALL_H
-#define ARC_PROC_SYSCALL_H
-
+#include <arc/proc/syscall.h>
+#include <arc/tty.h>
 #include <stdint.h>
 
-extern uintptr_t syscall_table[];
-extern uint64_t syscall_table_size;
-
-void syscall_init(void);
-void syscall_stub(void);
-
-#endif
+uintptr_t syscall_table[] =
+{
+  /* 0x0 */ (uintptr_t) &tty_puts
+};
+uint64_t syscall_table_size = sizeof(syscall_table) / sizeof(*syscall_table);
 
