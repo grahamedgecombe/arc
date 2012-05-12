@@ -123,7 +123,6 @@ static void apic_timer_calibrate(void)
 
   static spinlock_t apic_calibrate_lock = SPIN_UNLOCKED;
   spin_lock(&apic_calibrate_lock);
-  intr_lock();
 
   apic_write(APIC_TIMER_ICR, 0xFFFFFFFF);
   apic_write(APIC_TIMER_DCR, DCR_16);
@@ -132,7 +131,6 @@ static void apic_timer_calibrate(void)
 
   cpu->apic_ticks_per_ms = ticks * 16 / 10;
 
-  intr_unlock();
   spin_unlock(&apic_calibrate_lock);
 }
 

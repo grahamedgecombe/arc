@@ -31,7 +31,7 @@ void syscall_init(void)
   uint64_t star = 0;
   star |= ((uint64_t) (SLTR_KERNEL_DATA | RPL3)) << 48;
   star |=  (uint64_t) SLTR_KERNEL_CODE           << 32;
-  msr_write(MSR_STAR, star);// (((uint64_t) SLTR_KERNEL_DATA | RPL3) << 48) | (((uint64_t) SLTR_KERNEL_CODE) << 32));
+  msr_write(MSR_STAR, star);
 
   /*
    * how the selectors are determined:
