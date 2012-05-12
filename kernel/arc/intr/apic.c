@@ -124,6 +124,7 @@ static void apic_timer_calibrate(void)
   static spinlock_t apic_calibrate_lock = SPIN_UNLOCKED;
   spin_lock(&apic_calibrate_lock);
 
+  apic_write(APIC_LVT_TIMER, LVT_MASKED);
   apic_write(APIC_TIMER_ICR, 0xFFFFFFFF);
   apic_write(APIC_TIMER_DCR, DCR_16);
   pit_mdelay(10);
@@ -139,9 +140,10 @@ void apic_monotonic(int ms, intr_handler_t handler)
   cpu_t *cpu = cpu_get();
 
   intr_route_intr(LVT_TIMER, handler);
+
+  apic_write(APIC_LVT_TIMER, LVT_TIMER_PERIODIC | LVT_TYPE_FIXED | LVT_TIMER);
   apic_write(APIC_TIMER_ICR, cpu->apic_ticks_per_ms * ms / 16);
   apic_write(APIC_TIMER_DCR, DCR_16);
-  apic_write(APIC_LVT_TIMER, LVT_TIMER_PERIODIC | LVT_TYPE_FIXED | LVT_TIMER);
 }
 
 bool xapic_init(uintptr_t addr)
