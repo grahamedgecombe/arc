@@ -17,7 +17,7 @@
 ARCH := x86_64-pc-elf
 
 CC := $(ARCH)-gcc
-CFLAGS := -O3 -Wall -Wextra -pedantic -Wno-unused
+CFLAGS := -O3 -Wall -Wextra -pedantic -Wno-unused-parameter
 
 AS := nasm
 ASFLAGS := -f elf64

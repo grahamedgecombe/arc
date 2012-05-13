@@ -71,7 +71,7 @@ static void vmm_unlock(uintptr_t addr)
 }
 
 static void addr_to_index(page_index_t *index, uintptr_t addr)
-{uintptr_t t = addr;
+{
   /* calculate pml4 pointer */
   index->pml4 = (uint64_t *) PML4_OFFSET;
 
