@@ -1,0 +1,15 @@
+Arc Kernel Command Line
+
+The kernel command line can be specified in the multiboot2 GRUB entry e.g.
+
+multiboot2 /boot/vmarc acpi=off
+
+The general syntax is:
+
+key1[=value1] key2[=value2] ...
+
+The following keys can be used:
+
+acpi - set to 'off' to disable ACPI support
+mp - set to 'off' to disable Intel MP support
+
