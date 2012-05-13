@@ -66,6 +66,7 @@ bool elf64_load(elf64_ehdr_t *elf, size_t size)
     if (phdr->p_type != PT_LOAD)
       continue;
 
+    /* compute segment flags */
     int flags = 0;
     if (phdr->p_flags & PF_R)
       flags |= UHEAP_R;
@@ -74,12 +75,23 @@ bool elf64_load(elf64_ehdr_t *elf, size_t size)
     if (phdr->p_flags & PF_X)
       flags |= UHEAP_X;
 
-    // TODO: check if page alignment is done properly
-    if (!uheap_alloc_at((void *) PAGE_ALIGN_REVERSE(phdr->p_vaddr), PAGE_ALIGN(phdr->p_memsz), flags))
+    /* compute segment address and length */
+    uintptr_t seg_addr = phdr->p_vaddr - phdr->p_offset;
+    uintptr_t seg_len = PAGE_ALIGN(phdr->p_memsz);
+
+    /* check if start of segment is page aligned */
+    if (PAGE_ALIGN_REVERSE(seg_addr) != seg_addr)
       goto rollback;
 
-    uintptr_t file_base = (uintptr_t) elf + phdr->p_offset;
-    memcpy((void *) phdr->p_vaddr, (void *) file_base, phdr->p_filesz);
+    /* allocate segment on user heap */
+    if (!uheap_alloc_at((void *) seg_addr, seg_len, flags))
+      goto rollback;
+
+    /* copy data from the ELF file into memory */
+    uintptr_t file_addr = (uintptr_t) elf + phdr->p_offset;
+    memcpy((void *) phdr->p_vaddr, (void *) file_addr, phdr->p_filesz);
+
+    /* reset any remaining memory in the section */
     memclr((void *) (phdr->p_vaddr + phdr->p_filesz), phdr->p_memsz - phdr->p_filesz);
   }
   return true;
