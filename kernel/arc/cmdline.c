@@ -84,7 +84,7 @@ const char *cmdline_get(const char *key)
 {
   hashtab_node_t *node = hashtab_get(&cmdline_table, (void *) key);
   if (!node)
-    return node;
+    return 0;
 
   return node->value;
 }
