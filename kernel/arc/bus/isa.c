@@ -15,6 +15,8 @@
  */
 
 #include <arc/bus/isa.h>
+#include <arc/cpu/port.h>
+#include <arc/tty.h>
 #include <arc/panic.h>
 #include <string.h>
 
