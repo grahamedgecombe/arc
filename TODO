@@ -10,9 +10,6 @@
 
 * split features into local CPU features and features that all CPUs share
 
-* I/O APIC interrupts don't seem to work at all in Bochs, keyboard IRQ (IRQ1)
-  doesn't seem to work in QEMU
-
 * elf64 size checks to check we don't read outside the bounds of the elf64 file
 
 * free module pmm frames when they are loaded

@@ -58,6 +58,7 @@ inb:
   push rbp
   mov rbp, rsp
   mov rdx, rdi
+  xor rax, rax
   in al, dx
   pop rbp
   ret
@@ -67,6 +68,7 @@ inw:
   push rbp
   mov rbp, rsp
   mov rdx, rdi
+  xor rax, rax
   in ax, dx
   pop rbp
   ret
@@ -76,6 +78,7 @@ inl:
   push rbp
   mov rbp, rsp
   mov rdx, rdi
+  xor rax, rax
   in eax, dx
   pop rbp
   ret

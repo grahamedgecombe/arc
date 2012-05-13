@@ -26,6 +26,7 @@ typedef uint8_t isa_line_t;
 
 void isa_init(void);
 irq_tuple_t *isa_irq(isa_line_t line);
+void isa_bochs_workaround(void);
 
 #endif
 

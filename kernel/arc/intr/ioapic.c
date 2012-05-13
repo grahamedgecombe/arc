@@ -80,8 +80,11 @@ bool ioapic_init(ioapic_id_t id, uintptr_t addr, irq_t irq_base)
 
 void ioapic_route(ioapic_t *apic, irq_tuple_t *tuple, intr_t intr)
 {
+  // TODO: bochs does not support lowest priority delivery in physical
+  //       destination mode, should switch this back to lowest priority and set
+  //       up logical mode instead
   uint8_t src = tuple->irq - apic->irq_base;
-  uint64_t redtbl_entry = (0xFFL << 56) | REDTBL_DESTMOD_PHYSICAL | REDTBL_DELMOD_LOWPRI | intr;
+  uint64_t redtbl_entry = REDTBL_DESTMOD_PHYSICAL | REDTBL_DELMOD_FIXED | intr;
 
   if (tuple->active_polarity == POLARITY_HIGH)
     redtbl_entry |= REDTBL_ACTIVE_HIGH;

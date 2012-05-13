@@ -7,4 +7,5 @@ log: bochs.log
 mouse: enabled=0
 clock: sync=realtime
 cpu: count=2, ips=1000000
+port_e9_hack: enabled=1
 

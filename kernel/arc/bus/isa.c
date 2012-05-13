@@ -45,3 +45,15 @@ irq_tuple_t *isa_irq(isa_line_t line)
   return &isa_irqs[line];
 }
 
+void isa_bochs_workaround(void)
+{
+  /* check if we are running in bochs (only works if the port E9 hack is enabled) */
+  if (inb_p(0xE9) == 0xE9)
+  {
+    tty_puts("Fixing Bochs ISA IRQ routing...\n");
+
+    /* the PIT is actually connected to INTIN2 on the I/O APIC */
+    isa_irqs[0].irq = 2;
+  }
+}
+
