@@ -18,6 +18,11 @@
 #define ARC_MM_COMMON_H
 
 /*
+ * user-space virtual memory end address (inclusive)
+ */
+#define VM_USER_END 0x00007FFFFFFFFFFF
+
+/*
  * virtual memory offset for transforming virtual addresses between
  * _start/_end to physical addresses
  */

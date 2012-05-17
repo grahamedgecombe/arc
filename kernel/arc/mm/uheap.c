@@ -207,7 +207,7 @@ bool uheap_init(uheap_t *heap)
 
   /* set the first last user-space address */
   block->start = 0x1000; /* so NULL pointer isn't included */
-  block->end = 0x00007FFFFFFFFFFF;
+  block->end = VM_USER_END;
   block->allocated = false;
 
   /* init the spinlock */

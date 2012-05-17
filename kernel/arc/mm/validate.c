@@ -14,15 +14,20 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <arc/proc/syscalls.h>
 #include <arc/mm/validate.h>
-#include <arc/tty.h>
+#include <arc/mm/common.h>
+#include <stdint.h>
+#include <string.h>
 
-void sys_trace(const char *message)
+bool valid_buffer(const void *ptr, size_t len)
 {
-  if (!valid_string(message))
-    return; // TODO: return some err number
+  uintptr_t addr_start = (uintptr_t) ptr;
+  uintptr_t addr_end = addr_start + len;
+  return addr_start <= VM_USER_END && addr_end <= VM_USER_END && addr_start <= addr_end;
+}
 
-  tty_puts(message);
+bool valid_string(const char *str)
+{
+  return valid_buffer(str, strlen(str) + 1);
 }
 

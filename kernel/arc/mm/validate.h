@@ -14,15 +14,14 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <arc/proc/syscalls.h>
-#include <arc/mm/validate.h>
-#include <arc/tty.h>
+#ifndef ARC_MM_VALIDATE_H
+#define ARC_MM_VALIDATE_H
 
-void sys_trace(const char *message)
-{
-  if (!valid_string(message))
-    return; // TODO: return some err number
+#include <stdbool.h>
+#include <stddef.h>
 
-  tty_puts(message);
-}
+bool valid_buffer(const void *ptr, size_t len);
+bool valid_string(const char *str);
+
+#endif
 
