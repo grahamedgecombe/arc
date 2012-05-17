@@ -17,7 +17,6 @@
 #include <arc/mm/validate.h>
 #include <arc/mm/common.h>
 #include <stdint.h>
-#include <string.h>
 
 bool valid_buffer(const void *ptr, size_t len)
 {
@@ -28,6 +27,13 @@ bool valid_buffer(const void *ptr, size_t len)
 
 bool valid_string(const char *str)
 {
-  return valid_buffer(str, strlen(str) + 1);
+  for (;;)
+  {
+    if ((uintptr_t) str > VM_USER_END)
+      return false;
+
+    if (*str++ == 0)
+      return true;
+  }
 }
 
