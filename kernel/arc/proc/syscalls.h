@@ -14,13 +14,11 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <arc/proc/syscall.h>
-#include <arc/tty.h>
-#include <stdint.h>
+#ifndef ARC_PROC_SYSCALLS_H
+#define ARC_PROC_SYSCALLS_H
 
-uintptr_t syscall_table[] =
-{
-  /* 0x0 */ (uintptr_t) &tty_puts
-};
-uint64_t syscall_table_size = sizeof(syscall_table) / sizeof(*syscall_table);
+void sys_trace(const char *message);
+void sys_exit(int status);
+
+#endif
 
