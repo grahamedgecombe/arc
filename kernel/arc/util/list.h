@@ -30,7 +30,7 @@ typedef struct
 
 #define LIST_EMPTY { .head = 0, .tail = 0, .size = 0 }
 
-#define list_for_each(list, node) for (list_node_t *node = (list)->head, *next = node ? node->next : 0; node; node = next, next = node ? node->next : 0)
+#define list_for_each(list, node) for (list_node_t *node = (list)->head, *__next = node ? node->next : 0; node; node = __next, __next = node ? node->next : 0)
 
 void list_init(list_t *list);
 void list_add_head(list_t *list, list_node_t *node);

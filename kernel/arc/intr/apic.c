@@ -32,10 +32,6 @@
 #define APIC_EOI        0x0B
 #define APIC_SVR        0x0F
 #define APIC_ESR        0x28
-#define APIC_LVT_TIMER  0x32
-#define APIC_LVT_LINT0  0x35
-#define APIC_LVT_LINT1  0x36
-#define APIC_LVT_ERROR  0x37
 #define APIC_TIMER_ICR  0x38
 #define APIC_TIMER_CCR  0x39
 #define APIC_TIMER_DCR  0x3E
@@ -50,19 +46,6 @@
 
 /* SVR flags */
 #define SVR_ENABLED 0x100
-
-/* LVT flags */
-#define LVT_MASKED         0x00010000
-#define LVT_TYPE_FIXED     0x00000000
-#define LVT_TYPE_SMI       0x00000200
-#define LVT_TYPE_NMI       0x00000400
-#define LVT_TYPE_EXTINT    0x00000700
-#define LVT_DELIVS         0x00001000
-#define LVT_REMOTE_IRR     0x00004000
-#define LVT_TRIGGER_LEVEL  0x00008000
-#define LVT_TRIGGER_EDGE   0x00000000
-#define LVT_TIMER_PERIODIC 0x00020000
-#define LVT_TIMER_ONE_SHOT 0x00000000
 
 /* ICR flags */
 #define ICR_TYPE_FIXED        0x00000000
@@ -101,7 +84,7 @@ static apic_mode_t apic_mode;
 static uintptr_t apic_phy_addr;
 static volatile uint32_t *apic_mmio;
 
-static uint64_t apic_read(size_t reg)
+uint64_t apic_read(size_t reg)
 {
   if (apic_mode == MODE_X2APIC)
     return msr_read(MSR_X2APIC_MMIO + reg);
@@ -109,7 +92,7 @@ static uint64_t apic_read(size_t reg)
     return apic_mmio[reg * 4];
 }
 
-static void apic_write(size_t reg, uint64_t val)
+void apic_write(size_t reg, uint64_t val)
 {
   if (apic_mode == MODE_X2APIC)
     msr_write(MSR_X2APIC_MMIO + reg, val);
@@ -234,6 +217,18 @@ void apic_ipi_init(cpu_lapic_id_t id)
 void apic_ipi_startup(cpu_lapic_id_t id, uint8_t trampoline_addr)
 {
   uint64_t icr = ICR_TYPE_STARTUP | trampoline_addr;
+
+  if (apic_mode == MODE_X2APIC)
+    icr |= ((uint64_t) id) << 32;
+  else
+    icr |= ((uint64_t) id) << 56;
+
+  apic_ipi(icr);
+}
+
+void apic_ipi_fixed(cpu_lapic_id_t id, intr_t intr)
+{
+  uint64_t icr = ICR_TYPE_FIXED | intr;
 
   if (apic_mode == MODE_X2APIC)
     icr |= ((uint64_t) id) << 32;

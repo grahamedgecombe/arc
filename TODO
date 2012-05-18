@@ -46,3 +46,7 @@
 
 * re-structure some of the headers (mainly mm and proc folders)
 
+* x2APIC support in MADT parsing code
+
+* MP tables NMI support (also ISA LINTn support?)
+

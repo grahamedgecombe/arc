@@ -33,6 +33,8 @@
 #include <arc/intr/pic.h>
 #include <arc/intr/route.h>
 #include <arc/intr/fault.h>
+#include <arc/intr/nmi.h>
+#include <arc/intr/lint.h>
 #include <arc/panic.h>
 #include <arc/smp/cpu.h>
 #include <arc/acpi/scan.h>
@@ -143,10 +145,11 @@ void init(uint32_t magic, multiboot_t *multiboot)
   /* enable interrupts now the IDT and interrupt controllers are set up */
   intr_unlock();
 
-  /* set up interrupt routing */
+  /* set up IPI routing */
   panic_init(); /* all of these calls route interrupts */
   fault_init();
   tlb_init();
+  lint_init();
 
   /* set up symmetric multi-processing */
   if (!up_fallback)
@@ -155,7 +158,10 @@ void init(uint32_t magic, multiboot_t *multiboot)
     smp_init();
   }
 
-  /* set up the scheduler */
+  /* set up NMI routing, this must be done when we are in SMP mode */
+  nmi_init();
+
+  /* set up the scheduler, also needs SMP mode */
   sched_init();
 
   /* set up modules */

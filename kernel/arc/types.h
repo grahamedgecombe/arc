@@ -54,10 +54,37 @@ typedef enum
   TRIGGER_LEVEL
 } trigger_t;
 
-/* a tuple consisting of an IRQ number, active polarity and trigger type */
+/* the type of an IRQ tuple */
+typedef enum
+{
+  IRQ_IO,   /* means this IRQ is routed through an I/O APIC */
+  IRQ_LOCAL /* means this IRQ is routed through a local APIC's LINTn pins */
+} irq_type_t;
+
+/*
+ * a tuple consisting of an IRQ or LINTn number, active polarity and trigger
+ * type
+ */
 typedef struct
 {
-  irq_t irq;
+  /* type of IRQ */
+  irq_type_t type;
+
+  /* where the interrupt line is routed to */
+  union
+  {
+    /* for IRQ_IO type: I/O APIC IRQ number */
+    irq_t irq;
+
+    /* for IO_LOCAL type: local APIC ID and INTn number */
+    struct
+    {
+      cpu_lapic_id_t apic;
+      uint8_t intn;
+    } local;
+  };
+
+  /* the polarity and trigger type */
   polarity_t active_polarity;
   trigger_t trigger;
 } irq_tuple_t;

@@ -76,6 +76,7 @@ void irq21(void);
 void irq22(void);
 void irq23(void);
 
+void ipi_route(void);
 void ipi_panic(void);
 void ipi_tlb(void);
 void lvt_timer(void);

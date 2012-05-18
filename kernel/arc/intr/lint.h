@@ -14,40 +14,15 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef ARC_INTR_IOAPIC_H
-#define ARC_INTR_IOAPIC_H
+#ifndef ARC_INTR_LINT_H
+#define ARC_INTR_LINT_H
 
-#include <stdbool.h>
-#include <stdint.h>
-#include <arc/util/list.h>
+#include <arc/smp/cpu.h>
 #include <arc/types.h>
 
-#define IOAPIC_MAX_IRQS 240
-
-typedef struct ioapic
-{
-  /* global I/O APIC list node */
-  list_node_t node;
-
-  /* the id of this I/O APIC */
-  ioapic_id_t id;
-
-  /* the MMIO registers */
-  volatile uint32_t *reg, *val;
-
-  /* the base IRQ number */
-  irq_t irq_base;
-
-  /* the number of IRQs this I/O APIC routes */
-  irq_t irqs;
-} ioapic_t;
-
-extern list_t ioapic_list;
-
-bool ioapic_init(ioapic_id_t id, uintptr_t addr, irq_t irq_base);
-void ioapic_route(ioapic_t *apic, irq_tuple_t *tuple, intr_t intr);
-void ioapic_route_nmi(ioapic_t *apic, irq_tuple_t *tuple);
-void ioapic_mask(ioapic_t *apic, irq_tuple_t *tuple);
+void lint_init(void);
+void lint_route_nmi(cpu_t *cpu, uint8_t lintn, trigger_t trigger);
+void lint_unroute_nmi(cpu_t *cpu, uint8_t lintn);
 
 #endif
 

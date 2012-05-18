@@ -19,11 +19,26 @@
 #include <arc/intr/apic.h>
 #include <arc/intr/pic.h>
 #include <arc/intr/ioapic.h>
+#include <arc/intr/nmi.h>
 #include <arc/smp/cpu.h>
+#include <arc/util/container.h>
 #include <arc/panic.h>
 #include <arc/tty.h>
 #include <stdbool.h>
 #include <stddef.h>
+
+static void madt_flags_to_trigger(irq_tuple_t *tuple, uint16_t flags)
+{
+  if ((flags & MADT_INTR_POLARITY_HIGH) == MADT_INTR_POLARITY_HIGH)
+    tuple->active_polarity = POLARITY_HIGH;
+  else if ((flags & MADT_INTR_POLARITY_LOW) == MADT_INTR_POLARITY_LOW)
+    tuple->active_polarity = POLARITY_LOW;
+
+  if ((flags & MADT_INTR_TRIGGER_EDGE) == MADT_INTR_TRIGGER_EDGE)
+    tuple->trigger = TRIGGER_EDGE;
+  else if ((flags & MADT_INTR_TRIGGER_LEVEL) == MADT_INTR_TRIGGER_LEVEL)
+    tuple->trigger = TRIGGER_LEVEL;
+}
 
 void madt_scan(madt_t *madt)
 {
@@ -58,15 +73,7 @@ void madt_scan(madt_t *madt)
             irq_tuple_t *tuple = isa_irq(line);
             tuple->irq = gsi;
 
-            if ((flags & MADT_INTR_POLARITY_HIGH) == MADT_INTR_POLARITY_HIGH)
-              tuple->active_polarity = POLARITY_HIGH;
-            else if ((flags & MADT_INTR_POLARITY_LOW) == MADT_INTR_POLARITY_LOW)
-              tuple->active_polarity = POLARITY_LOW;
-
-            if ((flags & MADT_INTR_TRIGGER_EDGE) == MADT_INTR_TRIGGER_EDGE)
-              tuple->trigger = TRIGGER_EDGE;
-            else if ((flags & MADT_INTR_TRIGGER_LEVEL) == MADT_INTR_TRIGGER_LEVEL)
-              tuple->trigger = TRIGGER_LEVEL;
+            madt_flags_to_trigger(tuple, flags);
           }
         }
         break;
@@ -79,8 +86,8 @@ void madt_scan(madt_t *madt)
       case MADT_TYPE_LAPIC:
         if (entry->lapic.flags & MADT_LAPIC_FLAGS_ENABLED)
         {
-          uint8_t acpi_id  = entry->lapic.cpu_id;
-          uint8_t lapic_id = entry->lapic.lapic_id;
+          uint8_t id  = entry->lapic.id;
+          uint8_t apic_id = entry->lapic.apic_id;
 
           if (bsp)
           {
@@ -91,12 +98,12 @@ void madt_scan(madt_t *madt)
              * the extra bits not done by cpu_bsp_init() here
              */
             cpu_t *cpu_bsp = cpu_get();
-            cpu_bsp->lapic_id = lapic_id;
-            cpu_bsp->acpi_id = acpi_id;
+            cpu_bsp->lapic_id = apic_id;
+            cpu_bsp->acpi_id = id;
           }
           else
           {
-            if (!cpu_ap_init(lapic_id, acpi_id))
+            if (!cpu_ap_init(apic_id, id))
               panic("failed to register AP");
           }
         }
@@ -111,6 +118,26 @@ void madt_scan(madt_t *madt)
             panic("failed to register I/O APIC");
         }
         break;
+
+      case MADT_TYPE_NMI:
+        {
+          uint32_t gsi = entry->nmi.gsi;
+          uint16_t flags = entry->nmi.flags;
+
+          irq_tuple_t tuple;
+          tuple.type = IRQ_IO;
+          tuple.irq = gsi;
+
+          /* TODO: check if this should be the default */
+          tuple.active_polarity = POLARITY_HIGH;
+          tuple.trigger = TRIGGER_EDGE;
+
+          madt_flags_to_trigger(&tuple, flags);
+
+          if (!nmi_add(tuple))
+            panic("failed to register NMI");
+        }
+        break;
     }
   }
 
@@ -120,5 +147,68 @@ void madt_scan(madt_t *madt)
 
   /* initialise the local APIC */
   xapic_init(lapic_addr);
+
+  /* perform a second pass to route local NMIs */
+  ptr = (uintptr_t) &madt->entries[0];
+  while (ptr < ptr_end)
+  {
+    madt_entry_t *entry = (madt_entry_t *) ptr;
+    ptr += entry->len;
+
+    switch (entry->type)
+    {
+      case MADT_TYPE_LNMI:
+        {
+          uint8_t id = entry->lnmi.id;
+          uint16_t flags = entry->lnmi.flags;
+          uint8_t lintn = entry->lnmi.lintn;
+
+          /* set defaults */
+          irq_tuple_t tuple;
+          tuple.type = IRQ_LOCAL;
+          tuple.local.intn = lintn;
+          tuple.active_polarity = POLARITY_HIGH; // TODO: check default trigger/polarity
+          tuple.trigger = TRIGGER_EDGE;
+
+          /* set IRQ trigger/polarity flags */
+          madt_flags_to_trigger(&tuple, flags);
+
+          if (id == 0xFF)
+          {
+            /* magic value which indicates NMI is connected to all APICs */
+            list_for_each(&cpu_list, node)
+            {
+              cpu_t *cpu = container_of(node, cpu_t, node);
+              tuple.local.apic = cpu->lapic_id;
+
+              if (!nmi_add(tuple))
+                panic("failed to register local NMI");
+            }
+          }
+          else
+          {
+            /* find the local APIC id for this NMI */
+            bool found_lapic = false;
+            list_for_each(&cpu_list, node)
+            {
+              cpu_t *cpu = container_of(node, cpu_t, node);
+              if (cpu->acpi_id == id)
+              {
+                tuple.local.apic = cpu->lapic_id;
+                found_lapic = true;
+                break;
+              }
+            }
+ 
+            if (!found_lapic)
+              panic("failed to find local APIC referred to by local NMI entry");
+
+            if (!nmi_add(tuple))
+              panic("failed to register local NMI");
+          }
+        }
+        break;
+    }
+  }
 }
 

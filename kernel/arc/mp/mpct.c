@@ -125,7 +125,11 @@ void mpct_scan(mpct_t *mpct)
           /* fake the ACPI GSI number */
           uint32_t gsi = ioapic * IOAPIC_MAX_IRQS + intr;
 
-          if (type == MPCT_IO_INTR_TYPE_INT && isa_bus_found && bus == isa_bus_id)
+          if (type == MPCT_IO_INTR_TYPE_NMI)
+          {
+            panic("todo IO NMI");
+          }
+          else if (type == MPCT_IO_INTR_TYPE_INT && isa_bus_found && bus == isa_bus_id)
           {
             if (line >= ISA_INTR_LINES)
               panic("ISA interrupt line out of range: %d", line);
@@ -149,6 +153,7 @@ void mpct_scan(mpct_t *mpct)
 
       case MPCT_TYPE_LOCAL_INTR:
         /* LINTn interrupts haven't been implemented yet */
+        panic("todo local NMI");
         entry_addr += sizeof(entry->local_intr);
         break;
 

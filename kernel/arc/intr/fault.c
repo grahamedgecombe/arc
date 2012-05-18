@@ -56,8 +56,14 @@ static const char *fault_names[] = {
 void fault_init(void)
 {
   for (intr_t intr = FAULT0; intr <= FAULT31; intr++)
-    if (!intr_route_intr(intr, &fault_handle))
-      panic("failed to route FAULT%d", intr);
+  {
+    /* skip routing NMI, this is done in nmi.c */
+    if (intr != FAULT2)
+    {
+      if (!intr_route_intr(intr, &fault_handle))
+        panic("failed to route FAULT%d", intr);
+    }
+  }
 }
 
 void fault_handle(intr_state_t *state)

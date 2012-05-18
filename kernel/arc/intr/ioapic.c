@@ -100,6 +100,28 @@ void ioapic_route(ioapic_t *apic, irq_tuple_t *tuple, intr_t intr)
   ioapic_write(apic, IOAPIC_REDTBL + 2 * src, redtbl_entry & 0xFFFFFFFF); /* unset mask bit last */
 }
 
+void ioapic_route_nmi(ioapic_t *apic, irq_tuple_t *tuple)
+{
+  // TODO: bochs does not support lowest priority delivery in physical
+  //       destination mode, should switch this back to lowest priority and set
+  //       up logical mode instead
+  uint8_t src = tuple->irq - apic->irq_base;
+  uint64_t redtbl_entry = REDTBL_DESTMOD_PHYSICAL | REDTBL_DELMOD_NMI;
+
+  if (tuple->active_polarity == POLARITY_HIGH)
+    redtbl_entry |= REDTBL_ACTIVE_HIGH;
+  else
+    redtbl_entry |= REDTBL_ACTIVE_LOW;
+
+  if (tuple->trigger == TRIGGER_LEVEL)
+    redtbl_entry |= REDTBL_TRIGGER_LEVEL;
+  else
+    redtbl_entry |= REDTBL_TRIGGER_EDGE;
+
+  ioapic_write(apic, IOAPIC_REDTBL + 2 * src + 1, (redtbl_entry >> 32) & 0xFFFFFFFF);
+  ioapic_write(apic, IOAPIC_REDTBL + 2 * src, redtbl_entry & 0xFFFFFFFF); /* unset mask bit last */
+}
+
 void ioapic_mask(ioapic_t *apic, irq_tuple_t *tuple)
 {
   uint8_t src = tuple->irq - apic->irq_base;

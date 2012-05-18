@@ -18,7 +18,9 @@
 #include <arc/intr/pic.h>
 #include <arc/intr/apic.h>
 #include <arc/intr/ioapic.h>
+#include <arc/intr/lint.h>
 #include <arc/lock/rwlock.h>
+#include <arc/smp/cpu.h>
 #include <arc/smp/mode.h>
 #include <arc/util/container.h>
 #include <arc/util/list.h>
@@ -146,25 +148,43 @@ bool intr_route_irq(irq_tuple_t *tuple, intr_handler_t handler)
     irq_t irq = tuple->irq;
     intr_t intr = (irq % IRQS) + IRQ0;
 
-    /* iterate through the I/O APICs */
-    list_for_each(&ioapic_list, node)
+    if (tuple->type == IRQ_IO)
     {
-      ioapic_t *apic = container_of(node, ioapic_t, node);
-
-      /* check if the IRQ belongs to this I/O APIC */
-      irq_t irq_first = apic->irq_base;
-      irq_t irq_last = apic->irq_base + apic->irqs - 1;
-      if (irq >= irq_first && irq < irq_last)
+      /* iterate through the I/O APICs */
+      list_for_each(&ioapic_list, node)
       {
-        /* route the interrupt */
-        bool ok = _intr_route_intr(intr, handler);
+        ioapic_t *apic = container_of(node, ioapic_t, node);
 
-        /* program the I/O APIC */
-        ioapic_route(apic, tuple, intr);
+        /* check if the IRQ belongs to this I/O APIC */
+        irq_t irq_first = apic->irq_base;
+        irq_t irq_last = apic->irq_base + apic->irqs - 1;
+        if (irq >= irq_first && irq < irq_last)
+        {
+          /* route the interrupt */
+          bool ok = _intr_route_intr(intr, handler);
 
-        /* all done! */
-        rw_wunlock(&intr_route_lock);
-        return ok;
+          /* program the I/O APIC */
+          ioapic_route(apic, tuple, intr);
+
+          /* all done! */
+          rw_wunlock(&intr_route_lock);
+          return ok;
+        }
+      }
+    }
+    else
+    {
+      /* iterate through the local APICs */
+      list_for_each(&cpu_list, node)
+      {
+        cpu_t *cpu = container_of(node, cpu_t, node);
+
+        /* check if the IRQ belongs to this local APIC */
+        if (cpu->lapic_id == tuple->local.apic)
+        {
+          // TODO: implement
+          return false;
+        }
       }
     }
   }
@@ -202,6 +222,125 @@ void intr_unroute_irq(irq_tuple_t *tuple, intr_handler_t handler)
     irq_t irq = tuple->irq;
     intr_t intr = (irq % IRQS) + IRQ0;
 
+    if (tuple->type == IRQ_IO)
+    {
+      /* iterate through the I/O APICs */
+      list_for_each(&ioapic_list, node)
+      {
+        ioapic_t *apic = container_of(node, ioapic_t, node);
+
+        /* check if the IRQ belongs to this I/O APIC */
+        irq_t irq_first = apic->irq_base;
+        irq_t irq_last = apic->irq_base + apic->irqs - 1;
+        if (irq >= irq_first && irq < irq_last)
+        {
+          /* program the I/O APIC */
+          ioapic_mask(apic, tuple);
+          return;
+        }
+      }
+
+      /* unroute this interrupt */
+      _intr_unroute_intr(intr, handler);
+    }
+    else
+    {
+      /* iterate through the local APICs */
+      list_for_each(&cpu_list, node)
+      {
+        cpu_t *cpu = container_of(node, cpu_t, node);
+
+        /* check if the IRQ belongs to this local APIC */
+        if (cpu->lapic_id == tuple->local.apic)
+        {
+          // TODO: implement
+          return;
+        }
+      }
+    }
+  }
+
+  /* release the write lock */
+  rw_wunlock(&intr_route_lock);
+}
+
+bool intr_route_nmi(irq_tuple_t *tuple)
+{
+  /* obtain the write lock */
+  rw_wlock(&intr_route_lock);
+
+  /* check if we are in uni-processor or SMP mode */
+  if (smp_mode == MODE_UP)
+    panic("PIC does not support NMI routing");
+
+  /* calculate the interrupt number */
+  irq_t irq = tuple->irq;
+
+  if (tuple->type == IRQ_IO)
+  {
+    /* iterate through the I/O APICs */
+    list_for_each(&ioapic_list, node)
+    {
+      ioapic_t *apic = container_of(node, ioapic_t, node);
+
+      /* check if the IRQ belongs to this I/O APIC */
+      irq_t irq_first = apic->irq_base;
+      irq_t irq_last = apic->irq_base + apic->irqs - 1;
+      if (irq >= irq_first && irq < irq_last)
+      {
+        /* program the I/O APIC */
+        ioapic_route_nmi(apic, tuple);
+
+        /* all done! */
+        rw_wunlock(&intr_route_lock);
+        return true;
+      }
+    }
+  }
+  else
+  {
+    /* iterate through the local APICs */
+    list_for_each(&cpu_list, node)
+    {
+      cpu_t *cpu = container_of(node, cpu_t, node);
+
+      /* check if the IRQ belongs to this local APIC */
+      if (cpu->lapic_id == tuple->local.apic)
+      {
+        /*
+         * release the write lock, must be done before we actually route the
+         * NMI as routing an NMI uses an IPI in most cases
+         *
+         * TODO: seems a bit racy? think about this.
+         */
+        rw_wunlock(&intr_route_lock);
+
+        /* program the local APIC */
+        lint_route_nmi(cpu, tuple->local.intn, tuple->trigger);
+        return true;
+      }
+    }
+  }
+
+  /* release the write lock */
+  rw_wunlock(&intr_route_lock);
+  return false;
+}
+
+void intr_unroute_nmi(irq_tuple_t *tuple)
+{
+  /* obtain the write lock */
+  rw_wlock(&intr_route_lock);
+
+  /* check if we are in uni-processor or SMP mode */
+  if (smp_mode == MODE_UP)
+    panic("PIC does not support NMI routing");
+
+  /* calculate the interrupt number */
+  irq_t irq = tuple->irq;
+
+  if (tuple->type == IRQ_IO)
+  {
     /* iterate through the I/O APICs */
     list_for_each(&ioapic_list, node)
     {
@@ -214,11 +353,33 @@ void intr_unroute_irq(irq_tuple_t *tuple, intr_handler_t handler)
       {
         /* program the I/O APIC */
         ioapic_mask(apic, tuple);
+        return;
       }
     }
+  }
+  else
+  {
+    /* iterate through the local APICs */
+    list_for_each(&cpu_list, node)
+    {
+      cpu_t *cpu = container_of(node, cpu_t, node);
 
-    /* unroute this interrupt */
-    _intr_unroute_intr(intr, handler);
+      /* check if the IRQ belongs to this local APIC */
+      if (cpu->lapic_id == tuple->local.apic)
+      {
+        /*
+         * release the write lock, must be done before we actually unroute the
+         * NMI as unrouting an NMI uses an IPI in most cases
+         *
+         * TODO: seems a bit racy? think about this.
+         */
+        rw_wunlock(&intr_route_lock);
+
+        /* program the local APIC */
+        lint_unroute_nmi(cpu, tuple->local.intn);
+        return;
+      }
+    }
   }
 
   /* release the write lock */

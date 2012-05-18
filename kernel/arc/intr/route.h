@@ -39,5 +39,9 @@ void intr_unroute_intr(intr_t intr, intr_handler_t handler);
 bool intr_route_irq(irq_tuple_t *tuple, intr_handler_t handler);
 void intr_unroute_irq(irq_tuple_t *tuple, intr_handler_t handler);
 
+/* route an NMI */
+bool intr_route_nmi(irq_tuple_t *tuple);
+void intr_unroute_nmi(irq_tuple_t *tuple);
+
 #endif
 

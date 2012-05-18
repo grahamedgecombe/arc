@@ -52,8 +52,8 @@ typedef PACK(struct
   {
     PACK(struct
     {
-      uint8_t cpu_id;
-      uint8_t lapic_id;
+      uint8_t id;
+      uint8_t apic_id;
       uint32_t flags;
     }) lapic;
 
@@ -81,7 +81,7 @@ typedef PACK(struct
 
     PACK(struct
     {
-      uint8_t cpu_id;
+      uint8_t id;
       uint16_t flags;
       uint8_t lintn;
     }) lnmi;
@@ -95,15 +95,15 @@ typedef PACK(struct
     PACK(struct
     {
       uint16_t reserved;
-      uint32_t x2apic_id;
+      uint32_t apic_id;
       uint32_t flags;
-      uint32_t cpu_uid;
+      uint32_t id;
     }) lx2apic;
 
     PACK(struct
     {
       uint16_t flags;
-      uint32_t cpu_uid;
+      uint32_t id;
       uint8_t lintn;
       uint8_t reserved[3];
     }) lx2nmi;
