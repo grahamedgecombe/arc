@@ -55,3 +55,7 @@
 
 * tidy up repitition in the interrupt routing code
 
+* make it so cmdline doesn't depend on a memory allocator... or use some kind
+  of earlyalloc system where memory is reserved in the bss e.g. 4k or so (could
+  be used for mmap too?)
+
