@@ -50,3 +50,8 @@
 
 * MP tables NMI support (also ISA LINTn support?)
 
+* merge lint.c and apic.c so messing around with making apic_read/write
+  non-static, and moving some #defines to apic.h, isn't needed?
+
+* tidy up repitition in the interrupt routing code
+

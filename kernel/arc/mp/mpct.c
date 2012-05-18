@@ -19,8 +19,23 @@
 #include <arc/intr/apic.h>
 #include <arc/intr/ioapic.h>
 #include <arc/intr/pic.h>
+#include <arc/intr/nmi.h>
 #include <arc/smp/cpu.h>
+#include <arc/util/container.h>
 #include <arc/panic.h>
+
+static void mpct_flags_to_trigger(irq_tuple_t *tuple, uint16_t flags)
+{
+  if ((flags & MPCT_IO_INTR_POLARITY_HIGH) == MPCT_IO_INTR_POLARITY_HIGH)
+    tuple->active_polarity = POLARITY_HIGH;
+  else if ((flags & MPCT_IO_INTR_POLARITY_LOW) == MPCT_IO_INTR_POLARITY_LOW)
+    tuple->active_polarity = POLARITY_LOW;
+
+  if ((flags & MPCT_IO_INTR_TRIGGER_EDGE) == MPCT_IO_INTR_TRIGGER_EDGE)
+    tuple->trigger = TRIGGER_EDGE;
+  else if ((flags & MPCT_IO_INTR_TRIGGER_LEVEL) == MPCT_IO_INTR_TRIGGER_LEVEL)
+    tuple->trigger = TRIGGER_LEVEL;
+}
 
 bool mpct_valid(mpct_t *mpct)
 {
@@ -127,7 +142,18 @@ void mpct_scan(mpct_t *mpct)
 
           if (type == MPCT_IO_INTR_TYPE_NMI)
           {
-            panic("todo IO NMI");
+            irq_tuple_t tuple;
+            tuple.type = IRQ_IO;
+            tuple.irq = gsi;
+
+            /* TODO: check if this should be the default */
+            tuple.active_polarity = POLARITY_HIGH;
+            tuple.trigger = TRIGGER_EDGE;
+
+            mpct_flags_to_trigger(&tuple, flags);
+
+            if (!nmi_add(tuple))
+              panic("failed to register NMI");
           }
           else if (type == MPCT_IO_INTR_TYPE_INT && isa_bus_found && bus == isa_bus_id)
           {
@@ -137,23 +163,69 @@ void mpct_scan(mpct_t *mpct)
             irq_tuple_t *tuple = isa_irq(line);
             tuple->irq = gsi;
 
-            if ((flags & MPCT_IO_INTR_POLARITY_HIGH) == MPCT_IO_INTR_POLARITY_HIGH)
-              tuple->active_polarity = POLARITY_HIGH;
-            else if ((flags & MPCT_IO_INTR_POLARITY_LOW) == MPCT_IO_INTR_POLARITY_LOW)
-              tuple->active_polarity = POLARITY_LOW;
-
-            if ((flags & MPCT_IO_INTR_TRIGGER_EDGE) == MPCT_IO_INTR_TRIGGER_EDGE)
-              tuple->trigger = TRIGGER_EDGE;
-            else if ((flags & MPCT_IO_INTR_TRIGGER_LEVEL) == MPCT_IO_INTR_TRIGGER_LEVEL)
-              tuple->trigger = TRIGGER_LEVEL;
+            mpct_flags_to_trigger(tuple, flags);
           }
         }
         entry_addr += sizeof(entry->io_intr);
         break;
 
       case MPCT_TYPE_LOCAL_INTR:
-        /* LINTn interrupts haven't been implemented yet */
-        panic("todo local NMI");
+        {
+          uint8_t type = entry->local_intr.type;
+          uint16_t flags = entry->local_intr.flags;
+          uint8_t bus = entry->local_intr.bus;
+          uint8_t line = entry->local_intr.irq;
+          uint8_t lapic = entry->local_intr.lapic;
+          uint8_t lint = entry->local_intr.lint;
+
+          if (type == MPCT_IO_INTR_TYPE_NMI)
+          {
+            irq_tuple_t tuple;
+            tuple.type = IRQ_LOCAL;
+            tuple.local.apic = lapic;
+            tuple.local.intn = lint;
+
+            /* TODO: check if this should be the default */
+            tuple.active_polarity = POLARITY_HIGH;
+            tuple.trigger = TRIGGER_EDGE;
+
+            mpct_flags_to_trigger(&tuple, flags);
+
+            if (lapic == 0xFF)
+            {
+              /* magic value which indicates NMI is connected to all APICs */
+              list_for_each(&cpu_list, node)
+              {
+                cpu_t *cpu = container_of(node, cpu_t, node);
+                tuple.local.apic = cpu->lapic_id;
+
+                if (!nmi_add(tuple))
+                  panic("failed to register local NMI");
+              }
+            }
+            else
+            {
+              if (!nmi_add(tuple))
+                panic("failed to register local NMI");
+            }
+          }
+          else if (type == MPCT_IO_INTR_TYPE_INT && isa_bus_found && bus == isa_bus_id)
+          {
+            if (line >= ISA_INTR_LINES)
+              panic("ISA interrupt line out of range: %d", line);
+
+            // TODO consider what we should do in this case
+            if (lapic == 0xFF)
+              panic("ISA interrupt line hardwired to all local APICs");
+
+            irq_tuple_t *tuple = isa_irq(line);
+            tuple->type = IRQ_IO;
+            tuple->local.apic = lapic;
+            tuple->local.intn = lint;
+
+            mpct_flags_to_trigger(tuple, flags);
+          }
+        }
         entry_addr += sizeof(entry->local_intr);
         break;
 
