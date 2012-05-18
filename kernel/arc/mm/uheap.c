@@ -221,7 +221,44 @@ bool uheap_init(uheap_t *heap)
 
 void uheap_destroy(void)
 {
-  /* TODO destroy the heap */
+  uheap_t *heap = uheap_get();
+
+  /* lock the heap */
+  spin_lock(&heap->lock);
+
+  /* iterate through every block in this heap */
+  list_for_each(&heap->block_list, node)
+  {
+    uheap_block_t *block = container_of(node, uheap_block_t, node);
+
+    /*
+     * free the virtual and physical memory used by the block, if it is
+     * allocated
+     */
+    if (block->allocated)
+    {
+      size_t block_size = block->end - block->start + 1;
+      range_free((uintptr_t) block->start, block_size);
+    }
+
+    /*
+     * remove the block from the list and free the memory the kernel uses to
+     * keep track of it
+     */
+    list_remove(&heap->block_list, node);
+    free(block);
+  }
+
+  /* a sanity check to ensure we really have emptied the heap */
+  assert(heap->block_list.size == 0);
+
+  /*
+   * release the lock, any further operations on the heap _will_ fail as it is
+   * empty, so it can be safely free()ed by the proc code any time after this
+   * function was called, even though we are releasing the lock so there is a
+   * potential for it to be used again in a very small period of time
+   */
+  spin_unlock(&heap->lock);
 }
 
 bool uheap_alloc_at(void *ptr, size_t size, vm_acc_t flags)
