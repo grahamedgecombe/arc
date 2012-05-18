@@ -31,7 +31,7 @@
 
 * change tty_* -> trace_*, then make it so it can be backed by tty or uart,
   will be useful for debugging to see the whole log rather than just what fits
-  into the 80x25 vga console
+  into the 80x25 vga console (add trace=tty,uart|off param to cmdline)
 
 * consider issue that proc and thread in cpu_t might not be consistent - is
   this going to cause problems? do we need any locking there also?
@@ -40,4 +40,9 @@
   should this be done by its callers?
 
 * switch from NASM to GNU AS?
+
+* route and handle NMIs (just by panic), need to consider a way to route LINTn
+  interrupts, this will also help to fully support MP
+
+* re-structure some of the headers (mainly mm and proc folders)
 
