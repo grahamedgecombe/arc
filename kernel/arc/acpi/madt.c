@@ -23,7 +23,6 @@
 #include <arc/smp/cpu.h>
 #include <arc/util/container.h>
 #include <arc/panic.h>
-#include <arc/tty.h>
 #include <stdbool.h>
 #include <stddef.h>
 

@@ -22,7 +22,7 @@
 #include <arc/mm/range.h>
 #include <arc/pack.h>
 #include <arc/panic.h>
-#include <arc/tty.h>
+#include <arc/trace.h>
 #include <assert.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -237,7 +237,7 @@ void heap_trace(void)
 {
   spin_lock(&heap_lock);
 
-  tty_printf("Tracing kernel heap...\n");
+  trace_printf("Tracing kernel heap...\n");
   for (heap_node_t *node = heap_root; node; node = node->next)
   {
     const char *state = "free";
@@ -246,7 +246,7 @@ void heap_trace(void)
     else if (node->state == HEAP_NODE_ALLOCATED)
       state = "allocated";
 
-    tty_printf(" => %0#18x -> %0#18x (%s)\n", node->start, node->end, state);
+    trace_printf(" => %0#18x -> %0#18x (%s)\n", node->start, node->end, state);
   }
 
   spin_unlock(&heap_lock);

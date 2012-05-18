@@ -22,7 +22,6 @@
 #include <arc/proc/sched.h>
 #include <arc/mm/phy32.h>
 #include <arc/panic.h>
-#include <arc/tty.h>
 #include <stddef.h>
 
 static void module_load(multiboot_tag_t *tag)

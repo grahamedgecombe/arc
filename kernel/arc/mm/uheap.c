@@ -20,7 +20,7 @@
 #include <arc/mm/range.h>
 #include <arc/proc/proc.h>
 #include <arc/util/container.h>
-#include <arc/tty.h>
+#include <arc/trace.h>
 #include <assert.h>
 #include <stdlib.h>
 
@@ -305,12 +305,12 @@ void uheap_trace(void)
   {
     spin_lock(&heap->lock);
 
-    tty_printf("Tracing user heap...\n");
+    trace_printf("Tracing user heap...\n");
     list_for_each(&heap->block_list, node)
     {
       uheap_block_t *block = container_of(node, uheap_block_t, node);
       const char *state = block->allocated ? "allocated" : "free";
-      tty_printf(" => %0#18x -> %0#18x (%s)\n", block->start, block->end, state);
+      trace_printf(" => %0#18x -> %0#18x (%s)\n", block->start, block->end, state);
     }
 
     spin_unlock(&heap->lock);

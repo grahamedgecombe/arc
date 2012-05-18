@@ -16,13 +16,13 @@
 
 #include <arc/proc/syscalls.h>
 #include <arc/mm/validate.h>
-#include <arc/tty.h>
+#include <arc/trace.h>
 
 void sys_trace(const char *message)
 {
   if (!valid_string(message))
     return; // TODO: return some err number
 
-  tty_puts(message);
+  trace_puts(message);
 }
 

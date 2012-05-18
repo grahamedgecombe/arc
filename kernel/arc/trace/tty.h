@@ -14,44 +14,26 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <arc/panic.h>
-#include <arc/trace.h>
-#include <arc/smp/mode.h>
-#include <arc/cpu/intr.h>
-#include <arc/cpu/halt.h>
-#include <arc/intr/route.h>
-#include <arc/intr/apic.h>
+#ifndef ARC_TRACE_TTY_H
+#define ARC_TRACE_TTY_H
 
-void panic_init(void)
-{
-  if (!intr_route_intr(IPI_PANIC, &panic_handle_ipi))
-    panic("failed to route panic IPI");
-}
+#include <stdarg.h>
 
-void panic_handle_ipi(intr_state_t *state)
-{
-  intr_disable();
-  halt_forever();
-}
+/* the dimensions of the terminal */
+#define TTY_WIDTH  80
+#define TTY_HEIGHT 25
 
-void panic(const char *message, ...)
-{
-  va_list args;
-  va_start(args, message);
-  vpanic(message, args);
-  va_end(args);
-}
+/* initializes the tty driver */
+void tty_init(void);
 
-void vpanic(const char *message, va_list args)
-{
-  if (smp_mode == MODE_SMP)
-    apic_ipi_all_exc_self(IPI_PANIC);
+/* puts a character onto the screen */
+void tty_putch(char c);
 
-  trace_puts("PANIC: ");
-  trace_vprintf(message, args);
-  trace_puts("\n");
+/* puts a string onto the screen */
+void tty_puts(const char *str);
 
-  intr_disable();
-  halt_forever();
-}
+/* prints formatted strings onto the screen */
+void tty_vprintf(const char *fmt, va_list args);
+
+#endif
 

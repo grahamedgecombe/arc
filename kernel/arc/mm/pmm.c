@@ -20,7 +20,7 @@
 #include <arc/cpu/tlb.h>
 #include <arc/lock/spinlock.h>
 #include <arc/pack.h>
-#include <arc/tty.h>
+#include <arc/trace.h>
 #include <string.h>
 
 #define PAGE_TABLE_OFFSET 0xFFFFFFFFBF7FF000
@@ -318,7 +318,7 @@ void pmm_init(mm_map_t *map)
       {
         const char *zone_str = get_zone_str(zone);
         const char *size_str = get_size_str(size);
-        tty_printf(" => Zone %s Size %s: %d frames\n", zone_str, size_str, count);
+        trace_printf(" => Zone %s Size %s: %d frames\n", zone_str, size_str, count);
       }
     }
   }

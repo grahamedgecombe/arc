@@ -14,7 +14,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <arc/tty.h>
+#include <arc/trace/tty.h>
 #include <arc/bda.h>
 #include <arc/cpu/port.h>
 #include <arc/lock/spinlock.h>
@@ -298,15 +298,6 @@ static void _tty_putch(char c)
     dirty_text = true;
     dirty_cursor = true;
   }
-}
-
-/* print a formatted string to the terminal */
-void tty_printf(const char *fmt, ...)
-{
-  va_list args;
-  va_start(args, fmt);
-  tty_vprintf(fmt, args);
-  va_end(args);
 }
 
 /* print a formatted string to the terminal using the given va_list */

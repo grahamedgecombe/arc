@@ -14,27 +14,34 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef ARC_TTY_H
-#define ARC_TTY_H
+#include <arc/trace.h>
+#include <arc/trace/tty.h>
 
-#include <stdarg.h>
+void trace_init(void)
+{
+  tty_init();
+}
 
-/* the dimensions of the terminal */
-#define TTY_WIDTH  80
-#define TTY_HEIGHT 25
+void trace_putch(char c)
+{
+  tty_putch(c);
+}
 
-/* initializes the tty driver */
-void tty_init(void);
+void trace_puts(const char *str)
+{
+  tty_puts(str);
+}
 
-/* puts a character onto the screen */
-void tty_putch(char c);
+void trace_printf(const char *fmt, ...)
+{
+  va_list args;
+  va_start(args, fmt);
+  trace_vprintf(fmt, args);
+  va_end(args);
+}
 
-/* puts a string onto the screen */
-void tty_puts(const char *str);
-
-/* prints formatted strings onto the screen */
-void tty_printf(const char *fmt, ...);
-void tty_vprintf(const char *fmt, va_list args);
-
-#endif
+void trace_vprintf(const char *fmt, va_list args)
+{
+  tty_vprintf(fmt, args);
+}
 

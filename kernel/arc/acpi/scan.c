@@ -22,7 +22,7 @@
 #include <arc/mm/mmio.h>
 #include <arc/cmdline.h>
 #include <arc/panic.h>
-#include <arc/tty.h>
+#include <arc/trace.h>
 #include <stddef.h>
 #include <string.h>
 
@@ -76,7 +76,7 @@ bool acpi_scan(void)
   const char *acpi = cmdline_get("acpi");
   if (acpi && strcmp(acpi, "off") == 0)
   {
-    tty_puts(" => ACPI disabled by kernel command line\n");
+    trace_puts(" => ACPI disabled by kernel command line\n");
     return false;
   }
 
@@ -84,7 +84,7 @@ bool acpi_scan(void)
   rsdp_t *rsdp = rsdp_scan();
   if (!rsdp)
   {
-    tty_puts(" => ACPI not supported\n");
+    trace_puts(" => ACPI not supported\n");
     return false;
   }
 

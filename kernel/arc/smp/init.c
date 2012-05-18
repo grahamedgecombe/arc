@@ -31,7 +31,7 @@
 #include <arc/proc/sched.h>
 #include <arc/proc/syscall.h>
 #include <arc/util/container.h>
-#include <arc/tty.h>
+#include <arc/trace.h>
 #include <arc/panic.h>
 #include <stdlib.h>
 #include <string.h>
@@ -55,7 +55,7 @@ static spinlock_t mode_switch_lock = SPIN_UNLOCKED;
 static void print_cpu_info(cpu_t *cpu)
 {
   const char *str = cpu->bsp ? ", bsp" : "";
-  tty_printf(" => CPU (struct at %0#18x, id %0#10x%s)\n", cpu, cpu->lapic_id, str);
+  trace_printf(" => CPU (struct at %0#18x, id %0#10x%s)\n", cpu, cpu->lapic_id, str);
 }
 
 /* bring up an AP */

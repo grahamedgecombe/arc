@@ -21,7 +21,7 @@
 #include <arc/mm/phy32.h>
 #include <arc/cmdline.h>
 #include <arc/panic.h>
-#include <arc/tty.h>
+#include <arc/trace.h>
 #include <string.h>
 
 bool mp_scan(void)
@@ -30,7 +30,7 @@ bool mp_scan(void)
   const char *mp = cmdline_get("mp");
   if (mp && strcmp(mp, "off") == 0)
   {
-    tty_puts(" => MP disabled by kernel command line\n");
+    trace_puts(" => MP disabled by kernel command line\n");
     return false;
   }
 
@@ -38,7 +38,7 @@ bool mp_scan(void)
   mpfp_t *mpfp = mpfp_scan();
   if (!mpfp)
   {
-    tty_puts(" => MP not supported\n");
+    trace_puts(" => MP not supported\n");
     return false;
   }
 
@@ -46,7 +46,7 @@ bool mp_scan(void)
   if (mpfp->features[0] != 0)
   {
     // TODO: add support for default config
-    tty_puts(" => MP default configuration not supported\n");
+    trace_puts(" => MP default configuration not supported\n");
     return false;
   }
 

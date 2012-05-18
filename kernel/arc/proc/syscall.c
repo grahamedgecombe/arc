@@ -20,7 +20,6 @@
 #include <arc/cpu/efer.h>
 #include <arc/cpu/msr.h>
 #include <arc/cpu/gdt.h>
-#include <arc/tty.h>
 
 uintptr_t syscall_table[] =
 {

@@ -18,7 +18,7 @@
 #include <arc/mm/common.h>
 #include <arc/mm/phy32.h>
 #include <arc/panic.h>
-#include <arc/tty.h>
+#include <arc/trace.h>
 #include <string.h>
 #include <stdbool.h>
 
@@ -244,7 +244,7 @@ mm_map_t *mm_map_init(multiboot_t *multiboot)
     uintptr_t start = map.entries[id].addr_start;
     uintptr_t end = map.entries[id].addr_end;
     int type = map.entries[id].type;
-    tty_printf(" => %0#18x -> %0#18x (%s)\n", start, end, mm_map_type_desc(type));
+    trace_printf(" => %0#18x -> %0#18x (%s)\n", start, end, mm_map_type_desc(type));
   }
 
   /* and return a pointer to it */

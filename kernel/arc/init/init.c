@@ -15,7 +15,7 @@
  */
 
 #include <arc/init.h>
-#include <arc/tty.h>
+#include <arc/trace.h>
 #include <arc/cmdline.h>
 #include <arc/mm/map.h>
 #include <arc/mm/phy32.h>
@@ -50,19 +50,19 @@
 static void print_banner(void)
 {
   const char *banner = "Arc Operating System";
-  int gap_len = TTY_WIDTH / 2 - strlen(banner) / 2;
+  int tty_width = 80;
+  int gap_len = tty_width / 2 - strlen(banner) / 2;
 
-  char dashes[TTY_WIDTH + 1], gap[gap_len + 1];
+  char dashes[tty_width + 1], gap[gap_len + 1];
 
-  for (int i = 0; i < TTY_WIDTH; i++)
-    dashes[i] = '-';
-  dashes[TTY_WIDTH] = 0;
+  memset(dashes, '-', tty_width);
+  dashes[tty_width] = 0;
 
   for (int i = 0; i < gap_len; i++)
     gap[i] = ' ';
   gap[gap_len] = 0;
 
-  tty_printf("%s%s%s%s%s", dashes, gap, banner, gap, dashes);
+  trace_printf("%s%s%s%s%s", dashes, gap, banner, gap, dashes);
 }
 
 void init(uint32_t magic, multiboot_t *multiboot)
@@ -70,8 +70,8 @@ void init(uint32_t magic, multiboot_t *multiboot)
   /* set up the BSP's percpu structure */
   cpu_bsp_init();
 
-  /* initialise tty driver */
-  tty_init();
+  /* initialise tracing */
+  trace_init();
 
   /* print banner */
   print_banner();
@@ -94,19 +94,19 @@ void init(uint32_t magic, multiboot_t *multiboot)
   cpu_features_init();
 
   /* map physical memory */
-  tty_puts("Mapping physical memory...\n");
+  trace_puts("Mapping physical memory...\n");
   mm_map_t *map = mm_map_init(multiboot);
 
   /* set up the physical memory manager */
-  tty_puts("Setting up the physical memory manager...\n");
+  trace_puts("Setting up the physical memory manager...\n");
   pmm_init(map);
 
   /* set up the virtual memory manager */
-  tty_puts("Setting up the virtual memory manager...\n");
+  trace_puts("Setting up the virtual memory manager...\n");
   vmm_init();
 
   /* set up the heap */
-  tty_puts("Setting up the heap...\n");
+  trace_puts("Setting up the heap...\n");
   heap_init();
 
   /* parse command line arguments now we can malloc */
@@ -119,16 +119,16 @@ void init(uint32_t magic, multiboot_t *multiboot)
   bool up_fallback = false;
 
   /* search for ACPI tables */
-  tty_puts("Scanning ACPI tables...\n");
+  trace_puts("Scanning ACPI tables...\n");
   if (!acpi_scan())
   {
     /* search for MP tables if the PC doesn't support ACPI */
-    tty_puts("Scanning MP tables...\n");
+    trace_puts("Scanning MP tables...\n");
 
     if (!mp_scan())
     {
       /* fall back to non-SMP mode using the PIC */
-      tty_puts("Falling back to single processor mode...\n");
+      trace_puts("Falling back to single processor mode...\n");
       pic_init();
       up_fallback = true;
     }
@@ -154,7 +154,7 @@ void init(uint32_t magic, multiboot_t *multiboot)
   /* set up symmetric multi-processing */
   if (!up_fallback)
   {
-    tty_puts("Setting up SMP...\n");
+    trace_puts("Setting up SMP...\n");
     smp_init();
   }
 
