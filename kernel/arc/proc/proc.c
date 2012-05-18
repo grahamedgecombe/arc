@@ -19,6 +19,7 @@
 #include <arc/smp/cpu.h>
 #include <arc/mm/pmm.h>
 #include <arc/mm/vmm.h>
+#include <arc/lock/intr.h>
 #include <stdlib.h>
 
 proc_t *proc_create(void)
@@ -74,9 +75,25 @@ void proc_thread_add(proc_t *proc, thread_t *thread)
 
 void proc_destroy(proc_t *proc)
 {
-  // TODO: destroy threads within the process
+  // TODO: destroy threads within the process and make sure they aren't queued
+
+  /* lock interrupts so we can temporarily switch address spaces */
+  intr_lock();
+
+  /* record the old pml4 table and switch to the new one */
+  uintptr_t old_pml4_table = cr3_read();
+  cr3_write(proc->pml4_table);
+
+  /* destroy the user-space heap */
   uheap_destroy();
-  // TODO: switch to a new process before destroying it
+
+  /* switch back to the old address space and unlock interrupts */
+  cr3_write(old_pml4_table);
+  intr_unlock();
+
+  // TODO: if cpu->proc == proc, change it to 0?
+
+  /* free the pml4 table and process struct */
   pmm_free(proc->pml4_table);
   free(proc);
 }
