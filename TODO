@@ -41,21 +41,23 @@
 
 * switch from NASM to GNU AS?
 
-* route and handle NMIs (just by panic), need to consider a way to route LINTn
-  interrupts, this will also help to fully support MP
-
 * re-structure some of the headers (mainly mm and proc folders)
 
 * x2APIC support in MADT parsing code
-
-* MP tables NMI support (also ISA LINTn support?)
 
 * merge lint.c and apic.c so messing around with making apic_read/write
   non-static, and moving some #defines to apic.h, isn't needed?
 
 * tidy up repitition in the interrupt routing code
 
-* make it so cmdline doesn't depend on a memory allocator... or use some kind
-  of earlyalloc system where memory is reserved in the bss e.g. 4k or so (could
-  be used for mmap too?)
+* make it so cmdline doesn't depend on a memory allocator, this way it can b
+  used early enough to select the trace output(s)
+
+* remove MP support, uniprocessor support (i.e. PIC only stuff), simplify NMI
+  routing (in cpu_t just have an lint0_nmi and lint1_nmi flag, so we don't need
+  to mess around with an IPI to route NMIs), remove support for arbitrary
+  interrupts to get routed to LINTn (this is messy) - I don't think any of this
+  is really needed given almost every computer with x86-64 support will have
+  ACPI, local APICs and an I/O APIC - even without multiple cores - and this
+  legacy cruft is making the code ugly
 
