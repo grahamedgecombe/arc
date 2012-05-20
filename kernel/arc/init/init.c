@@ -34,11 +34,9 @@
 #include <arc/intr/route.h>
 #include <arc/intr/fault.h>
 #include <arc/intr/nmi.h>
-#include <arc/intr/lint.h>
 #include <arc/panic.h>
 #include <arc/smp/cpu.h>
 #include <arc/acpi/scan.h>
-#include <arc/mp/scan.h>
 #include <arc/smp/init.h>
 #include <arc/proc/sched.h>
 #include <arc/proc/syscall.h>
@@ -122,16 +120,10 @@ void init(uint32_t magic, multiboot_t *multiboot)
   trace_puts("Scanning ACPI tables...\n");
   if (!acpi_scan())
   {
-    /* search for MP tables if the PC doesn't support ACPI */
-    trace_puts("Scanning MP tables...\n");
-
-    if (!mp_scan())
-    {
-      /* fall back to non-SMP mode using the PIC */
-      trace_puts("Falling back to single processor mode...\n");
-      pic_init();
-      up_fallback = true;
-    }
+    /* fall back to non-SMP mode using the PIC */
+    trace_puts("Falling back to single processor mode...\n");
+    pic_init();
+    up_fallback = true;
   }
 
   /* workaround for a bug in the Bochs ACPI/MP tables */
@@ -145,11 +137,10 @@ void init(uint32_t magic, multiboot_t *multiboot)
   /* enable interrupts now the IDT and interrupt controllers are set up */
   intr_unlock();
 
-  /* set up IPI routing */
-  panic_init(); /* all of these calls route interrupts */
+  /* route IPIs */
+  panic_init();
   fault_init();
   tlb_init();
-  lint_init();
 
   /* set up symmetric multi-processing */
   if (!up_fallback)

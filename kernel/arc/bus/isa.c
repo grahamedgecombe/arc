@@ -33,7 +33,6 @@ void isa_init(void)
   for (int line = 0; line < ISA_INTR_LINES; line++)
   {
     irq_tuple_t *tuple = &isa_irqs[line];
-    tuple->type = IRQ_IO;
     tuple->irq = line;
     tuple->active_polarity = POLARITY_HIGH;
     tuple->trigger = TRIGGER_EDGE;

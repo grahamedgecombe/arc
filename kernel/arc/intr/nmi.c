@@ -48,7 +48,7 @@ void nmi_init(void)
      * this way to avoid collisions with another IRQ - the NMI handler *always*
      * panic()s, so it cannot be shared
      */
-    if (!intr_route_nmi(&nmi->tuple))
+    if (!intr_route_irq_to(&nmi->tuple, FAULT2))
       panic("failed to route NMI");
   }
 

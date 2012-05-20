@@ -124,10 +124,7 @@ void madt_scan(madt_t *madt)
           uint16_t flags = entry->nmi.flags;
 
           irq_tuple_t tuple;
-          tuple.type = IRQ_IO;
           tuple.irq = gsi;
-
-          /* TODO: check if this should be the default */
           tuple.active_polarity = POLARITY_HIGH;
           tuple.trigger = TRIGGER_EDGE;
 
@@ -159,18 +156,12 @@ void madt_scan(madt_t *madt)
       case MADT_TYPE_LNMI:
         {
           uint8_t id = entry->lnmi.id;
-          uint16_t flags = entry->lnmi.flags;
           uint8_t lintn = entry->lnmi.lintn;
+          // TODO: deal with the flags
+          //uint16_t flags = entry->lnmi.flags;
 
-          /* set defaults */
-          irq_tuple_t tuple;
-          tuple.type = IRQ_LOCAL;
-          tuple.local.intn = lintn;
-          tuple.active_polarity = POLARITY_HIGH; // TODO: check default trigger/polarity
-          tuple.trigger = TRIGGER_EDGE;
-
-          /* set IRQ trigger/polarity flags */
-          madt_flags_to_trigger(&tuple, flags);
+          if (lintn != 0 && lintn != 1)
+            panic("LINTn can only be set to 0 or 1");
 
           if (id == 0xFF)
           {
@@ -178,32 +169,24 @@ void madt_scan(madt_t *madt)
             list_for_each(&cpu_list, node)
             {
               cpu_t *cpu = container_of(node, cpu_t, node);
-              tuple.local.apic = cpu->lapic_id;
-
-              if (!nmi_add(tuple))
-                panic("failed to register local NMI");
+              cpu->apic_lint_nmi[lintn] = true;
             }
           }
           else
           {
             /* find the local APIC id for this NMI */
-            bool found_lapic = false;
+            cpu_t *cpu = 0;
             list_for_each(&cpu_list, node)
             {
-              cpu_t *cpu = container_of(node, cpu_t, node);
+              cpu = container_of(node, cpu_t, node);
               if (cpu->acpi_id == id)
-              {
-                tuple.local.apic = cpu->lapic_id;
-                found_lapic = true;
                 break;
-              }
             }
  
-            if (!found_lapic)
+            if (!cpu)
               panic("failed to find local APIC referred to by local NMI entry");
 
-            if (!nmi_add(tuple))
-              panic("failed to register local NMI");
+            cpu->apic_lint_nmi[lintn] = true;
           }
         }
         break;

@@ -11,5 +11,4 @@ key1[=value1] key2[=value2] ...
 The following keys can be used:
 
 acpi - set to 'off' to disable ACPI support
-mp - set to 'off' to disable Intel MP support
 

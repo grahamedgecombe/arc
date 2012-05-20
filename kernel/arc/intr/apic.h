@@ -21,25 +21,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-/* LVT registers */
-#define APIC_LVT_TIMER  0x32
-#define APIC_LVT_LINT0  0x35
-#define APIC_LVT_LINT1  0x36
-#define APIC_LVT_ERROR  0x37
-
-/* LVT flags */
-#define LVT_MASKED         0x00010000
-#define LVT_TYPE_FIXED     0x00000000
-#define LVT_TYPE_SMI       0x00000200
-#define LVT_TYPE_NMI       0x00000400
-#define LVT_TYPE_EXTINT    0x00000700
-#define LVT_DELIVS         0x00001000
-#define LVT_REMOTE_IRR     0x00004000
-#define LVT_TRIGGER_LEVEL  0x00008000
-#define LVT_TRIGGER_EDGE   0x00000000
-#define LVT_TIMER_PERIODIC 0x00020000
-#define LVT_TIMER_ONE_SHOT 0x00000000
-
 /* global xAPIC/x2APIC enable */
 bool xapic_init(uintptr_t addr); /* init in xAPIC mode using MMIO */
 void x2apic_init(void);          /* init in x2APIC mode using MSRs */

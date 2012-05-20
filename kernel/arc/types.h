@@ -61,28 +61,11 @@ typedef enum
   IRQ_LOCAL /* means this IRQ is routed through a local APIC's LINTn pins */
 } irq_type_t;
 
-/*
- * a tuple consisting of an IRQ or LINTn number, active polarity and trigger
- * type
- */
+/* a tuple consisting of an IRQ number, active polarity and trigger type */
 typedef struct
 {
-  /* type of IRQ */
-  irq_type_t type;
-
-  /* where the interrupt line is routed to */
-  union
-  {
-    /* for IRQ_IO type: I/O APIC IRQ number */
-    irq_t irq;
-
-    /* for IO_LOCAL type: local APIC ID and INTn number */
-    struct
-    {
-      cpu_lapic_id_t apic;
-      uint8_t intn;
-    } local;
-  };
+  /* I/O APIC IRQ number */
+  irq_t irq;
 
   /* the polarity and trigger type */
   polarity_t active_polarity;

@@ -32,16 +32,16 @@ void intr_dispatch(intr_state_t *state);
 bool intr_route_intr(intr_t intr, intr_handler_t handler);
 void intr_unroute_intr(intr_t intr, intr_handler_t handler);
 
+/* route an IRQ to an interrupt */
+bool intr_route_irq_to(irq_tuple_t *tuple, intr_t intr);
+void intr_unroute_irq_to(irq_tuple_t *tuple, intr_t intr);
+
 /*
- * route by IRQ, these actually work by figuring out which interrupt an IRQ is
- * routed to by the I/O APICs and then using the above functions
+ * route an IRQ to an interrupt handler directly without worrying about picking
+ * an interrupt id - this function is a combination of the above functions
  */
 bool intr_route_irq(irq_tuple_t *tuple, intr_handler_t handler);
 void intr_unroute_irq(irq_tuple_t *tuple, intr_handler_t handler);
-
-/* route an NMI */
-bool intr_route_nmi(irq_tuple_t *tuple);
-void intr_unroute_nmi(irq_tuple_t *tuple);
 
 #endif
 
