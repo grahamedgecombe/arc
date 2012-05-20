@@ -14,8 +14,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef ARC_MM_UHEAP_H
-#define ARC_MM_UHEAP_H
+#ifndef ARC_MM_SEG_H
+#define ARC_MM_SEG_H
 
 #include <arc/mm/common.h>
 #include <arc/lock/spinlock.h>
@@ -23,30 +23,26 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-#define UHEAP_R 0x1
-#define UHEAP_W 0x2
-#define UHEAP_X 0x4
-
-typedef struct uheap_block
+typedef struct seg_block
 {
   list_node_t node;
   uintptr_t start;
   uintptr_t end;
   bool allocated;
-} uheap_block_t;
+} seg_block_t;
 
 typedef struct
 {
   spinlock_t lock;
   list_t block_list;
-} uheap_t;
+} seg_t;
 
-bool uheap_init(uheap_t *heap);
-void uheap_destroy(void);
-bool uheap_alloc_at(void *ptr, size_t size, vm_acc_t flags);
-void *uheap_alloc(size_t size, vm_acc_t flags);
-void uheap_free(void *ptr);
-void uheap_trace(void);
+bool seg_init(seg_t *segments);
+void seg_destroy(void);
+bool seg_alloc_at(void *ptr, size_t size, vm_acc_t flags);
+void *seg_alloc(size_t size, vm_acc_t flags);
+void seg_free(void *ptr);
+void seg_trace(void);
 
 #endif
 

@@ -17,7 +17,7 @@
 #ifndef ARC_PROC_PROC_H
 #define ARC_PROC_PROC_H
 
-#include <arc/mm/uheap.h>
+#include <arc/mm/seg.h>
 #include <arc/proc/thread.h>
 #include <arc/lock/spinlock.h>
 #include <arc/util/list.h>
@@ -34,8 +34,8 @@ typedef struct proc
   /* list of threads in this process */
   list_t thread_list;
 
-  /* user-space heap */
-  uheap_t heap;
+  /* memory segments */
+  seg_t segments;
 } proc_t;
 
 proc_t *proc_create(void);

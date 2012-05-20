@@ -16,7 +16,7 @@
 
 #include <arc/proc/elf64.h>
 #include <arc/mm/align.h>
-#include <arc/mm/uheap.h>
+#include <arc/mm/seg.h>
 #include <string.h>
 
 static bool elf64_ehdr_valid(elf64_ehdr_t *ehdr)
@@ -67,13 +67,13 @@ bool elf64_load(elf64_ehdr_t *elf, size_t size)
       continue;
 
     /* compute segment flags */
-    int flags = 0;
+    vm_acc_t flags = 0;
     if (phdr->p_flags & PF_R)
-      flags |= UHEAP_R;
+      flags |= VM_R;
     if (phdr->p_flags & PF_W)
-      flags |= UHEAP_W;
+      flags |= VM_W;
     if (phdr->p_flags & PF_X)
-      flags |= UHEAP_X;
+      flags |= VM_X;
 
     /* compute segment address and length */
     uintptr_t seg_addr = phdr->p_vaddr - phdr->p_offset;
@@ -84,7 +84,7 @@ bool elf64_load(elf64_ehdr_t *elf, size_t size)
       goto rollback;
 
     /* allocate segment on user heap */
-    if (!uheap_alloc_at((void *) seg_addr, seg_len, flags))
+    if (!seg_alloc_at((void *) seg_addr, seg_len, flags))
       goto rollback;
 
     /* copy data from the ELF file into memory */
@@ -99,7 +99,7 @@ bool elf64_load(elf64_ehdr_t *elf, size_t size)
 rollback:
   for (size_t j = 0; j < i; j++) {
     elf64_phdr_t *phdr = &phdrs[j];
-    uheap_free((void *) phdr->p_vaddr);
+    seg_free((void *) phdr->p_vaddr);
   }
   return false;
 }

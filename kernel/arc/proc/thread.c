@@ -18,7 +18,7 @@
 #include <arc/cpu/flags.h>
 #include <arc/cpu/gdt.h>
 #include <arc/smp/cpu.h>
-#include <arc/mm/uheap.h>
+#include <arc/mm/seg.h>
 #include <stdlib.h>
 
 #define THREAD_STACK_SIZE 8192
@@ -29,7 +29,7 @@ thread_t *thread_create(proc_t *proc)
   if (!thread)
     return 0;
 
-  void *stack = uheap_alloc(THREAD_STACK_SIZE, UHEAP_R | UHEAP_W);
+  void *stack = seg_alloc(THREAD_STACK_SIZE, VM_R | VM_W);
   if (!stack)
   {
     free(thread);

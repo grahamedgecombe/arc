@@ -44,7 +44,7 @@ proc_t *proc_create(void)
 
   proc->vmm_lock = SPIN_UNLOCKED;
 
-  if (!uheap_init(&proc->heap))
+  if (!seg_init(&proc->segments))
   {
     pmm_free(proc->pml4_table);
     free(proc);
@@ -84,8 +84,8 @@ void proc_destroy(proc_t *proc)
   uintptr_t old_pml4_table = cr3_read();
   cr3_write(proc->pml4_table);
 
-  /* destroy the user-space heap */
-  uheap_destroy();
+  /* destroy the user memory segments */
+  seg_destroy();
 
   /* switch back to the old address space and unlock interrupts */
   cr3_write(old_pml4_table);

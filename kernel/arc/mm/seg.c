@@ -14,7 +14,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <arc/mm/uheap.h>
+#include <arc/mm/seg.h>
 #include <arc/mm/align.h>
 #include <arc/mm/common.h>
 #include <arc/mm/range.h>
@@ -24,17 +24,17 @@
 #include <assert.h>
 #include <stdlib.h>
 
-static bool _uheap_alloc_at(uheap_t *heap, void *ptr, size_t size, vm_acc_t flags)
+static bool _seg_alloc_at(seg_t *segments, void *ptr, size_t size, vm_acc_t flags)
 {
   uintptr_t addr = (uintptr_t) ptr;
   assert((size % FRAME_SIZE) == 0);
 
-  list_for_each(&heap->block_list, node)
+  list_for_each(&segments->block_list, node)
   {
-    uheap_block_t *block = container_of(node, uheap_block_t, node);
+    seg_block_t *block = container_of(node, seg_block_t, node);
     if (addr >= block->start && (addr + size - 1) <= block->end)
     {
-      uheap_block_t *left_block = 0, *right_block = 0;
+      seg_block_t *left_block = 0, *right_block = 0;
 
       /* allocate underlying page frames and map the region into memory */
       if (!range_alloc(addr, size, flags))
@@ -76,7 +76,7 @@ static bool _uheap_alloc_at(uheap_t *heap, void *ptr, size_t size, vm_acc_t flag
         left_block->allocated = false;
         block->start = addr;
 
-        list_insert_before(&heap->block_list, &block->node, &left_block->node);
+        list_insert_before(&segments->block_list, &block->node, &left_block->node);
       }
 
       /* split the right side of the block away */
@@ -87,7 +87,7 @@ static bool _uheap_alloc_at(uheap_t *heap, void *ptr, size_t size, vm_acc_t flag
         right_block->allocated = false;
         block->end = addr + size - 1;
 
-        list_insert_after(&heap->block_list, &block->node, &right_block->node);
+        list_insert_after(&segments->block_list, &block->node, &right_block->node);
       }
 
       /* mark this block as allocated */
@@ -99,13 +99,13 @@ static bool _uheap_alloc_at(uheap_t *heap, void *ptr, size_t size, vm_acc_t flag
   return false;
 }
 
-static void *_uheap_alloc(uheap_t *heap, size_t size, vm_acc_t flags)
+static void *_seg_alloc(seg_t *segments, size_t size, vm_acc_t flags)
 {
   assert((size % FRAME_SIZE) == 0);
 
-  list_for_each(&heap->block_list, node)
+  list_for_each(&segments->block_list, node)
   {
-    uheap_block_t *block = container_of(node, uheap_block_t, node);
+    seg_block_t *block = container_of(node, seg_block_t, node);
     size_t block_size = block->end - block->start + 1;
     if (!block->allocated && block_size >= size)
     {
@@ -118,7 +118,7 @@ static void *_uheap_alloc(uheap_t *heap, size_t size, vm_acc_t flags)
       /* split the right part of the block away */
       if (block_size != size)
       {
-        uheap_block_t *right_block = malloc(sizeof(*block));
+        seg_block_t *right_block = malloc(sizeof(*block));
         if (!right_block)
         {
           range_free(addr, size);
@@ -130,7 +130,7 @@ static void *_uheap_alloc(uheap_t *heap, size_t size, vm_acc_t flags)
         right_block->allocated = false;
         block->end = addr + size - 1;
 
-        list_insert_after(&heap->block_list, &block->node, &right_block->node);
+        list_insert_after(&segments->block_list, &block->node, &right_block->node);
       }
 
       /* mark this block as allocated and return a pointer to it */
@@ -142,13 +142,13 @@ static void *_uheap_alloc(uheap_t *heap, size_t size, vm_acc_t flags)
   return 0;
 }
 
-static void _uheap_free(uheap_t *heap, void *ptr)
+static void _seg_free(seg_t *segments, void *ptr)
 {
   uintptr_t addr = (uintptr_t) ptr;
 
-  list_for_each(&heap->block_list, node)
+  list_for_each(&segments->block_list, node)
   {
-    uheap_block_t *block = container_of(node, uheap_block_t, node);
+    seg_block_t *block = container_of(node, seg_block_t, node);
     if (block->allocated && block->start == addr)
     {
       /* free the underlying page frames and unmap the virtual memory */
@@ -161,12 +161,12 @@ static void _uheap_free(uheap_t *heap, void *ptr)
       /* try to merge with the left block */
       if (block->node.prev)
       {
-        uheap_block_t *left_block = container_of(block->node.prev, uheap_block_t, node);
+        seg_block_t *left_block = container_of(block->node.prev, seg_block_t, node);
         if (!left_block->allocated)
         {
           block->start = left_block->start;
 
-          list_remove(&heap->block_list, &left_block->node);
+          list_remove(&segments->block_list, &left_block->node);
           free(left_block);
         }
       }
@@ -174,12 +174,12 @@ static void _uheap_free(uheap_t *heap, void *ptr)
       /* try to merge with the right block */
       if (block->node.next)
       {
-        uheap_block_t *right_block = container_of(block->node.next, uheap_block_t, node);
+        seg_block_t *right_block = container_of(block->node.next, seg_block_t, node);
         if (!right_block->allocated)
         {
           block->end = right_block->end;
 
-          list_remove(&heap->block_list, &right_block->node);
+          list_remove(&segments->block_list, &right_block->node);
           free(right_block);
         }
       }
@@ -189,19 +189,19 @@ static void _uheap_free(uheap_t *heap, void *ptr)
   }
 }
 
-static uheap_t *uheap_get(void)
+static seg_t *seg_get(void)
 {
   proc_t *proc = proc_get();
   if (!proc)
     return 0;
 
-  return &proc->heap;
+  return &proc->segments;
 }
 
-bool uheap_init(uheap_t *heap)
+bool seg_init(seg_t *segments)
 {
   /* allocate head block */
-  uheap_block_t *block = malloc(sizeof(*block));
+  seg_block_t *block = malloc(sizeof(*block));
   if (!block)
     return false;
 
@@ -211,25 +211,25 @@ bool uheap_init(uheap_t *heap)
   block->allocated = false;
 
   /* init the spinlock */
-  heap->lock = SPIN_UNLOCKED;
+  segments->lock = SPIN_UNLOCKED;
 
   /* init the block list and add the block to the head */
-  list_init(&heap->block_list);
-  list_add_head(&heap->block_list, &block->node);
+  list_init(&segments->block_list);
+  list_add_head(&segments->block_list, &block->node);
   return true;
 }
 
-void uheap_destroy(void)
+void seg_destroy(void)
 {
-  uheap_t *heap = uheap_get();
+  seg_t *segments = seg_get();
 
-  /* lock the heap */
-  spin_lock(&heap->lock);
+  /* lock the seg */
+  spin_lock(&segments->lock);
 
-  /* iterate through every block in this heap */
-  list_for_each(&heap->block_list, node)
+  /* iterate through every block in this seg */
+  list_for_each(&segments->block_list, node)
   {
-    uheap_block_t *block = container_of(node, uheap_block_t, node);
+    seg_block_t *block = container_of(node, seg_block_t, node);
 
     /*
      * free the virtual and physical memory used by the block, if it is
@@ -245,75 +245,75 @@ void uheap_destroy(void)
      * remove the block from the list and free the memory the kernel uses to
      * keep track of it
      */
-    list_remove(&heap->block_list, node);
+    list_remove(&segments->block_list, node);
     free(block);
   }
 
-  /* a sanity check to ensure we really have emptied the heap */
-  assert(heap->block_list.size == 0);
+  /* a sanity check to ensure we really have emptied the seg */
+  assert(segments->block_list.size == 0);
 
   /*
-   * release the lock, any further operations on the heap _will_ fail as it is
+   * release the lock, any further operations on the seg _will_ fail as it is
    * empty, so it can be safely free()ed by the proc code any time after this
    * function was called, even though we are releasing the lock so there is a
    * potential for it to be used again in a very small period of time
    */
-  spin_unlock(&heap->lock);
+  spin_unlock(&segments->lock);
 }
 
-bool uheap_alloc_at(void *ptr, size_t size, vm_acc_t flags)
+bool seg_alloc_at(void *ptr, size_t size, vm_acc_t flags)
 {
-  uheap_t *heap = uheap_get();
-  if (!heap)
+  seg_t *segments = seg_get();
+  if (!segments)
     return false;
 
-  spin_lock(&heap->lock);
-  bool ok = _uheap_alloc_at(heap, ptr, size, flags);
-  spin_unlock(&heap->lock);
+  spin_lock(&segments->lock);
+  bool ok = _seg_alloc_at(segments, ptr, size, flags);
+  spin_unlock(&segments->lock);
 
   return ok;
 }
 
-void *uheap_alloc(size_t size, vm_acc_t flags)
+void *seg_alloc(size_t size, vm_acc_t flags)
 {
-  uheap_t *heap = uheap_get();
-  if (!heap)
+  seg_t *segments = seg_get();
+  if (!segments)
     return 0;
 
-  spin_lock(&heap->lock);
-  void *ptr = _uheap_alloc(heap, size, flags);
-  spin_unlock(&heap->lock);
+  spin_lock(&segments->lock);
+  void *ptr = _seg_alloc(segments, size, flags);
+  spin_unlock(&segments->lock);
 
   return ptr;
 }
 
-void uheap_free(void *ptr)
+void seg_free(void *ptr)
 {
-  uheap_t *heap = uheap_get();
-  if (heap)
+  seg_t *segments = seg_get();
+  if (segments)
   {
-    spin_lock(&heap->lock);
-    _uheap_free(heap, ptr);
-    spin_unlock(&heap->lock);
+    spin_lock(&segments->lock);
+    _seg_free(segments, ptr);
+    spin_unlock(&segments->lock);
   }
 }
 
-void uheap_trace(void)
+void seg_trace(void)
 {
-  uheap_t *heap = uheap_get();
-  if (heap)
+  seg_t *segments = seg_get();
+  if (segments)
   {
-    spin_lock(&heap->lock);
+    spin_lock(&segments->lock);
 
-    trace_printf("Tracing user heap...\n");
-    list_for_each(&heap->block_list, node)
+    trace_printf("Tracing user segments...\n");
+    list_for_each(&segments->block_list, node)
     {
-      uheap_block_t *block = container_of(node, uheap_block_t, node);
+      seg_block_t *block = container_of(node, seg_block_t, node);
       const char *state = block->allocated ? "allocated" : "free";
       trace_printf(" => %0#18x -> %0#18x (%s)\n", block->start, block->end, state);
     }
 
-    spin_unlock(&heap->lock);
+    spin_unlock(&segments->lock);
   }
 }
 
