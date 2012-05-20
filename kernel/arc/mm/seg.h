@@ -23,12 +23,19 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+typedef enum
+{
+  SEG_FREE,
+  SEG_ALLOCATED
+} seg_state_t;
+
 typedef struct seg_block
 {
   list_node_t node;
   uintptr_t start;
   uintptr_t end;
-  bool allocated;
+  seg_state_t state;
+  vm_acc_t flags;
 } seg_block_t;
 
 typedef struct

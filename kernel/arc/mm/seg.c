@@ -73,7 +73,7 @@ static bool _seg_alloc_at(seg_t *segments, void *ptr, size_t size, vm_acc_t flag
       {
         left_block->start = block->start;
         left_block->end = addr - 1;
-        left_block->allocated = false;
+        left_block->state = SEG_FREE;
         block->start = addr;
 
         list_insert_before(&segments->block_list, &block->node, &left_block->node);
@@ -84,14 +84,15 @@ static bool _seg_alloc_at(seg_t *segments, void *ptr, size_t size, vm_acc_t flag
       {
         right_block->start = addr + size;
         right_block->end = block->end;
-        right_block->allocated = false;
+        right_block->state = SEG_FREE;
         block->end = addr + size - 1;
 
         list_insert_after(&segments->block_list, &block->node, &right_block->node);
       }
 
       /* mark this block as allocated */
-      block->allocated = true;
+      block->state = SEG_ALLOCATED;
+      block->flags = flags;
       return true;
     }
   }
@@ -107,7 +108,7 @@ static void *_seg_alloc(seg_t *segments, size_t size, vm_acc_t flags)
   {
     seg_block_t *block = container_of(node, seg_block_t, node);
     size_t block_size = block->end - block->start + 1;
-    if (!block->allocated && block_size >= size)
+    if (block->state == SEG_FREE && block_size >= size)
     {
       uintptr_t addr = (uintptr_t) block->start;
 
@@ -127,14 +128,15 @@ static void *_seg_alloc(seg_t *segments, size_t size, vm_acc_t flags)
 
         right_block->start = addr + size;
         right_block->end = block->end;
-        right_block->allocated = false;
+        right_block->state = SEG_FREE;
         block->end = addr + size - 1;
 
         list_insert_after(&segments->block_list, &block->node, &right_block->node);
       }
 
       /* mark this block as allocated and return a pointer to it */
-      block->allocated = true;
+      block->state = SEG_ALLOCATED;
+      block->flags = flags;
       return (void *) block->start;
     }
   }
@@ -149,20 +151,20 @@ static void _seg_free(seg_t *segments, void *ptr)
   list_for_each(&segments->block_list, node)
   {
     seg_block_t *block = container_of(node, seg_block_t, node);
-    if (block->allocated && block->start == addr)
+    if (block->state != SEG_FREE && block->start == addr)
     {
       /* free the underlying page frames and unmap the virtual memory */
       size_t block_size = block->end - block->start + 1;
       range_free(addr, block_size);
 
       /* unmark this block as being allocated */
-      block->allocated = false;
+      block->state = SEG_FREE;
 
       /* try to merge with the left block */
       if (block->node.prev)
       {
         seg_block_t *left_block = container_of(block->node.prev, seg_block_t, node);
-        if (!left_block->allocated)
+        if (left_block->state == SEG_FREE)
         {
           block->start = left_block->start;
 
@@ -175,7 +177,7 @@ static void _seg_free(seg_t *segments, void *ptr)
       if (block->node.next)
       {
         seg_block_t *right_block = container_of(block->node.next, seg_block_t, node);
-        if (!right_block->allocated)
+        if (right_block->state == SEG_FREE)
         {
           block->end = right_block->end;
 
@@ -208,7 +210,7 @@ bool seg_init(seg_t *segments)
   /* set the first last user-space address */
   block->start = 0x1000; /* so NULL pointer isn't included */
   block->end = VM_USER_END;
-  block->allocated = false;
+  block->state = SEG_FREE;
 
   /* init the spinlock */
   segments->lock = SPIN_UNLOCKED;
@@ -235,7 +237,7 @@ void seg_destroy(void)
      * free the virtual and physical memory used by the block, if it is
      * allocated
      */
-    if (block->allocated)
+    if (block->state != SEG_FREE)
     {
       size_t block_size = block->end - block->start + 1;
       range_free((uintptr_t) block->start, block_size);
@@ -309,8 +311,15 @@ void seg_trace(void)
     list_for_each(&segments->block_list, node)
     {
       seg_block_t *block = container_of(node, seg_block_t, node);
-      const char *state = block->allocated ? "allocated" : "free";
-      trace_printf(" => %0#18x -> %0#18x (%s)\n", block->start, block->end, state);
+      const char *state = block->state == SEG_ALLOCATED ? "allocated " : "free";
+      const char *r = "", *w = "", *x = "";
+      if (block->state == SEG_ALLOCATED)
+      {
+        r = block->flags & VM_R ? "r" : "-";
+        w = block->flags & VM_W ? "w" : "-";
+        x = block->flags & VM_X ? "x" : "-";
+      }
+      trace_printf(" => %0#18x -> %0#18x (%s%s%s%s)\n", block->start, block->end, state, r, w, x);
     }
 
     spin_unlock(&segments->lock);
