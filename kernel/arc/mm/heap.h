@@ -20,10 +20,6 @@
 #include <arc/mm/common.h>
 #include <stddef.h>
 
-#define HEAP_R 0x1
-#define HEAP_W 0x2
-#define HEAP_X 0x4
-
 void heap_init(void);
 void *heap_reserve(size_t size);
 void *heap_alloc(size_t size, vm_acc_t flags);

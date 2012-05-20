@@ -27,23 +27,27 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-/* the states a heap node can be in */
-#define HEAP_NODE_FREE      0 /* not allocated */
-#define HEAP_NODE_RESERVED  1 /* allocated, physical frames not managed by us */
-#define HEAP_NODE_ALLOCATED 2 /* allocated, physical frames managed by us */
-
 /* a magic id used to check if requests are valid */
 #define HEAP_MAGIC 0x461E7B705515DB7F
 
-typedef PACK(struct heap_node
+/* the states a heap node can be in */
+typedef enum
+{
+  HEAP_FREE,     /* not allocated */
+  HEAP_RESERVED, /* allocated, physical frames not managed by us */
+  HEAP_ALLOCATED /* allocated, physical frames managed by us */
+} heap_state_t;
+
+typedef struct heap_node
 {
   struct heap_node *next;
   struct heap_node *prev;
-  int state;
+  heap_state_t state;
+  vm_acc_t flags;
   uintptr_t start; /* the address of the first byte, inclusive */
   uintptr_t end;   /* the address of the last byte, inclusive */
   uint64_t magic;
-}) heap_node_t;
+} heap_node_t;
 
 static heap_node_t *heap_root;
 static spinlock_t heap_lock = SPIN_UNLOCKED;
@@ -74,7 +78,7 @@ void heap_init(void)
   /* fill out the root node */
   heap_root->next = 0;
   heap_root->prev = 0;
-  heap_root->state = HEAP_NODE_FREE;
+  heap_root->state = HEAP_FREE;
   heap_root->start = heap_start + FRAME_SIZE;
   heap_root->end = heap_end;
   heap_root->magic = heap_root->start ^ HEAP_MAGIC;
@@ -86,7 +90,7 @@ static heap_node_t *find_node(size_t size)
   for (heap_node_t *node = heap_root; node; node = node->next)
   {
     /* skip free nodes */
-    if (node->state != HEAP_NODE_FREE)
+    if (node->state != HEAP_FREE)
       continue;
 
     /* skip nodes that are too small */
@@ -109,7 +113,7 @@ static heap_node_t *find_node(size_t size)
           /* fill in the new heap_node_t */
           next->start = (uintptr_t) node + size + FRAME_SIZE * 2;
           next->end = node->end;
-          next->state = HEAP_NODE_FREE;
+          next->state = HEAP_FREE;
           next->prev = node;
           next->next = node->next;
           next->magic = next->start ^ HEAP_MAGIC;
@@ -131,7 +135,7 @@ static heap_node_t *find_node(size_t size)
     }
 
     /* update the state of the allocated node */
-    node->state = HEAP_NODE_RESERVED;
+    node->state = HEAP_RESERVED;
     return node;
   }
 
@@ -148,15 +152,15 @@ static void _heap_free(void *ptr)
 
   /* free the physical frames if heap_alloc allocated them */
   size_t size = node->end - node->start + 1;
-  if (node->state == HEAP_NODE_ALLOCATED)
+  if (node->state == HEAP_ALLOCATED)
     range_free(node->start, size);
 
   /* set the node's state to free */
-  node->state = HEAP_NODE_FREE;
+  node->state = HEAP_FREE;
 
   /* try to coalesce with the next node */
   heap_node_t *next = node->next;
-  if (next && next->state == HEAP_NODE_FREE)
+  if (next && next->state == HEAP_FREE)
   {
     /* update the pointers */
     node->next = next->next;
@@ -172,7 +176,7 @@ static void _heap_free(void *ptr)
 
   /* try to coalesce with the previous node */
   heap_node_t *prev = node->prev;
-  if (prev && prev->state == HEAP_NODE_FREE)
+  if (prev && prev->state == HEAP_FREE)
   {
     /* update the pointers */
     prev->next = node->next;
@@ -200,7 +204,8 @@ static void *_heap_alloc(size_t size, vm_acc_t flags, bool phy_alloc)
   if (phy_alloc)
   {
     /* change the state to allocated so heap_free releases the frames */
-    node->state = HEAP_NODE_ALLOCATED;
+    node->state = HEAP_ALLOCATED;
+    node->flags = flags;
 
     /* allocate physical frames and map them into memory */
     if (!range_alloc(node->start, size, flags))
@@ -241,12 +246,21 @@ void heap_trace(void)
   for (heap_node_t *node = heap_root; node; node = node->next)
   {
     const char *state = "free";
-    if (node->state == HEAP_NODE_RESERVED)
-      state = "reserved";
-    else if (node->state == HEAP_NODE_ALLOCATED)
-      state = "allocated";
+    const char *r = "", *w = "", *x = "";
 
-    trace_printf(" => %0#18x -> %0#18x (%s)\n", node->start, node->end, state);
+    if (node->state == HEAP_RESERVED)
+      state = "reserved";
+    else if (node->state == HEAP_ALLOCATED)
+      state = "allocated ";
+
+    if (node->state == HEAP_ALLOCATED)
+    {
+      r = node->flags & VM_R ? "r" : "-";
+      w = node->flags & VM_W ? "w" : "-";
+      x = node->flags & VM_X ? "x" : "-";
+    }
+
+    trace_printf(" => %0#18x -> %0#18x (%s%s%s%s)\n", node->start, node->end, state, r, w, x);
   }
 
   spin_unlock(&heap_lock);
