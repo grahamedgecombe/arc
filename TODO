@@ -41,7 +41,8 @@
 
 * switch from NASM to GNU AS?
 
-* re-structure some of the headers (mainly mm and proc folders)
+* re-structure some of the headers (mainly mm and proc folders, esp. common
+  stuff, also split arc/types.h?)
 
 * x2APIC support in MADT parsing code
 
