@@ -18,11 +18,12 @@
 #include <arc/mm/validate.h>
 #include <arc/trace.h>
 
-void sys_trace(const char *message)
+int64_t sys_trace(const char *message)
 {
   if (!valid_string(message))
-    return; // TODO: return some err number
+    return -1; // TODO: return some meaningful err number
 
   trace_puts(message);
+  return 0;
 }
 

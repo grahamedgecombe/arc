@@ -16,8 +16,9 @@
 
 #include <arc/proc/syscalls.h>
 
-void sys_exit(int status)
+int64_t sys_exit(int status)
 {
   // TODO: terminate current process
+  return 0;
 }
 

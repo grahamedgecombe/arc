@@ -17,8 +17,10 @@
 #ifndef ARC_PROC_SYSCALLS_H
 #define ARC_PROC_SYSCALLS_H
 
-void sys_trace(const char *message);
-void sys_exit(int status);
+#include <stdint.h>
+
+int64_t sys_trace(const char *message);
+int64_t sys_exit(int status);
 
 #endif
 
