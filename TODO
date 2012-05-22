@@ -59,3 +59,5 @@
 
 * I/O NMI code should route to NMI, and not to FAULT2, see ioapic_route_nmi()
 
+* forget about NMIs? they make everything messy
+

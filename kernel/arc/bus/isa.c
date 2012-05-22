@@ -25,10 +25,10 @@ static irq_tuple_t isa_irqs[ISA_INTR_LINES];
 void isa_init(void)
 {
   /*
-   * the default mapping of ISA interrupt lines to GSI numbers is 1:1 but they
-   * can also be overridden by MADT entries
+   * The default mapping of ISA interrupt lines to GSI numbers is 1:1 but they
+   * can also be overridden by MADT entries.
    *
-   * ISA IRQs are edge-triggered and active high by default
+   * ISA IRQs are edge-triggered and active high by default.
    */
   for (int line = 0; line < ISA_INTR_LINES; line++)
   {
@@ -49,12 +49,16 @@ irq_tuple_t *isa_irq(isa_line_t line)
 
 void isa_bochs_workaround(void)
 {
-  /* check if we are running in bochs (only works if the port E9 hack is enabled) */
+  /*
+   * Bochs uses port E9 as a special debug port. It can be detected by reading
+   * from port E9, and checking if the value there is E9. If so, we are
+   * probably running in Bochs.
+   */
   if (inb_p(0xE9) == 0xE9)
   {
     trace_puts("Fixing Bochs ISA IRQ routing...\n");
 
-    /* the PIT is actually connected to INTIN2 on the I/O APIC */
+    /* The PIT is actually connected to INTIN2 on the I/O APIC. */
     isa_irqs[0].irq = 2;
   }
 }
