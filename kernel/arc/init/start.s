@@ -176,16 +176,10 @@ gdtr:
 ; the entry point of the kernel executable
 [global start]
 start:
-  ; the multiboot2 spec states we start with a completely undefined stack
-  ; pointer
-  ; set the physical stack address here (we switch to a virtual stack later)
-  mov esp, stack + STACK_SIZE - KERNEL_VMA
-
-  ; push the info GRUB passes us as we trash the EAX register
-  push dword 0
-  push eax
-  push dword 0
-  push ebx
+  ; move the info GRUB passes us into the registers used for the main() call
+  ; later on
+  mov edi, eax
+  mov esi, ebx
 
   ; enable PAE and PSE
   mov eax, cr4
@@ -247,14 +241,14 @@ start:
     ; calculate the value of the page table entry
     mov rdx, rax
     shl rdx, LOG_PAGE_SIZE + LOG_TABLE_SIZE
-    mov rsi, rdx
-    mov rdi, KERNEL_VMA
-    add rsi, rdi
+    mov r8, rdx
+    mov r9, KERNEL_VMA
+    add r8, r9
     or rdx, PG_PRESENT + PG_WRITABLE + PG_BIG
 
     ; write the page table entry
     mov [rcx], rdx
-    invlpg [rsi]
+    invlpg [r8]
 
     ; increment pml2 pointer
     add rcx, 8
@@ -267,10 +261,6 @@ start:
     inc rax
     jmp .map_page
   .map_page_end:
-
-  ; pop the info GRUB passed us
-  pop rsi
-  pop rdi
 
   ; set up the new stack (GRUB's is in lower memory)
   mov rbp, 0
