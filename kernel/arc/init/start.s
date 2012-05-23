@@ -262,7 +262,8 @@ start:
     jmp .map_page
   .map_page_end:
 
-  ; set up the new stack (GRUB's is in lower memory)
+  ; set up the new stack (multiboot2 spec says the stack pointer could be
+  ; anything - even pointing to invalid memory)
   mov rbp, 0
   mov rsp, qword stack + STACK_SIZE
 
@@ -277,7 +278,7 @@ start:
   popf
 
   ; call the kernel
-  ; - the arguments were popped into RDI and RSI above
+  ; - the arguments were moved into EDI and ESI at the start
   ; - the DF has been reset by the code above - no CLD is required
   call init
 
