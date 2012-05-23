@@ -176,6 +176,11 @@ gdtr:
 ; the entry point of the kernel executable
 [global start]
 start:
+  ; the multiboot2 spec states we start with a completely undefined stack
+  ; pointer
+  ; set the physical stack address here (we switch to a virtual stack later)
+  mov esp, stack + STACK_SIZE - KERNEL_VMA
+
   ; push the info GRUB passes us as we trash the EAX register
   push dword 0
   push eax
