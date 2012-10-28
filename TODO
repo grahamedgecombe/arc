@@ -16,6 +16,8 @@
 
 * don't use PIT channel 2 for pit_mdelay(), using the KBC to check if the
   countdown has finished seems to be unreliable on modern hardware
+  (note: this issue actually seems to be the APs not responding to the init
+  sequence and seems to happen in Linux as well on this hardware sometimes?)
 
 * use enums in more places (e.g. heap node state)
 
@@ -60,4 +62,6 @@
 * I/O NMI code should route to NMI, and not to FAULT2, see ioapic_route_nmi()
 
 * forget about NMIs? they make everything messy
+
+* use -mcmodel=kernel (will require moving some virtual memory mappings)
 
