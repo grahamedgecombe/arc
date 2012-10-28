@@ -31,19 +31,16 @@ DEPENDENCIES := $(shell find -name "*.d")
 all: $(TARGET)
 
 clean:
-	@ $(RM) $(TARGET) $(OBJECTS) $(DEPENDENCIES)
+	$(RM) $(TARGET) $(OBJECTS) $(DEPENDENCIES)
 
 $(TARGET): $(OBJECTS)
-	@ echo " LD     $@"
-	@ $(LD) $(LDFLAGS) -o $@ $^
+	 $(LD) $(LDFLAGS) -o $@ $^
 
 include $(DEPENDENCIES)
 
 .c.o:
-	@ echo " CC     $<"
-	@ $(CC) $(CFLAGS) -MD -MP -MT $@ -MF $(addsuffix .d,$(basename $@)) -c -o $@ $<
+	$(CC) $(CFLAGS) -MD -MP -MT $@ -MF $(addsuffix .d,$(basename $@)) -c -o $@ $<
 
 .s.o:
-	@ echo " AS     $<"
-	@ $(AS) $(ASFLAGS) -o $@ $<
+	$(AS) $(ASFLAGS) -o $@ $<
 

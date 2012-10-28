@@ -21,9 +21,8 @@ MODULES := kernel hello
 all: $(MODULES)
 
 $(MODULES):
-	@ echo " MAKE   $@"
-	@ $(MAKE) -sC $@
+	$(MAKE) -C $@
 
 clean:
-	@ $(foreach module,$(MODULES),$(MAKE) -sC $(module) clean;)
+	$(foreach module,$(MODULES),$(MAKE) -C $(module) clean;)
 

@@ -25,13 +25,11 @@ OBJECTS := $(addsuffix .o, $(basename $(SOURCES)))
 all: $(TARGET)
 
 clean:
-	@ $(RM) $(TARGET) $(OBJECTS)
+	$(RM) $(TARGET) $(OBJECTS)
 
 $(TARGET): $(OBJECTS)
-	@ echo " LD     $@"
-	@ $(LD) $(LDFLAGS) -o $@ $^
+	$(LD) $(LDFLAGS) -o $@ $^
 
 .s.o:
-	@ echo " AS     $<"
-	@ $(AS) $(ASFLAGS) -o $@ $<
+	$(AS) $(ASFLAGS) -o $@ $<
 
