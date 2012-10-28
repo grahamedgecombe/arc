@@ -97,7 +97,6 @@ mb_hdr_start:
     dw 0
     dd (mb_tag_terminator_end - mb_tag_terminator_start)
   mb_tag_terminator_end:
-
 mb_hdr_end:
 
 ; paging structures
