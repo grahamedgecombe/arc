@@ -20,6 +20,8 @@ _start:
   mov rax, 0
   mov rdi, hello_str
   syscall
+  mov rax, 1
+  syscall
   jmp $
 
 [section .data]
