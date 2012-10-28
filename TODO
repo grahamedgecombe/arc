@@ -63,3 +63,6 @@
 
 * forget about NMIs? they make everything messy
 
+* load kernel at 2MB instead, to get rid of the +1MB offset. also ensure pmm
+  won't touch _any_ space mapped into the kernel's virtual memory (so round
+  up to the next 2mb boundary when reserving kernel's physical memory)
