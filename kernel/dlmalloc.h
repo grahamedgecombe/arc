@@ -4,8 +4,7 @@
   http://creativecommons.org/publicdomain/zero/1.0/ Send questions,
   comments, complaints, performance data, etc to dl@cs.oswego.edu
 
-* Version 2.8.5 Sun May 22 10:26:02 2011  Doug Lea  (dl at gee)
-
+* Version 2.8.6 Wed Aug 29 06:57:58 2012  Doug Lea
    Note: There may be an updated version of this malloc obtainable at
            ftp://gee.cs.oswego.edu/pub/misc/malloc.c
          Check before installing!
@@ -19,7 +18,7 @@
   compile-time and dynamic tuning options.
 
   For convenience, an include file for code using this malloc is at:
-     ftp://gee.cs.oswego.edu/pub/misc/malloc-2.8.5.h
+     ftp://gee.cs.oswego.edu/pub/misc/malloc-2.8.6.h
   You don't really need this .h file unless you call functions not
   defined in your system include files.  The .h file contains only the
   excerpts from this file needed for using this malloc on ANSI C/C++
@@ -41,7 +40,7 @@
        than pointers, you can use a previous release of this malloc
        (e.g. 2.7.2) supporting these.)
 
-  Alignment:                                     8 bytes (default)
+  Alignment:                                     8 bytes (minimum)
        This suffices for nearly all current machines and C compilers.
        However, you can define MALLOC_ALIGNMENT to be wider than this
        if necessary (up to 128bytes), at the expense of using more space.
@@ -242,11 +241,11 @@ WIN32                    default: defined if _WIN32 defined
 DLMALLOC_EXPORT       default: extern
   Defines how public APIs are declared. If you want to export via a
   Windows DLL, you might define this as
-    #define DLMALLOC_EXPORT extern  __declspace(dllexport)
+    #define DLMALLOC_EXPORT extern  __declspec(dllexport)
   If you want a POSIX ELF shared object, you might use
     #define DLMALLOC_EXPORT extern __attribute__((visibility("default")))
 
-MALLOC_ALIGNMENT         default: (size_t)8
+MALLOC_ALIGNMENT         default: (size_t)(2 * sizeof(void *))
   Controls the minimum alignment for malloc'ed chunks.  It must be a
   power of two and at least 8, even on machines for which smaller
   alignments would suffice. It may be defined as larger than this
@@ -278,6 +277,12 @@ USE_RECURSIVE_LOCKS      default: not defined
   If defined nonzero, uses recursive (aka reentrant) locks, otherwise
   uses plain mutexes. This is not required for malloc proper, but may
   be needed for layered allocators such as nedmalloc.
+
+LOCK_AT_FORK            default: not defined
+  If defined nonzero, performs pthread_atfork upon initialization
+  to initialize child lock while holding parent lock. The implementation
+  assumes that pthread locks (not custom locks) are being used. In other
+  cases, you may need to customize the implementation.
 
 FOOTERS                  default: 0
   If true, provide extra checking and dispatching by placing
@@ -518,7 +523,7 @@ MAX_RELEASE_CHECK_RATE   default: 4095 unless not HAVE_MMAP
 
 /* Version identifier to allow people to support multiple versions */
 #ifndef DLMALLOC_VERSION
-#define DLMALLOC_VERSION 20805
+#define DLMALLOC_VERSION 20806
 #endif /* DLMALLOC_VERSION */
 
 #ifndef DLMALLOC_EXPORT
@@ -610,7 +615,7 @@ MAX_RELEASE_CHECK_RATE   default: 4095 unless not HAVE_MMAP
 #endif  /* ONLY_MSPACES */
 #endif  /* MSPACES */
 #ifndef MALLOC_ALIGNMENT
-#define MALLOC_ALIGNMENT ((size_t)8U)
+#define MALLOC_ALIGNMENT ((size_t)(2 * sizeof(void *)))
 #endif  /* MALLOC_ALIGNMENT */
 #ifndef FOOTERS
 #define FOOTERS 0
@@ -1238,8 +1243,6 @@ DLMALLOC_EXPORT int  dlmalloc_trim(size_t);
 */
 DLMALLOC_EXPORT void  dlmalloc_stats(void);
 
-#endif /* ONLY_MSPACES */
-
 /*
   malloc_usable_size(void* p);
 
@@ -1255,6 +1258,8 @@ DLMALLOC_EXPORT void  dlmalloc_stats(void);
   assert(malloc_usable_size(p) >= 256);
 */
 size_t dlmalloc_usable_size(void*);
+
+#endif /* ONLY_MSPACES */
 
 #if MSPACES
 
@@ -1387,7 +1392,7 @@ DLMALLOC_EXPORT struct mallinfo mspace_mallinfo(mspace msp);
 /*
   malloc_usable_size(void* p) behaves the same as malloc_usable_size;
 */
-DLMALLOC_EXPORT size_t mspace_usable_size(void* mem);
+DLMALLOC_EXPORT size_t mspace_usable_size(const void* mem);
 
 /*
   mspace_malloc_stats behaves as malloc_stats, but reports
