@@ -30,7 +30,7 @@ AR := $(ARCH)-ar
 # if clang is used, we must specify the architecture on its command line rather
 # than in the name of the executable itself
 ifeq ($(CC),clang)
-  CFLAGS += -ccc-host-triple $(ARCH)
+  CFLAGS += -target $(ARCH)
 endif
 
 # nasm supports the -Ox command for performing multi-pass optimizations
