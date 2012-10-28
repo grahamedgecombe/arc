@@ -19,7 +19,7 @@
 
 #include <stdint.h>
 
-#define PHY32_OFFSET 0xFFFFFF7F00000000
+#define PHY32_OFFSET 0xFFFFFEFF00000000
 
 /*
  * The kernel maps the first 4 gigabytes of physical memory into virtual

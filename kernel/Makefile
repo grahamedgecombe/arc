@@ -16,7 +16,7 @@
 
 include ../template.mk
 
-CFLAGS += -I. -ffreestanding -mno-red-zone -mcmodel=large -mno-sse -mno-sse2 \
+CFLAGS += -I. -ffreestanding -mno-red-zone -mcmodel=kernel -mno-sse -mno-sse2 \
 	  -mno-sse3 -mno-3dnow -mno-mmx
 
 LDFLAGS += -Tvmarc.lds

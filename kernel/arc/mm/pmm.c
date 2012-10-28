@@ -23,7 +23,7 @@
 #include <arc/trace.h>
 #include <string.h>
 
-#define PAGE_TABLE_OFFSET 0xFFFFFFFFBF7FF000
+#define PAGE_TABLE_OFFSET 0xFFFFFF7F7F7FF000
 #define STACKS (ZONE_COUNT * SIZE_COUNT)
 #define PMM_STACK_SIZE (TABLE_SIZE - 2)
 #define SZ_TO_IDX(s,z) ((s) * ZONE_COUNT + (z))
@@ -256,7 +256,7 @@ void pmm_init(mm_map_t *map)
     for (int zone = 0; zone < ZONE_COUNT; zone++)
     {
       int idx = SZ_TO_IDX(size, zone);
-      stack_switch(size, zone, (uintptr_t) &pmm_phy_stacks[idx] - VM_OFFSET);
+      stack_switch(size, zone, (uintptr_t) &pmm_phy_stacks[idx] - VM_KERNEL_IMAGE);
       memset(&pmm_stacks[idx], 0, sizeof(*pmm_stacks));
     }
   }

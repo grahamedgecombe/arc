@@ -63,5 +63,3 @@
 
 * forget about NMIs? they make everything messy
 
-* use -mcmodel=kernel (will require moving some virtual memory mappings)
-

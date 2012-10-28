@@ -213,8 +213,8 @@ mm_map_t *mm_map_init(multiboot_t *multiboot)
 
   /* reserve kernel memory */
   extern int _start, _end;
-  uintptr_t start_addr = (uintptr_t) &_start - VM_OFFSET;
-  uintptr_t end_addr   = (uintptr_t) &_end   - VM_OFFSET - 1;
+  uintptr_t start_addr = (uintptr_t) &_start - VM_KERNEL_IMAGE;
+  uintptr_t end_addr   = (uintptr_t) &_end   - VM_KERNEL_IMAGE - 1;
   mm_map_add(MULTIBOOT_MMAP_RESERVED, start_addr, end_addr);
 
   /* reserve SMP trampoline area */

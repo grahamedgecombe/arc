@@ -27,10 +27,10 @@
 #include <stddef.h>
 #include <string.h>
 
-#define PML1_OFFSET 0xFFFFFF8000000000
-#define PML2_OFFSET 0xFFFFFFFFC0000000
-#define PML3_OFFSET 0xFFFFFFFFFFE00000
-#define PML4_OFFSET 0xFFFFFFFFFFFFF000
+#define PML1_OFFSET 0xFFFFFF0000000000
+#define PML2_OFFSET 0xFFFFFF7F80000000
+#define PML3_OFFSET 0xFFFFFF7FBFC00000
+#define PML4_OFFSET 0xFFFFFF7FBFDFE000
 
 typedef struct
 {
@@ -55,7 +55,7 @@ static int _vmm_size(uintptr_t virt);
 static void vmm_lock(uintptr_t addr)
 {
   proc_t *proc = proc_get();
-  if (proc && addr < VM_OFFSET)
+  if (proc && addr < VM_HIGHER_HALF)
     spin_lock(&proc->vmm_lock);
   else
     spin_lock(&kernel_vmm_lock);
@@ -64,7 +64,7 @@ static void vmm_lock(uintptr_t addr)
 static void vmm_unlock(uintptr_t addr)
 {
   proc_t *proc = proc_get();
-  if (proc && addr < VM_OFFSET)
+  if (proc && addr < VM_HIGHER_HALF)
     spin_unlock(&proc->vmm_lock);
   else
     spin_unlock(&kernel_vmm_lock);
@@ -76,9 +76,9 @@ static void addr_to_index(page_index_t *index, uintptr_t addr)
   index->pml4 = (uint64_t *) PML4_OFFSET;
 
   /* calculate pml4 index */
-  if (addr >= VM_OFFSET)
+  if (addr >= VM_HIGHER_HALF)
   {
-    addr -= VM_OFFSET;
+    addr -= VM_HIGHER_HALF;
     index->pml4e = (TABLE_SIZE / 2) + addr / FRAME_SIZE_512G;
   }
   else
@@ -121,7 +121,7 @@ void vmm_init(void)
    */
   for (int pml4_index = (TABLE_SIZE / 2); pml4_index <= TABLE_SIZE; pml4_index++)
   {
-    if (!_vmm_touch(VM_OFFSET + (pml4_index - (TABLE_SIZE / 2)) * FRAME_SIZE_512G, SIZE_1G))
+    if (!_vmm_touch(VM_HIGHER_HALF + (pml4_index - (TABLE_SIZE / 2)) * FRAME_SIZE_512G, SIZE_1G))
       panic("failed to touch pml4 entry %d", pml4_index);
   }
 }
@@ -139,13 +139,13 @@ bool vmm_init_pml4(uintptr_t pml4_table_addr)
   memset(pml4_table, 0, FRAME_SIZE / 2);
 
   /* copy the higher half PML4 entries from the master table */
-  for (int pml4e = TABLE_SIZE / 2; pml4e < TABLE_SIZE - 1; pml4e++)
+  for (int pml4e = TABLE_SIZE / 2; pml4e < TABLE_SIZE; pml4e++)
   {
     pml4_table[pml4e] = master_pml4_table[pml4e];
   }
 
   /* map PML4 into itself */
-  pml4_table[TABLE_SIZE - 1] = pml4_table_addr | PG_PRESENT | PG_WRITABLE | PG_NO_EXEC;
+  pml4_table[TABLE_SIZE - 2] = pml4_table_addr | PG_PRESENT | PG_WRITABLE | PG_NO_EXEC;
 
   mmio_unmap(pml4_table, FRAME_SIZE);
   return true;

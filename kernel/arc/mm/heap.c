@@ -54,9 +54,8 @@ static spinlock_t heap_lock = SPIN_UNLOCKED;
 
 void heap_init(void)
 {
-  /* find where the kernel image ends and the heap starts (inclusive) */
-  extern int _end;
-  uintptr_t heap_start = PAGE_ALIGN_2M((uintptr_t) &_end);
+  /* hard coded start of the heap (inclusive) */
+  uintptr_t heap_start = VM_HIGHER_HALF;
 
   /* hard coded end of the heap (inclusive) */
   uintptr_t heap_end = VM_STACK_OFFSET - 1;

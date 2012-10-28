@@ -21,7 +21,7 @@
 #include <stdint.h>
 
 /* where the stacks start in virtual memory */
-#define VM_STACK_OFFSET 0xFFFFFF7EFFFF7000
+#define VM_STACK_OFFSET 0xFFFFFEFEFFFF7000
 
 /* the ids of the memory zones */
 #define ZONE_DMA   0
