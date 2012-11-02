@@ -17,7 +17,6 @@
 #ifndef ARC_INTR_COMMON_H
 #define ARC_INTR_COMMON_H
 
-#include <arc/pack.h>
 #include <stdint.h>
 
 /* the max number of interrupts */
@@ -111,7 +110,7 @@
 #define SPURIOUS 0xFF /* in old processors bits 0-3 are hardwired to 1 */
 
 /* interrupt state passed to intr_dispatch() */
-typedef PACK(struct
+typedef struct
 {
   /* the register file */
   uint64_t regs[15];
@@ -126,7 +125,7 @@ typedef PACK(struct
   uint64_t rflags;
   uint64_t rsp;
   uint64_t ss;
-}) intr_state_t;
+} __attribute__((__packed__)) intr_state_t;
 
 #endif
 

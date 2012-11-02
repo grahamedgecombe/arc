@@ -19,7 +19,6 @@
 #include <arc/mm/common.h>
 #include <arc/cpu/tlb.h>
 #include <arc/lock/spinlock.h>
-#include <arc/pack.h>
 #include <arc/trace.h>
 #include <string.h>
 
@@ -28,14 +27,14 @@
 #define PMM_STACK_SIZE (TABLE_SIZE - 2)
 #define SZ_TO_IDX(s,z) ((s) * ZONE_COUNT + (z))
 
-typedef PACK(struct
+typedef struct
 {
   uint64_t next;
   uint64_t count;
   uint64_t frames[PMM_STACK_SIZE];
-}) pmm_stack_t;
+} __attribute__((__packed__)) pmm_stack_t;
 
-static ALIGN(pmm_stack_t pmm_phy_stacks[STACKS], FRAME_SIZE);
+static pmm_stack_t pmm_phy_stacks[STACKS] __attribute__((__aligned__(FRAME_SIZE)));
 static pmm_stack_t *pmm_stacks = (pmm_stack_t *) VM_STACK_OFFSET;
 static uint64_t *pmm_page_table = (uint64_t *) PAGE_TABLE_OFFSET;
 static spinlock_t pmm_lock = SPIN_UNLOCKED;

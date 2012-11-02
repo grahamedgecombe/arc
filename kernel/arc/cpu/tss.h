@@ -17,10 +17,9 @@
 #ifndef ARC_CPU_TSS_H
 #define ARC_CPU_TSS_H
 
-#include <arc/pack.h>
 #include <stdint.h>
 
-typedef PACK(struct
+typedef struct
 {
   uint32_t reserved0;
   uint64_t rsp0;
@@ -37,7 +36,7 @@ typedef PACK(struct
   uint64_t reserved2;
   uint16_t reserved3;
   uint16_t iomap_base;
-}) tss_t;
+} __attribute__((__packed__)) tss_t;
 
 void tss_init(void);
 void tss_install(uint16_t selector);

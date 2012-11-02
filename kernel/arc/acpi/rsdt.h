@@ -18,16 +18,15 @@
 #define ARC_ACPI_RSDT_H
 
 #include <stdint.h>
-#include <arc/pack.h>
 #include <arc/acpi/common.h>
 
 #define RSDT_SIGNATURE 0x54445352 /* 'RSDT' */
 
-typedef PACK(struct
+typedef struct
 {
   acpi_header_t header;
   uint32_t entries[1];
-}) rsdt_t;
+} __attribute__((__packed__)) rsdt_t;
 
 #endif
 

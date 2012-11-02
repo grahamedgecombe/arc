@@ -19,11 +19,10 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-#include <arc/pack.h>
 
 #define OEM_ID_LEN 6
 
-typedef PACK(struct
+typedef struct
 {
   uint32_t signature;
   uint32_t len;
@@ -34,7 +33,7 @@ typedef PACK(struct
   uint32_t oem_revision;
   uint32_t creator_id;
   uint32_t creator_revision;
-}) acpi_header_t;
+} __attribute__((__packed__)) acpi_header_t;
 
 bool acpi_table_valid(acpi_header_t *table);
 

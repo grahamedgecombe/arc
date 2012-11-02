@@ -17,14 +17,13 @@
 #ifndef ARC_CPU_IDT_H
 #define ARC_CPU_IDT_H
 
-#include <arc/pack.h>
 #include <stdint.h>
 
-typedef PACK(struct
+typedef struct
 {
   uint16_t len;
   uint64_t addr;
-}) idtr_t;
+} __attribute__((__packed__)) idtr_t;
 
 void idt_bsp_init(void);
 void idt_ap_init(void);

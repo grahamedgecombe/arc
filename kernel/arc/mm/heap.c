@@ -20,7 +20,6 @@
 #include <arc/mm/vmm.h>
 #include <arc/mm/align.h>
 #include <arc/mm/range.h>
-#include <arc/pack.h>
 #include <arc/panic.h>
 #include <arc/trace.h>
 #include <assert.h>

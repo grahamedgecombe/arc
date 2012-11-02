@@ -18,13 +18,12 @@
 #define ARC_ACPI_RSDP_H
 
 #include <stdint.h>
-#include <arc/pack.h>
 #include <arc/acpi/common.h>
 
 #define RSDP_SIGNATURE 0x2052545020445352 /* 'RSD PTR ' */
 #define RSDP_ALIGN     16
 
-typedef PACK(struct
+typedef struct
 {
   /* original rsdp structure */
   uint64_t signature;
@@ -38,7 +37,7 @@ typedef PACK(struct
   uint64_t xsdt_addr;
   uint8_t  ext_checksum;
   uint8_t  reserved[3];
-}) rsdp_t;
+} __attribute__((__packed__)) rsdp_t;
 
 rsdp_t *rsdp_scan(void);
 

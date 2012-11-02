@@ -17,7 +17,6 @@
 #ifndef ARC_CPU_GDT_H
 #define ARC_CPU_GDT_H
 
-#include <arc/pack.h>
 #include <stdint.h>
 
 #define GDT_GATES 7
@@ -34,13 +33,13 @@
 #define RPL2 0x2
 #define RPL3 0x3
 
-typedef PACK(struct
+typedef struct
 {
   uint16_t len;
   uint64_t addr;
-}) gdtr_t;
+} __attribute__((__packed__)) gdtr_t;
 
-typedef PACK(struct
+typedef struct
 {
   uint16_t limit_low;
   uint16_t base_low;
@@ -48,17 +47,17 @@ typedef PACK(struct
   uint8_t  flags;
   uint8_t  granularity; /* and high limit */
   uint8_t  base_high;
-}) gdt_gate_t;
+} __attribute__((__packed__)) gdt_gate_t;
 
-typedef PACK(struct
+typedef struct
 {
   gdt_gate_t low;
-  PACK(struct
+  struct
   {
     uint32_t base_xhigh;
     uint32_t reserved;
-  }) high;
-}) gdt_xgate_t;
+  } high;
+} __attribute__((__packed__)) gdt_xgate_t;
 
 void gdt_init(void);
 void gdtr_install(gdtr_t *gdtr, uint16_t cs, uint16_t ds);

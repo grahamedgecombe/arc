@@ -18,7 +18,6 @@
 #define ARC_ACPI_MADT_H
 
 #include <stdint.h>
-#include <arc/pack.h>
 #include <arc/acpi/common.h>
 
 #define MADT_SIGNATURE 0x43495041 /* 'APIC' */
@@ -44,79 +43,79 @@
 #define MADT_INTR_TRIGGER_EDGE  0x08
 #define MADT_INTR_TRIGGER_LEVEL 0x0C
 
-typedef PACK(struct
+typedef struct
 {
   uint8_t type;
   uint8_t len;
   union
   {
-    PACK(struct
+    struct
     {
       uint8_t id;
       uint8_t apic_id;
       uint32_t flags;
-    }) lapic;
+    } lapic;
 
-    PACK(struct
+    struct
     {
       uint8_t id;
       uint8_t reserved;
       uint32_t addr;
       uint32_t gsi_base;
-    }) ioapic;
+    } ioapic;
 
-    PACK(struct
+    struct
     {
       uint8_t bus;
       uint8_t irq;
       uint32_t gsi;
       uint16_t flags;
-    }) intr;
+    } intr;
 
-    PACK(struct
+    struct
     {
       uint16_t flags;
       uint32_t gsi;
-    }) nmi;
+    } nmi;
 
-    PACK(struct
+    struct
     {
       uint8_t id;
       uint16_t flags;
       uint8_t lintn;
-    }) lnmi;
+    } lnmi;
 
-    PACK(struct
+    struct
     {
       uint16_t reserved;
       uint64_t addr;
-    }) lapic_addr;
+    } lapic_addr;
 
-    PACK(struct
+    struct
     {
       uint16_t reserved;
       uint32_t apic_id;
       uint32_t flags;
       uint32_t id;
-    }) lx2apic;
+    } lx2apic;
 
-    PACK(struct
+    struct
     {
       uint16_t flags;
       uint32_t id;
       uint8_t lintn;
       uint8_t reserved[3];
-    }) lx2nmi;
+    } lx2nmi;
   };
-}) madt_entry_t;
+} __attribute__((__packed__)) madt_entry_t;
 
-typedef PACK(struct
+typedef struct
 {
   acpi_header_t header;
   uint32_t lapic_addr;
   uint32_t flags;
   madt_entry_t entries[1];
-}) madt_t;
+} __attribute__((__packed__)) madt_t;
 
 void madt_scan(madt_t *madt);
 

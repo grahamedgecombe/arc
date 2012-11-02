@@ -18,16 +18,15 @@
 #define ARC_ACPI_XSDT_H
 
 #include <stdint.h>
-#include <arc/pack.h>
 #include <arc/acpi/common.h>
 
 #define XSDT_SIGNATURE 0x54445358 /* 'XSDT' */
 
-typedef PACK(struct
+typedef struct
 {
   acpi_header_t header;
   uint64_t entries[1];
-}) xsdt_t;
+} __attribute__((__packed__)) xsdt_t;
 
 #endif
 

@@ -16,7 +16,6 @@
 
 #include <arc/smp/cpu.h>
 #include <arc/cpu/msr.h>
-#include <arc/pack.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -26,7 +25,7 @@
 list_t cpu_list = LIST_EMPTY;
 
 static cpu_t cpu_bsp;
-static ALIGN(uint8_t bsp_stack[KERNEL_STACK_SIZE], KERNEL_STACK_ALIGN);
+static uint8_t bsp_stack[KERNEL_STACK_SIZE] __attribute__((__aligned__(KERNEL_STACK_ALIGN)));
 
 void cpu_bsp_init(void)
 {

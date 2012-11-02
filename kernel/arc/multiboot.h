@@ -17,7 +17,6 @@
 #ifndef ARC_MULTIBOOT_H
 #define ARC_MULTIBOOT_H
 
-#include <arc/pack.h>
 #include <stdint.h>
 
 /* the multiboot magic number */
@@ -47,22 +46,22 @@
 #define MULTIBOOT_ALIGN(x) (((x) + 7) & 0xFFFFFFFFFFFFFFF8)
 
 /* multiboot information structure */
-typedef PACK(struct
+typedef struct
 {
   uint32_t total_size;
   uint32_t reserved;
-}) multiboot_t;
+} __attribute__((__packed__)) multiboot_t;
 
-typedef PACK(struct
+typedef struct
 {
   uint64_t base_addr;
   uint64_t length;
   uint32_t type;
   uint32_t reserved;
-}) multiboot_mmap_entry_t;
+} __attribute__((__packed__)) multiboot_mmap_entry_t;
 
 /* multiboot tag structure */
-typedef PACK(struct
+typedef struct
 {
   /* general information */
   uint32_t type;
@@ -93,7 +92,7 @@ typedef PACK(struct
       char string[1];
     } cmdline;
   };
-}) multiboot_tag_t;
+} __attribute__((__packed__)) multiboot_tag_t;
 
 multiboot_tag_t *multiboot_get(multiboot_t *multiboot, uint32_t type);
 multiboot_tag_t *multiboot_get_after(multiboot_t *multiboot, multiboot_tag_t *start, uint32_t type);

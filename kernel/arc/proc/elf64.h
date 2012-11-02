@@ -17,7 +17,6 @@
 #ifndef ARC_PROC_ELF64_H
 #define ARC_PROC_ELF64_H
 
-#include <arc/pack.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -85,7 +84,7 @@ typedef int32_t  elf64_sword_t;
 typedef uint64_t elf64_xword_t;
 typedef int64_t  elf64_sxword_t;
 
-typedef PACK(struct
+typedef struct
 {
   unsigned char e_ident[EI_NIDENT];
   elf64_half_t  e_type;
@@ -101,9 +100,9 @@ typedef PACK(struct
   elf64_half_t  e_shentsize;
   elf64_half_t  e_shnum;
   elf64_half_t  e_shstrndx;
-}) elf64_ehdr_t;
+} __attribute__((__packed__)) elf64_ehdr_t;
 
-typedef PACK(struct
+typedef struct
 {
   elf64_word_t  p_type;
   elf64_word_t  p_flags;
@@ -113,7 +112,7 @@ typedef PACK(struct
   elf64_xword_t p_filesz;
   elf64_xword_t p_memsz;
   elf64_xword_t p_align;
-}) elf64_phdr_t;
+} __attribute__((__packed__)) elf64_phdr_t;
 
 bool elf64_load(elf64_ehdr_t *elf, size_t size);
 
