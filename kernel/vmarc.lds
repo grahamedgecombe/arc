@@ -28,14 +28,14 @@ SECTIONS
 
   .init :
   {
-    *(.init.lower)
+    *(.initl)
   }
 
   . += KERNEL_VMA;
 
   .text ALIGN(PAGE_SIZE) : AT(ADDR(.text) - KERNEL_VMA)
   {
-    *(.init.higher)
+    *(.inith)
     *(.text)
   }
 

@@ -70,7 +70,7 @@ MB_INFO_MODULES   equ 3
 MB_INFO_MMAP      equ 6
 
 ; includes initialization code and lower-half data
-[section .init.lower align=MB_ALIGN]
+[section .initl align=MB_ALIGN]
 ; the multiboot header
 mb_hdr_start:
   dd MB_MAGIC
@@ -225,7 +225,7 @@ start:
   jmp rax
 
 ; the higher-half code
-[section .init.higher]
+[section .inith]
 .next:
   ; re-load the GDTR with a virtual base address
   mov rax, [gdtr + 2]
