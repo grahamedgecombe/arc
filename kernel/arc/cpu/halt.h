@@ -21,4 +21,3 @@ void halt_once(void);
 void halt_forever(void);
 
 #endif
-

@@ -71,4 +71,3 @@ void fault_handle(intr_state_t *state)
   const char *name = fault_names[state->id];
   panic("%s at %0#18x", name, state->rip);
 }
-

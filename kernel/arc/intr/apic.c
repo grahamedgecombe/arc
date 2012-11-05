@@ -281,4 +281,3 @@ void apic_ipi_self(intr_t intr)
     apic_ipi(icr);
   }
 }
-

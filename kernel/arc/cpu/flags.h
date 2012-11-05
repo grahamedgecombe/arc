@@ -42,4 +42,3 @@ uint64_t flags_read(void);
 void flags_write(uint64_t flags);
 
 #endif
-

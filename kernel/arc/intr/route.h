@@ -44,4 +44,3 @@ bool intr_route_irq(irq_tuple_t *tuple, intr_handler_t handler);
 void intr_unroute_irq(irq_tuple_t *tuple, intr_handler_t handler);
 
 #endif
-

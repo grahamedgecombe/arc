@@ -43,4 +43,3 @@ include $(DEPENDENCIES)
 
 .s.o:
 	$(AS) $(ASFLAGS) -o $@ $<
-

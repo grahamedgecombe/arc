@@ -97,4 +97,3 @@ void proc_destroy(proc_t *proc)
   pmm_free(proc->pml4_table);
   free(proc);
 }
-

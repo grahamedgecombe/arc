@@ -190,4 +190,3 @@ void tlb_transaction_commit(void)
   /* all done, we can release the master lock */
   spin_unlock(&tlb_transaction_lock);
 }
-

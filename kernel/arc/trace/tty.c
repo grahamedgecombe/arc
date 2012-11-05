@@ -469,4 +469,3 @@ void tty_vprintf(const char *fmt, va_list args)
   tty_sync();
   spin_unlock(&tty_lock);
 }
-

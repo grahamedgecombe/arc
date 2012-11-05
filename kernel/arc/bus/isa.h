@@ -46,4 +46,3 @@ irq_tuple_t *isa_irq(isa_line_t line);
 void isa_bochs_workaround(void);
 
 #endif
-

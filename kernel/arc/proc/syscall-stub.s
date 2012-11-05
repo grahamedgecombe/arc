@@ -62,4 +62,3 @@ syscall_stub:
 
   ; return to user long mode
   o64 sysret
-

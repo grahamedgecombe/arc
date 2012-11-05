@@ -30,4 +30,3 @@ bool spin_try_lock(spinlock_t *lock);
 void spin_unlock(spinlock_t *lock);
 
 #endif
-

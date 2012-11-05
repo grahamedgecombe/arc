@@ -29,4 +29,3 @@ halt_forever:
   .hang:
     hlt
     jmp .hang
-

@@ -23,4 +23,3 @@
 void init(uint32_t magic, multiboot_t *multiboot);
 
 #endif
-

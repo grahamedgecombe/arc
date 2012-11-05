@@ -82,4 +82,3 @@ inl:
   in eax, dx
   pop rbp
   ret
-

@@ -24,4 +24,3 @@ void *malloc(size_t size)
   spin_unlock(&malloc_lock);
   return ptr;
 }
-

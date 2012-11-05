@@ -90,4 +90,3 @@ void gdt_init(void)
   msr_write(MSR_GS_BASE, gs_base);
   msr_write(MSR_GS_KERNEL_BASE, gs_base);
 }
-

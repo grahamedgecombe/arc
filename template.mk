@@ -37,5 +37,3 @@ endif
 ifeq ($(AS),nasm)
   ASFLAGS += -Ox
 endif
-
-

@@ -42,4 +42,3 @@ thread_t *thread_create(struct proc *proc);
 thread_t *thread_get(void);
 
 #endif
-

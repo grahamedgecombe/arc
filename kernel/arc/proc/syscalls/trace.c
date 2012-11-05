@@ -26,4 +26,3 @@ int64_t sys_trace(const char *message)
   trace_puts(message);
   return 0;
 }
-

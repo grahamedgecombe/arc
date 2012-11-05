@@ -161,4 +161,3 @@ void init(uint32_t magic, multiboot_t *multiboot)
   /* halt forever - the scheduler will take over from here */
   halt_forever();
 }
-

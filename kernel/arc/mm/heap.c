@@ -263,4 +263,3 @@ void heap_trace(void)
 
   spin_unlock(&heap_lock);
 }
-

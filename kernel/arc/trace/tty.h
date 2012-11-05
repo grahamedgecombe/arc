@@ -36,4 +36,3 @@ void tty_puts(const char *str);
 void tty_vprintf(const char *fmt, va_list args);
 
 #endif
-

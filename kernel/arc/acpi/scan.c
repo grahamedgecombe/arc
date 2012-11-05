@@ -134,4 +134,3 @@ bool acpi_scan(void)
 
   return true;
 }
-

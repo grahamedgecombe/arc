@@ -123,4 +123,3 @@ void pit_mdelay(int ms)
   if (ms > 0)
     _pit_mdelay(ms);
 }
-

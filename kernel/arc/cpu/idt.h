@@ -30,4 +30,3 @@ void idt_ap_init(void);
 void idtr_install(idtr_t *idtr);
 
 #endif
-

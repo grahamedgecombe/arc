@@ -567,4 +567,3 @@ int vmm_size(uintptr_t virt)
   vmm_unlock(virt);
   return size;
 }
-

@@ -40,4 +40,3 @@ void apic_ipi_all_exc_self(intr_t intr);
 void apic_ipi_self(intr_t intr);
 
 #endif
-

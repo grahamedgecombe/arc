@@ -26,4 +26,3 @@ void efer_write(uint64_t efer)
 {
   msr_write(MSR_EFER, efer);
 }
-

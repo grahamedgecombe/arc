@@ -290,4 +290,3 @@ start:
 [section .bss align=STACK_ALIGN]
 stack:
   resb STACK_SIZE
-

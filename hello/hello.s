@@ -28,4 +28,3 @@ _start:
 hello_str:
   db "hello, world"
   db 33, 10, 0
-

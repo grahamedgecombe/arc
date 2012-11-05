@@ -28,4 +28,3 @@ uint16_t bda_reads(uint8_t off)
 {
   return *((uint16_t *) aphy32_to_virt(BDA_OFFSET + off));
 }
-

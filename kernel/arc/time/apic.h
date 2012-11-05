@@ -22,4 +22,3 @@
 void apic_monotonic(int ms, intr_handler_t handler);
 
 #endif
-

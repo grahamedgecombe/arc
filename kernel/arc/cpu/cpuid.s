@@ -34,4 +34,3 @@ cpu_id:
 
   pop rbp
   ret
-

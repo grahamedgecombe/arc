@@ -50,4 +50,3 @@ void ioapic_route_nmi(ioapic_t *apic, irq_tuple_t *tuple);
 void ioapic_mask(ioapic_t *apic, irq_tuple_t *tuple);
 
 #endif
-

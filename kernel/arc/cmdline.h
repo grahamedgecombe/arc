@@ -23,4 +23,3 @@ void cmdline_init(multiboot_t *multiboot);
 const char *cmdline_get(const char *key);
 
 #endif
-

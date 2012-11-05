@@ -37,4 +37,3 @@ void outw_p(uint16_t port, uint16_t value);
 void outl_p(uint16_t port, uint32_t value);
 
 #endif
-

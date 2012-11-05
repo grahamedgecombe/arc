@@ -26,4 +26,3 @@ void panic(const char *message, ...);
 void vpanic(const char *message, va_list args);
 
 #endif
-

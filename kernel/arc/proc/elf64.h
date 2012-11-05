@@ -117,4 +117,3 @@ typedef struct
 bool elf64_load(elf64_ehdr_t *elf, size_t size);
 
 #endif
-

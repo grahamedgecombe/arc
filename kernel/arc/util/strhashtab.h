@@ -24,4 +24,3 @@ size_t djb2(void *key);
 bool strcmpbool(void *key1, void *key2);
 
 #endif
-

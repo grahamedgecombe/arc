@@ -36,4 +36,3 @@ bool valid_buffer(const void *ptr, size_t len);
 bool valid_string(const char *str);
 
 #endif
-

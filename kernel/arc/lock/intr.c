@@ -34,4 +34,3 @@ void intr_unlock(void)
   if (--cpu->intr_depth == 0)
     intr_enable();
 }
-

@@ -325,4 +325,3 @@ void seg_trace(void)
     spin_unlock(&segments->lock);
   }
 }
-

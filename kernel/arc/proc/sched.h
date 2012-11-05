@@ -25,4 +25,3 @@ void sched_thread_ready(thread_t *thread);
 void sched_tick(intr_state_t *state);
 
 #endif
-

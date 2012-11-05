@@ -26,4 +26,3 @@ typedef enum
 extern smp_mode_t smp_mode;
 
 #endif
-

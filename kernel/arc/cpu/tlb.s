@@ -30,4 +30,3 @@ tlb_flush:
   mov cr3, rax
   pop rbp
   ret
-

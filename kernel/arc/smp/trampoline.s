@@ -170,4 +170,3 @@ trampoline_stack: ; variable for storing the virtual address of the AP's bootstr
 
 [global trampoline_end]
 trampoline_end:
-

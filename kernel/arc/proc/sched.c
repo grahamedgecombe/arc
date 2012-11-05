@@ -109,4 +109,3 @@ void sched_tick(intr_state_t *state)
     }
   }
 }
-

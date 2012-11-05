@@ -45,4 +45,3 @@ void proc_thread_add(proc_t *proc, thread_t *thread);
 void proc_destroy(proc_t *proc);
 
 #endif
-

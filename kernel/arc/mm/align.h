@@ -27,4 +27,3 @@
 #define PAGE_ALIGN_REVERSE_1G(x) ((x) & 0xFFFFFFFFC0000000)
 
 #endif
-

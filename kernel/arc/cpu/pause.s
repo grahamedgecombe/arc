@@ -21,4 +21,3 @@ pause_once:
   pause
   pop rbp
   ret
-

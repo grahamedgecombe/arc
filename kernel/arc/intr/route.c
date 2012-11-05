@@ -235,4 +235,3 @@ void intr_unroute_irq(irq_tuple_t *tuple, intr_handler_t handler)
 
   rw_wunlock(&intr_route_lock);
 }
-

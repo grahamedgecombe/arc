@@ -37,4 +37,3 @@ uint64_t msr_read(uint32_t msr);
 void msr_write(uint32_t msr, uint64_t value);
 
 #endif
-

@@ -32,4 +32,3 @@ $(TARGET): $(OBJECTS)
 
 .s.o:
 	$(AS) $(ASFLAGS) -o $@ $<
-

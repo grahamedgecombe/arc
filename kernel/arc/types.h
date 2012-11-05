@@ -66,4 +66,3 @@ typedef struct
 } irq_tuple_t;
 
 #endif
-

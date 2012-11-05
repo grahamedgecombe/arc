@@ -54,4 +54,3 @@ void outl_p(uint16_t port, uint32_t value)
   outl(port, value);
   iowait();
 }
-

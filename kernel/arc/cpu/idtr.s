@@ -21,4 +21,3 @@ idtr_install:
   lidt [rdi]
   pop rbp
   ret
-

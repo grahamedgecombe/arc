@@ -357,4 +357,3 @@ void pmm_frees(int size, uintptr_t addr)
   _pmm_free(size, get_zone(size, addr), addr);
   spin_unlock(&pmm_lock);
 }
-

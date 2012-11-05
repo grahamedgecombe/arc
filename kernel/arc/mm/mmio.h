@@ -38,4 +38,3 @@ void *mmio_map(uintptr_t phy, size_t len, vm_acc_t flags);
 void mmio_unmap(void *virt, size_t len);
 
 #endif
-

@@ -34,4 +34,3 @@ void tss_init(void)
   /* install it using the LTR instruction */
   tss_install(SLTR_TSS);
 }
-

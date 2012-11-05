@@ -29,4 +29,3 @@ intr_disable:
   cli
   pop rbp
   ret
-

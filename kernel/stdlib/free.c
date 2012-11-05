@@ -23,4 +23,3 @@ void free(void *ptr)
   dlfree(ptr);
   spin_unlock(&malloc_lock);
 }
-

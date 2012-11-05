@@ -25,4 +25,3 @@ void *memset(void *ptr, int value, size_t len)
 
   return ptr;
 }
-

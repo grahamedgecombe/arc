@@ -22,4 +22,3 @@ size_t strlen(const char *str)
   for (s = str; *s; s++);
   return (size_t) (s - str);
 }
-

@@ -38,4 +38,3 @@ typedef struct
 bool acpi_table_valid(acpi_header_t *table);
 
 #endif
-

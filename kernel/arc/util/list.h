@@ -40,4 +40,3 @@ void list_insert_after(list_t *list, list_node_t *node, list_node_t *new_node);
 void list_remove(list_t *list, list_node_t *node);
 
 #endif
-

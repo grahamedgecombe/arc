@@ -22,4 +22,3 @@ tss_install:
   ltr ax
   pop rbp
   ret
-

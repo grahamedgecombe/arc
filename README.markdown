@@ -154,4 +154,3 @@ file for the CC0 text. The CC0 licensing terms only apply to the
 [dl]: http://g.oswego.edu/
 [dlmalloc]: http://g.oswego.edu/dl/html/malloc.html
 [cc0]: http://creativecommons.org/publicdomain/zero/1.0/
-

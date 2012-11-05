@@ -22,4 +22,3 @@
 void module_init(multiboot_t *multiboot);
 
 #endif
-

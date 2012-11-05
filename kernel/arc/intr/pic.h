@@ -28,4 +28,3 @@ void pic_unmask(irq_t irq);
 void pic_ack(irq_t irq);
 
 #endif
-

@@ -113,4 +113,3 @@ void pic_ack(irq_t irq)
     outb_p(PIC2_CMD, 0x20);
   outb_p(PIC1_CMD, 0x20);
 }
-

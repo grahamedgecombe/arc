@@ -91,4 +91,3 @@ void list_remove(list_t *list, list_node_t *node)
 
   list->size--;
 }
-

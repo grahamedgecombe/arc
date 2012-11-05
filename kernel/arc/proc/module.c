@@ -79,4 +79,3 @@ void module_init(multiboot_t *multiboot)
   /* enable interrupts again */
   intr_unlock();
 }
-

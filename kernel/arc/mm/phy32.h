@@ -36,4 +36,3 @@ void *phy32_to_virt(void *ptr);
 uintptr_t aphy32_to_virt(uintptr_t addr);
 
 #endif
-

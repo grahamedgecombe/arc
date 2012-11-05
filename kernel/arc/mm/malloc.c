@@ -48,4 +48,3 @@ int munmap(void *addr, size_t len)
   heap_free(addr);
   return 0;
 }
-

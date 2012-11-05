@@ -62,4 +62,3 @@ void isa_bochs_workaround(void)
     isa_irqs[0].irq = 2;
   }
 }
-

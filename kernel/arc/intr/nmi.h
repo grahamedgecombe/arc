@@ -24,4 +24,3 @@ void nmi_init(void);
 bool nmi_add(irq_tuple_t tuple);
 
 #endif
-

@@ -41,4 +41,3 @@ void vmm_unmap_range(uintptr_t virt, size_t len);
 int vmm_size(uintptr_t virt);
 
 #endif
-

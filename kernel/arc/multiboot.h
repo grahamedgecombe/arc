@@ -98,4 +98,3 @@ multiboot_tag_t *multiboot_get(multiboot_t *multiboot, uint32_t type);
 multiboot_tag_t *multiboot_get_after(multiboot_t *multiboot, multiboot_tag_t *start, uint32_t type);
 
 #endif
-

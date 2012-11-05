@@ -42,4 +42,3 @@ void pmm_free(uintptr_t addr);
 void pmm_frees(int size, uintptr_t addr);
 
 #endif
-

@@ -49,4 +49,3 @@ thread_t *thread_get(void)
   cpu_t *cpu = cpu_get();
   return cpu->thread;
 }
-

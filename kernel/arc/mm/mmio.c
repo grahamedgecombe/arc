@@ -56,4 +56,3 @@ void mmio_unmap(void *virt, size_t len)
   /* unreserve the virtual memory in the heap */
   heap_free((void *) aligned_virt);
 }
-

@@ -27,4 +27,3 @@ uintptr_t aphy32_to_virt(uintptr_t addr)
 {
   return addr + PHY32_OFFSET;
 }
-

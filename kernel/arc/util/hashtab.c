@@ -81,4 +81,3 @@ void hashtab_remove(hashtab_t *hashtab, void *key)
     }
   }
 }
-

@@ -15,4 +15,3 @@ R9  - argument 6
 The kernel will trash the RCX and R11 registers. The result will be returned in
 the RAX register (and the RDX register, if a second return register is
 required.)
-

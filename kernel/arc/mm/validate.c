@@ -36,4 +36,3 @@ bool valid_string(const char *str)
       return true;
   }
 }
-

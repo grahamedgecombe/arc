@@ -77,4 +77,3 @@ void syscall_init(void)
   /* enable the SCE flag in the EFER register */
   efer_write(efer_read() | EFER_SCE);
 }
-

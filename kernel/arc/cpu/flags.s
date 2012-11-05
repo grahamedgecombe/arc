@@ -31,4 +31,3 @@ flags_write:
   popf
   pop rbp
   ret
-

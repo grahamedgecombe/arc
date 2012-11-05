@@ -250,4 +250,3 @@ mm_map_t *mm_map_init(multiboot_t *multiboot)
   /* and return a pointer to it */
   return &map;
 }
-

@@ -120,4 +120,3 @@ typedef struct
 void madt_scan(madt_t *madt);
 
 #endif
-

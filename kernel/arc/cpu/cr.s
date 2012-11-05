@@ -69,4 +69,3 @@ cr4_write:
   mov cr4, rdi
   pop rbp
   ret
-

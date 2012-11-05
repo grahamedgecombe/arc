@@ -33,4 +33,3 @@ gdtr_install:
 .trampoline:
   pop rbp
   ret
-

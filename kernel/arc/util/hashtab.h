@@ -43,4 +43,3 @@ bool hashtab_put(hashtab_t *hashtab, void *key, void *value);
 void hashtab_remove(hashtab_t *hashtab, void *key);
 
 #endif
-

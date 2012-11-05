@@ -130,4 +130,3 @@ void ioapic_mask(ioapic_t *apic, irq_tuple_t *tuple)
   ioapic_write(apic, IOAPIC_REDTBL + 2 * src, redtbl_entry & 0xFFFFFFFF); /* set mask bit first */
   ioapic_write(apic, IOAPIC_REDTBL + 2 * src + 1, (redtbl_entry >> 32) & 0xFFFFFFFF);
 }
-

@@ -27,4 +27,3 @@ bool acpi_table_valid(acpi_header_t *table)
 
   return sum == 0;
 }
-

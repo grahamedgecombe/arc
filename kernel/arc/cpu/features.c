@@ -59,4 +59,3 @@ bool cpu_feature_supported(cpu_feature_t feature)
   int bit = feature % BITS_PER_ELEMENT;
   return (features[element] >> bit) & 0x1;
 }
-

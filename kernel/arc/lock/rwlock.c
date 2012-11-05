@@ -65,4 +65,3 @@ void rw_wunlock(rwlock_t *lock)
   intr_unlock();
   spin_unlock(&lock->lock);
 }
-

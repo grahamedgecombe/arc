@@ -63,4 +63,3 @@ void gdt_init(void);
 void gdtr_install(gdtr_t *gdtr, uint16_t cs, uint16_t ds);
 
 #endif
-

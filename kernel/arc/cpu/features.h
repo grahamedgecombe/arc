@@ -29,4 +29,3 @@ void cpu_features_init(void);
 bool cpu_feature_supported(cpu_feature_t feature);
 
 #endif
-

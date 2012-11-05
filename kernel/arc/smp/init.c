@@ -189,4 +189,3 @@ void smp_ap_init(void)
   /* halt forever - the scheduler will take over from here */
   halt_forever();
 }
-

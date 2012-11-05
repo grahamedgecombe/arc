@@ -22,4 +22,3 @@
 bool acpi_scan(void);
 
 #endif
-

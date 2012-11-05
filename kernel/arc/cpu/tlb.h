@@ -21,4 +21,3 @@ void tlb_invlpg(uintptr_t address);
 void tlb_flush(void);
 
 #endif
-

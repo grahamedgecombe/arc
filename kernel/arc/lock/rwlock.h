@@ -67,4 +67,3 @@ void rw_wlock(rwlock_t *lock);
 void rw_wunlock(rwlock_t *lock);
 
 #endif
-

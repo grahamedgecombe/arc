@@ -29,4 +29,3 @@ int strcmp(const char *str1, const char *str2)
 
   return *s1 - *s2;
 }
-

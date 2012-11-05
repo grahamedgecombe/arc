@@ -88,4 +88,3 @@ const char *cmdline_get(const char *key)
 
   return node->value;
 }
-

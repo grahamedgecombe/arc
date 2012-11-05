@@ -65,4 +65,3 @@ bool nmi_add(irq_tuple_t tuple)
   list_add_tail(&nmi_list, &nmi->node);
   return true;
 }
-

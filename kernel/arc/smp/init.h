@@ -21,4 +21,3 @@ void smp_init(void);
 void smp_ap_init(void);
 
 #endif
-

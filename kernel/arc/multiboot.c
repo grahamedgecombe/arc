@@ -61,4 +61,3 @@ multiboot_tag_t *multiboot_get_after(multiboot_t *multiboot, multiboot_tag_t *st
 
   return 0;
 }
-

@@ -38,4 +38,3 @@ msr_write:
   wrmsr
   pop rbp
   ret
-

@@ -24,4 +24,3 @@ void *calloc(size_t num, size_t size)
   spin_unlock(&malloc_lock);
   return ptr;
 }
-

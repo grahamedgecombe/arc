@@ -86,4 +86,3 @@ void cpu_ap_install(cpu_t *cpu);
 cpu_t *cpu_get(void);
 
 #endif
-

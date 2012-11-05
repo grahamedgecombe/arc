@@ -44,4 +44,3 @@ void trace_vprintf(const char *fmt, va_list args)
 {
   tty_vprintf(fmt, args);
 }
-

@@ -47,4 +47,3 @@ void spin_unlock(spinlock_t *lock)
   assert(exchange(SPIN_UNLOCKED, lock) == SPIN_LOCKED);
   intr_unlock();
 }
-

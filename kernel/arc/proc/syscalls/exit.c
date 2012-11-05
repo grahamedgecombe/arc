@@ -21,4 +21,3 @@ int64_t sys_exit(int status)
   // TODO: terminate current process
   return 0;
 }
-

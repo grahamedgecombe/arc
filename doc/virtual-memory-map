@@ -10,4 +10,3 @@ Arc Virtual Memory Map
 | 0xFFFFFF0000000000 | 0xFFFFFF7FFFFFFFFF | recursive page tables         |
 | 0xFFFFFF8000000000 | 0xFFFFFFFFFFFFFFFF | kernel image                  |
 +--------------------+--------------------+-------------------------------+
-

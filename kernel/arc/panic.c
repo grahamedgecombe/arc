@@ -54,4 +54,3 @@ void vpanic(const char *message, va_list args)
   intr_disable();
   halt_forever();
 }
-

@@ -26,4 +26,3 @@ void trace_printf(const char *fmt, ...);
 void trace_vprintf(const char *fmt, va_list args);
 
 #endif
-

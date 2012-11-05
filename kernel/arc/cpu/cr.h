@@ -65,4 +65,3 @@ uint64_t cr4_read(void);
 void cr4_write(uint64_t cr4);
 
 #endif
-

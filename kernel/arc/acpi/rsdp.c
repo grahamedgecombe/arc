@@ -79,4 +79,3 @@ rsdp_t *rsdp_scan(void)
 
   return 0;
 }
-

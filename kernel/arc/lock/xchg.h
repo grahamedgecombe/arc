@@ -22,4 +22,3 @@
 uint64_t exchange(uint64_t val, uint64_t *ptr);
 
 #endif
-

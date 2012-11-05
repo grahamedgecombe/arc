@@ -129,4 +129,3 @@ void idt_ap_init(void)
 {
   idtr_install(&idtr);
 }
-

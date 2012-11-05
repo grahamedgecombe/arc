@@ -29,4 +29,3 @@ typedef struct
 } __attribute__((__packed__)) rsdt_t;
 
 #endif
-

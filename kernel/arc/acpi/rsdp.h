@@ -42,4 +42,3 @@ typedef struct
 rsdp_t *rsdp_scan(void);
 
 #endif
-

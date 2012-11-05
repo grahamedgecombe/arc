@@ -28,4 +28,3 @@ uint64_t efer_read(void);
 void efer_write(uint64_t efer);
 
 #endif
-

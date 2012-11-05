@@ -128,4 +128,3 @@ typedef struct
 } __attribute__((__packed__)) intr_state_t;
 
 #endif
-

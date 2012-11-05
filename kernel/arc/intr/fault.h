@@ -23,4 +23,3 @@ void fault_init(void);
 void fault_handle(intr_state_t *state);
 
 #endif
-

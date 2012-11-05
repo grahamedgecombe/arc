@@ -26,4 +26,3 @@ void syscall_init(void);
 void syscall_stub(void);
 
 #endif
-

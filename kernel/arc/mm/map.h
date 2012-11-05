@@ -49,4 +49,3 @@ typedef struct
 mm_map_t *mm_map_init(multiboot_t *multiboot);
 
 #endif
-
