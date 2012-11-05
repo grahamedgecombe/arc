@@ -70,6 +70,3 @@
 * should IPI_ROUTE still exist?
 
 * remove support for MGA tty, all amd64 PCs should support CGA at least
-
-* are structs inside packed structs also packed? also check the alignment
-  attributes

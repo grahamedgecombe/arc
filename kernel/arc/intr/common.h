@@ -98,7 +98,6 @@
  */
 
 /* IPIs */
-#define IPI_ROUTE 0xFA
 #define IPI_PANIC 0xFB
 #define IPI_TLB   0xFC
 

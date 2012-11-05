@@ -42,13 +42,6 @@ irq%1:
   jmp intr_stub
 %endmacro
 
-; IRQ routing IPI entry code
-[global ipi_route]
-ipi_route:
-  push 0
-  push 0xFA
-  jmp intr_stub
-
 ; panic IPI entry code
 [global ipi_panic]
 ipi_panic:
