@@ -76,7 +76,7 @@ typedef struct
       uint32_t entry_size;
       uint32_t entry_version;
       /* entries follow here */
-    } mmap;
+    } __attribute__((__packed__)) mmap;
 
     /* module tag */
     struct
@@ -84,13 +84,13 @@ typedef struct
       uint32_t mod_start;
       uint32_t mod_end;
       char string[1];
-    } module;
+    } __attribute__((__packed__)) module;
 
     /* cmdline tag */
     struct
     {
       char string[1];
-    } cmdline;
+    } __attribute__((__packed__)) cmdline;
   };
 } __attribute__((__packed__)) multiboot_tag_t;
 

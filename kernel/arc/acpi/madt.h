@@ -54,7 +54,7 @@ typedef struct
       uint8_t id;
       uint8_t apic_id;
       uint32_t flags;
-    } lapic;
+    } __attribute__((__packed__)) lapic;
 
     struct
     {
@@ -62,7 +62,7 @@ typedef struct
       uint8_t reserved;
       uint32_t addr;
       uint32_t gsi_base;
-    } ioapic;
+    } __attribute__((__packed__)) ioapic;
 
     struct
     {
@@ -70,26 +70,26 @@ typedef struct
       uint8_t irq;
       uint32_t gsi;
       uint16_t flags;
-    } intr;
+    } __attribute__((__packed__)) intr;
 
     struct
     {
       uint16_t flags;
       uint32_t gsi;
-    } nmi;
+    } __attribute__((__packed__)) nmi;
 
     struct
     {
       uint8_t id;
       uint16_t flags;
       uint8_t lintn;
-    } lnmi;
+    } __attribute__((__packed__)) lnmi;
 
     struct
     {
       uint16_t reserved;
       uint64_t addr;
-    } lapic_addr;
+    } __attribute__((__packed__)) lapic_addr;
 
     struct
     {
@@ -97,7 +97,7 @@ typedef struct
       uint32_t apic_id;
       uint32_t flags;
       uint32_t id;
-    } lx2apic;
+    } __attribute__((__packed__)) lx2apic;
 
     struct
     {
@@ -105,7 +105,7 @@ typedef struct
       uint32_t id;
       uint8_t lintn;
       uint8_t reserved[3];
-    } lx2nmi;
+    } __attribute__((__packed__)) lx2nmi;
   };
 } __attribute__((__packed__)) madt_entry_t;
 
