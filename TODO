@@ -70,3 +70,5 @@
 * should IPI_ROUTE still exist?
 
 * remove support for MGA tty, all amd64 PCs should support CGA at least
+
+* bochs isn't firing local APIC tick interrupts

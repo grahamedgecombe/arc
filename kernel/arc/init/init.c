@@ -126,10 +126,6 @@ void init(uint32_t magic, multiboot_t *multiboot)
     up_fallback = true;
   }
 
-  /* workaround for a bug in the Bochs ACPI/MP tables */
-  if (!up_fallback)
-    isa_bochs_workaround();
-
   /* set up the local APIC on the BSP if we are in SMP mode */
   if (!up_fallback)
     apic_init();

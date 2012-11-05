@@ -46,19 +46,3 @@ irq_tuple_t *isa_irq(isa_line_t line)
 
   return &isa_irqs[line];
 }
-
-void isa_bochs_workaround(void)
-{
-  /*
-   * Bochs uses port E9 as a special debug port. It can be detected by reading
-   * from port E9, and checking if the value there is E9. If so, we are
-   * probably running in Bochs.
-   */
-  if (inb_p(0xE9) == 0xE9)
-  {
-    trace_puts("Fixing Bochs ISA IRQ routing...\n");
-
-    /* The PIT is actually connected to INTIN2 on the I/O APIC. */
-    isa_irqs[0].irq = 2;
-  }
-}

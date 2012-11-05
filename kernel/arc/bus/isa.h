@@ -37,12 +37,4 @@ void isa_init(void);
  */
 irq_tuple_t *isa_irq(isa_line_t line);
 
-/*
- * Bochs connects the PIT to input 2 of the I/O APIC. But the ACPI/MP tables do
- * not reflect this, and report that it is connected to input 0. This function
- * (unreliably) checks if we are running in Bochs, and then corrects the ISA
- * IRQ table.
- */
-void isa_bochs_workaround(void);
-
 #endif
