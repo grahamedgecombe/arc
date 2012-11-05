@@ -17,7 +17,6 @@
 #include <arc/lock/spinlock.h>
 #include <arc/cpu/pause.h>
 #include <arc/lock/intr.h>
-#include <arc/lock/xchg.h>
 #include <assert.h>
 
 void spin_lock(spinlock_t *lock)
@@ -35,7 +34,7 @@ bool spin_try_lock(spinlock_t *lock)
 {
   intr_lock();
 
-  if (exchange(SPIN_LOCKED, lock) == SPIN_UNLOCKED)
+  if (__sync_bool_compare_and_swap(lock, SPIN_UNLOCKED, SPIN_LOCKED))
     return true;
 
   intr_unlock();
@@ -44,6 +43,6 @@ bool spin_try_lock(spinlock_t *lock)
 
 void spin_unlock(spinlock_t *lock)
 {
-  assert(exchange(SPIN_UNLOCKED, lock) == SPIN_LOCKED);
+  assert(__sync_bool_compare_and_swap(lock, SPIN_LOCKED, SPIN_UNLOCKED));
   intr_unlock();
 }
