@@ -62,7 +62,7 @@ void pic_init(void)
   outb_p(PIC2_DATA, 0x02); /* connected to IRQ2 of master */
 
   /* change the PICs to use 8086 mode */
-  outb_p(PIC1_DATA, ICW4_8086);
+  outb_p(PIC1_DATA, ICW4_8086 | ICW4_M);
   outb_p(PIC2_DATA, ICW4_8086);
 
   /* mask every IRQ by default except IRQ2 which is used for cascading */
