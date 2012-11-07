@@ -23,22 +23,33 @@
 #define PIC2_CMD  0x00A0
 #define PIC2_DATA 0x00A1
 
+/* ICW1 flags */
 #define ICW1_IC4  0x1
 #define ICW1_SNGL 0x2
 #define ICW1_ADI  0x4
 #define ICW1_LTIM 0x8
 #define ICW1_MB1  0x10 /* must be set to 1 */
 
+/*
+ * ICW2: interrupt vector offset
+ * ICW3: for the master, bits indicate which IRx lines are connected to slaves,
+ *       for slaves, the number of the IRx line the slave is connected to on
+ *       the master.
+ */
+
+/* ICW4 flags */
 #define ICW4_8086 0x1
 #define ICW4_AEOI 0x2
 #define ICW4_M    0x4  /* don't care if BUF not set */
 #define ICW4_BUF  0x8
 #define ICW4_SFNM 0x10
 
+/* OCW2 flags */
 #define OCW2_EOI 0x20
 #define OCW2_SL  0x40
 #define OCW2_R   0x80
 
+/* OCW3 flags */
 #define OCW3_RIS  0x1
 #define OCW3_RR   0x2
 #define OCW3_P    0x4
