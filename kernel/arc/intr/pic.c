@@ -23,24 +23,47 @@
 #define PIC2_CMD  0x00A0
 #define PIC2_DATA 0x00A1
 
+#define ICW1_IC4  0x1
+#define ICW1_SNGL 0x2
+#define ICW1_ADI  0x4
+#define ICW1_LTIM 0x8
+#define ICW1_MB1  0x10 /* must be set to 1 */
+
+#define ICW4_8086 0x1
+#define ICW4_AEOI 0x2
+#define ICW4_M    0x4  /* don't care if BUF not set */
+#define ICW4_BUF  0x8
+#define ICW4_SFNM 0x10
+
+#define OCW2_EOI 0x20
+#define OCW2_SL  0x40
+#define OCW2_R   0x80
+
+#define OCW3_RIS  0x1
+#define OCW3_RR   0x2
+#define OCW3_P    0x4
+#define OCW3_MB1  0x8  /* must be set to 1 */
+#define OCW3_SMM  0x20
+#define OCW3_ESMM 0x40
+
 /* remaps the PICs so IRQ0 -> IRQ15 do not clash with CPU exceptions */
 void pic_init(void)
 {
-  /* initialise the slave and master */
-  outb_p(PIC1_CMD, 0x11);
-  outb_p(PIC2_CMD, 0x11);
+  /* start initialising the PICs */
+  outb_p(PIC1_CMD, ICW1_MB1 | ICW1_IC4);
+  outb_p(PIC2_CMD, ICW1_MB1 | ICW1_IC4);
 
   /* set the offsets */
-  outb_p(PIC1_DATA, 0x20);
-  outb_p(PIC2_DATA, 0x28);
+  outb_p(PIC1_DATA, IRQ0);
+  outb_p(PIC2_DATA, IRQ8);
 
   /* tell the PICs how they are wired to each other */
-  outb_p(PIC1_DATA, 0x04);
-  outb_p(PIC2_DATA, 0x02);
+  outb_p(PIC1_DATA, 0x04); /* IRQ2 has slave */
+  outb_p(PIC2_DATA, 0x02); /* connected to IRQ2 of master */
 
   /* change the PICs to use 8086 mode */
-  outb_p(PIC1_DATA, 0x01);
-  outb_p(PIC2_DATA, 0x01);
+  outb_p(PIC1_DATA, ICW4_8086);
+  outb_p(PIC2_DATA, ICW4_8086);
 
   /* mask every IRQ by default except IRQ2 which is used for cascading */
   outb_p(PIC1_DATA, 0xFB);
@@ -62,7 +85,7 @@ bool pic_spurious(irq_t irq)
     uint8_t isr = inb_p(PIC2_CMD);
     if (~isr & 0x80)
     {
-      outb_p(PIC1_CMD, 0x20);
+      outb_p(PIC1_CMD, OCW2_EOI);
       return true;
     }
   }
@@ -110,6 +133,6 @@ void pic_unmask(irq_t irq)
 void pic_ack(irq_t irq)
 {
   if (irq >= 8)
-    outb_p(PIC2_CMD, 0x20);
-  outb_p(PIC1_CMD, 0x20);
+    outb_p(PIC2_CMD, OCW2_EOI);
+  outb_p(PIC1_CMD, OCW2_EOI);
 }
