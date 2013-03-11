@@ -7,7 +7,7 @@ Introduction
 Arc is a simple hobby operating system for modern PCs with amd64
 processors. It is written mostly in C11, with small amounts of Intel-style
 assembly where required. It can be loaded by any
-[Multiboot 2][multiboot]-complaint boot loader, such as [GNU GRUB][grub].
+[Multiboot 2][multiboot]-compliant boot loader, such as [GNU GRUB][grub].
 
 Building
 --------
