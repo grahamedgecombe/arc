@@ -9,6 +9,11 @@ processors. It is written mostly in C11, with small amounts of Intel-style
 assembly where required. It can be loaded by any
 [Multiboot 2][multiboot]-compliant boot loader, such as [GNU GRUB][grub].
 
+Screenshot
+----------
+
+![Arc running the 'hello' program][screenshot]
+
 Building
 --------
 
@@ -155,3 +160,4 @@ file for the CC0 text. The CC0 licensing terms only apply to the
 [dl]: http://g.oswego.edu/
 [dlmalloc]: http://g.oswego.edu/dl/html/malloc.html
 [cc0]: http://creativecommons.org/publicdomain/zero/1.0/
+[screenshot]: https://raw.github.com/grahamedgecombe/arc/master/doc/screenshot.png
