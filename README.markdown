@@ -35,7 +35,7 @@ To use these scripts you must create a [GNU GRUB][grub] disk image. Due to the
 licenses used by Arc and GRUB (GPL and ISC respectively) I do not believe that
 this image can be distributed with the Arc code.
 
-### Generating `disk.img.lzma`
+### Generating `disk.img.xz`
 
 To create this image you will need to install a recent version of GRUB 2, e.g.
 from your Linux distribution's package manager. You could also compile and
@@ -52,13 +52,13 @@ Then run fdisk:
 
 At the fdisk prompt, first type "o" to create a new partition table. Then type
 "n" to create a new partition. Type "p" to set it as the primary partition and
-then type "1" to make it the first. The first sector should be set to 63, this
+then type "1" to make it the first. The first sector should be set to 2048, this
 is probably already the default. Leave all the other settings as the default
 by simply hitting the return key. Finally use "w" to save the changes.
 
 Now set up a loop device for the partition:
 
-    sudo losetup -o 32256 /dev/loop1 /dev/loop0
+    sudo losetup -o 1048576 /dev/loop1 /dev/loop0
 
 Format this partition as ext2 and mount it to a temporary location:
 
@@ -79,12 +79,12 @@ mount point:
     sudo losetup -d /dev/loop0
     rmdir temp
 
-The template is compressed using LZMA to save space (most of it is full of
+The template is compressed using XZ to save space (most of it is full of
 zeroes), to compress it run the following command:
 
-    lzma -9 disk.img
+    xz -9 disk.img
 
-The should create a `disk.img.lzma` file. Put this in the `run` folder of the
+The should create a `disk.img.xz` file. Put this in the `run` folder of the
 Arc distribution. The `run/qemu.sh` and `run/bochs.sh` scripts should now work
 assuming you have the correct software installed and Arc was compiled
 correctly.
