@@ -24,7 +24,7 @@ The following software is required to build Arc:
   * [NASM][nasm] or [YASM][yasm]
   * [GNU Make][make]
 
-GCC and Binutils must be cross-compiled for the `x86_64-pc-elf` target.
+GCC and Binutils must be [cross-compiled][cross] for the `x86_64-pc-elf` target.
 
 When the required software is installed, simply use the `make` command to build
 the operating system.
@@ -150,6 +150,7 @@ file for the CC0 text. The CC0 licensing terms only apply to the
 [nasm]: http://nasm.us/
 [yasm]: http://yasm.tortall.net/
 [make]: http://gnu.org/software/make/
+[cross]: http://wiki.osdev.org/GCC_Cross-Compiler
 [qemu]: http://qemu.org/
 [bochs]: http://bochs.sourceforge.net/
 [isc]: http://isc.org/software/license/
