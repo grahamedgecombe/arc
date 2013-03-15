@@ -14,6 +14,32 @@ Screenshot
 
 ![Arc running the 'hello' program][screenshot]
 
+Features
+--------
+
+The current feature set, at a high level, is roughly:
+
+  * Symmetric multiprocessing (i.e. multiple processors/cores)
+  * Paging (and TLB shootdown)
+  * Physical memory allocation (several zones for DMA addressing limitations)
+  * Virtual memory allocation (in user- and kernel-space)
+  * Interrupt handling (dual 8259 PICs or local APIC)
+  * Interrupt routing (with I/O APIC and ACPI tables)
+  * Timing (8253/8254 PIT or local APIC)
+  * Processes (loaded as ELF64 Multiboot modules) and threads
+  * Scheduling (round-robin)
+  * System calls (with `SYSCALL`/`SYSRET`)
+  * Fine-grained locking with spinlocks
+
+My current short-term goals are:
+
+  * Idle thread per CPU so processes can terminate
+  * Inter-process communication
+  * Some useful system calls (e.g. memory allocation, spawning threads, etc.)
+  * Better scheduling algorithm (e.g. MLFQ)
+
+and after that, who knows?
+
 Building
 --------
 
