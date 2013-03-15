@@ -116,7 +116,7 @@ zeroes), to compress it run the following command:
     xz -9 disk.img
 
 The should create a `disk.img.xz` file. Put this in the `run` folder of the
-Arc distribution. The `run/qemu.sh` and `run/bochs.sh` scripts should now work
+Arc distribution. The `run/{qemu,bochs,virtualbox}.sh` scripts should now work
 assuming you have the correct software installed and Arc was compiled
 correctly.
 
