@@ -12,4 +12,3 @@ VBoxManage modifyvm arc --acpi on --ioapic on --cpus 2 --memory 128 --boot1 disk
 VBoxManage storagectl arc --name "SATA Controller" --add sata
 VBoxManage storageattach arc --storagectl "SATA Controller" --port 0 --type hdd --medium disk.vdi
 VBoxManage startvm arc
-

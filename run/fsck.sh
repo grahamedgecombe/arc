@@ -8,4 +8,3 @@ sync
 sudo losetup -d $LOOP1
 sync
 sudo losetup -d $LOOP0
-

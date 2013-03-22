@@ -14,4 +14,3 @@ sudo cp ../hello/hello mnt/bin
 sudo cp grub.cfg mnt/boot/grub
 sync
 sudo umount mnt
-
