@@ -27,7 +27,7 @@ The current feature set, at a high level, is roughly:
   * Interrupt routing (with I/O APIC and ACPI tables)
   * Timing (8253/8254 PIT or local APIC)
   * Processes (loaded as ELF64 Multiboot modules) and threads
-  * Scheduling (round-robin)
+  * Scheduling (round-robin, preemptive)
   * System calls (with `SYSCALL`/`SYSRET`)
   * Fine-grained locking with spinlocks
 
