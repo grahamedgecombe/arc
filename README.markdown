@@ -132,10 +132,10 @@ after the requisite number of mounts have passed.
 
 ### Patching GRUB
 
-GRUB up to version 1.99 has a bug where it load parts of a 64-bit ELF file as
-if it were a 32-bit ELF file. If booting with your distribution's GRUB package
-doesn't work, or if you downloaded GRUB 1.99 from source, you will need to
-patch it to fix this problem.
+GRUB up to and including version 1.99 has a bug where it load parts of a 64-bit
+ELF file as if it were a 32-bit ELF file. If booting with your distribution's
+GRUB package doesn't work, or if you downloaded GRUB 1.99 from source, you will
+need to patch it to fix this problem.
 
 In `grub-core/loader/multiboot_elfxx.c` you should add the following:
 
@@ -163,9 +163,8 @@ After:
 
 Thomas Haller, who submitted this fix to the GRUB mailing list, also provided a
 [diff and some more information][grub-fix]. It is also in the
-[Bazaar repository][grub-fix-bzr] and therefore this step won't be necessary
-with future versions of GRUB. I believe it is no longer necessary in GRUB 2.00
-and above.
+[Bazaar repository][grub-fix-bzr] and therefore this step is not necessary for
+GRUB 2.00 and above.
 
 License
 -------
