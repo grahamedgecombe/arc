@@ -4,10 +4,10 @@ Arc
 Introduction
 ------------
 
-Arc is a simple hobby operating system for modern PCs with amd64
-processors. It is written mostly in C11, with small amounts of Intel-style
-assembly where required. It can be loaded by any
-[Multiboot 2][multiboot]-compliant boot loader, such as [GNU GRUB][grub].
+Arc is a simple toy operating system for modern PCs with amd64 processors.
+It is written mostly in C11, with small amounts of Intel-style assembly where
+required. It can be loaded by any [Multiboot 2][multiboot]-compliant boot
+loader, such as [GNU GRUB][grub].
 
 Screenshot
 ----------
@@ -120,6 +120,13 @@ Arc distribution. The `run/{qemu,bochs,virtualbox}.sh` scripts should now work
 assuming you have the correct software installed and Arc was compiled
 correctly.
 
+If you mess up the disk image somehow, just delete `disk.img`. The scripts will
+automatically create a new disk image from `disk.img.xz`.
+
+From time to time it may be a good idea to run `run/fsck.sh`, which mounts the
+disk image and runs `e2fsck` on it, to avoid complaints in the host kernel's log
+after the requisite number of mounts has passed.
+
 ### Patching GRUB
 
 GRUB up to version 1.99 has a bug where it load parts of a 64-bit ELF file as
@@ -169,6 +176,10 @@ into the public domain using the [CC0][cc0] license. See the `LICENSE.dlmalloc`
 file for the CC0 text. The CC0 licensing terms only apply to the
 `include/dlmalloc.h` and `src/dlmalloc.c` files.
 
+Finally, whilst not related to licensing, it is worth mentioning the
+[OSDev.org wiki][osdev]. It provides a good overview before you jump into the
+various manuals and specifications.
+
 [multiboot]: http://download.savannah.gnu.org/releases/grub/phcoder/multiboot.pdf
 [clang]: http://clang.llvm.org/
 [gcc]: http://gcc.gnu.org/
@@ -188,3 +199,4 @@ file for the CC0 text. The CC0 licensing terms only apply to the
 [dlmalloc]: http://g.oswego.edu/dl/html/malloc.html
 [cc0]: http://creativecommons.org/publicdomain/zero/1.0/
 [screenshot]: https://raw.github.com/grahamedgecombe/arc/master/doc/screenshot.png
+[osdev]: http://osdev.org/
