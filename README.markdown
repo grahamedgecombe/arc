@@ -40,8 +40,8 @@ My current short-term goals are:
 
 and after that, who knows?
 
-I've also got a cryptic `TODO` list (and some comments spred about the code)
-with shorter-term problems and thoughts.
+I've also got a cryptic `TODO` list (and some comments spread about the code)
+with shorter-term bugs and ideas.
 
 Building
 --------
