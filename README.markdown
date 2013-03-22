@@ -63,7 +63,7 @@ The easiest way to test Arc is with the [QEMU][qemu], [Bochs][bochs] or
 `./run/virtualbox.sh` to launch QEMU, Bochs or VirtualBox respectively.
 
 To use these scripts you must create a [GNU GRUB][grub] disk image. Due to the
-licenses used by Arc and GRUB (GPL and ISC respectively) I do not believe that
+licenses used by Arc and GRUB (ISC and GPL respectively) I do not believe that
 this image can be distributed with the Arc code.
 
 ### Generating `disk.img.xz`
