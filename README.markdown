@@ -125,7 +125,7 @@ automatically create a new disk image from `disk.img.xz`.
 
 From time to time it may be a good idea to run `run/fsck.sh`, which mounts the
 disk image and runs `e2fsck` on it, to avoid complaints in the host kernel's log
-after the requisite number of mounts has passed.
+after the requisite number of mounts have passed.
 
 ### Patching GRUB
 
