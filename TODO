@@ -70,3 +70,5 @@
 * remove support for MGA tty, all amd64 PCs should support CGA at least
 
 * bochs isn't firing local APIC tick interrupts
+
+* check SMP code more carefully - do we need memory fences/barriers anywhere?
