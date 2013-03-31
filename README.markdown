@@ -176,7 +176,7 @@ information and licensing terms.
 Arc uses [Doug Lea][dl]'s [memory allocator][dlmalloc] which has been released
 into the public domain using the [CC0][cc0] license. See the `LICENSE.dlmalloc`
 file for the CC0 text. The CC0 licensing terms only apply to the
-`include/dlmalloc.h` and `src/dlmalloc.c` files.
+`kernel/dlmalloc.h` and `kernel/dlmalloc.c` files.
 
 Finally, whilst not related to licensing, it is worth mentioning the
 [OSDev.org wiki][osdev]. It provides a good overview before you jump into the
