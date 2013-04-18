@@ -17,6 +17,7 @@
 #include <arc/trace.h>
 #include <arc/trace/tty.h>
 #include <arc/trace/uart.h>
+#include <arc/trace/e9.h>
 #include <arc/lock/spinlock.h>
 #include <arc/cmdline.h>
 #include <arc/panic.h>
@@ -28,6 +29,7 @@
 /* backends */
 #define TRACE_TTY  0x1
 #define TRACE_UART 0x2
+#define TRACE_E9   0x4
 
 /* tty_vprintf() flags */
 #define FLAG_JUSTIFY 0x1
@@ -122,6 +124,8 @@ static void _trace_putch(char c) {
     tty_putch(c);
   if (trace_backends & TRACE_UART)
     uart_putch(c);
+  if (trace_backends & TRACE_E9)
+    e9_putch(c);
 }
 
 static void _trace_puts(const char *str) {
@@ -129,6 +133,8 @@ static void _trace_puts(const char *str) {
     tty_puts(str);
   if (trace_backends & TRACE_UART)
     uart_puts(str);
+  if (trace_backends & TRACE_E9)
+    e9_puts(str);
 }
 
 void trace_init(void)
@@ -144,6 +150,8 @@ void trace_init(void)
           trace_backends |= TRACE_TTY;
         if (memcmp(backend, "uart", max(c - backend, 4)) == 0)
           trace_backends |= TRACE_UART;
+        if (memcmp(backend, "e9", max(c - backend, 2)) == 0)
+          trace_backends |= TRACE_E9;
 
         if (*c)
           backend = c + 1;
