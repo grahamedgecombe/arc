@@ -65,8 +65,6 @@
   won't touch _any_ space mapped into the kernel's virtual memory (so round
   up to the next 2mb boundary when reserving kernel's physical memory)
 
-* remove support for MGA tty, all amd64 PCs should support CGA at least
-
 * bochs isn't firing local APIC tick interrupts
 
 * check SMP code more carefully - do we need memory fences/barriers anywhere?

@@ -23,9 +23,8 @@
 #include <stdint.h>
 #include <string.h>
 
-/* the physical addresses of the video buffers */
-#define VIDEO_BUFFER_MGA 0xB0000
-#define VIDEO_BUFFER_CGA 0xB8000
+/* the physical address of the video buffers */
+#define VIDEO_BUFFER 0xB8000
 
 /* CRTC addresses */
 #define CRTC_CURSOR_LOW  0x0F
@@ -177,14 +176,12 @@ static void tty_sync(void)
 /* initializes the terminal */
 void tty_init(void)
 {
-  /* grab the VGA mode and port base from the BIOS data area */
-  uint8_t vga_mode = bda_read(BDA_VGA_MODE);
+  /* grab the VGA port base from the BIOS data area */
   vga_port_base = bda_reads(BDA_VGA_PORT);
 
-  /* grab the appropriate pointer to the video buffer */
-  bool mga = (vga_mode & 0x30) == 0x30;
-  video_buf = (uint16_t *) aphy32_to_virt(mga ? VIDEO_BUFFER_MGA : VIDEO_BUFFER_CGA);
-
+  /* set the pointer to the video buffer */
+  video_buf = (uint16_t *) aphy32_to_virt(VIDEO_BUFFER);
+  
   /* reset the cursor and the attributes */
   row = 0;
   col = 0;
