@@ -21,8 +21,6 @@
 
 * use enums in more places (e.g. heap node state)
 
-* add idle process and threads (one per cpu)
-
 * use a more efficient user-space heap structure (red black tree?)
 
 * consider interupt masking more in relation to locks (e.g. current solution
@@ -74,3 +72,5 @@
 * check SMP code more carefully - do we need memory fences/barriers anywhere?
 
 * look at using kpartx in run/ shell scripts, instead of hard-coded offsets
+
+* try to avoid the need to preserve the value of CR3 so many times during boot

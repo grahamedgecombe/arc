@@ -33,7 +33,6 @@ The current feature set, at a high level, is roughly:
 
 My current short-term goals are:
 
-  * Idle thread per CPU so processes can terminate
   * Inter-process communication
   * Some useful system calls (e.g. memory allocation, spawning threads, etc.)
   * Better scheduling algorithm (e.g. MLFQ)
