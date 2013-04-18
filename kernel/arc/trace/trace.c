@@ -165,6 +165,8 @@ void trace_init(void)
     tty_init();
   if (trace_backends & TRACE_UART)
     uart_init();
+  if (trace_backends & TRACE_E9)
+    e9_init();
 }
 
 void trace_putch(char c)
