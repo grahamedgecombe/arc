@@ -21,6 +21,10 @@
 #include <stdbool.h>
 #include <string.h>
 
+/* the dimensions of the terminal */
+#define TTY_WIDTH  80
+#define TTY_HEIGHT 25
+
 /* the tab width */
 #define TAB_WIDTH 4
 

@@ -17,10 +17,6 @@
 #ifndef ARC_TRACE_TTY_H
 #define ARC_TRACE_TTY_H
 
-/* the dimensions of the terminal */
-#define TTY_WIDTH  80
-#define TTY_HEIGHT 25
-
 /* initializes the tty driver */
 void tty_init(void);
 
