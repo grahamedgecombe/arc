@@ -17,7 +17,6 @@
 #include <arc/trace/tty.h>
 #include <arc/bda.h>
 #include <arc/cpu/port.h>
-#include <arc/lock/spinlock.h>
 #include <arc/mm/phy32.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -42,9 +41,6 @@
 #define FLAG_SPACE   0x4
 #define FLAG_HASH    0x8
 #define FLAG_ZERO    0x10
-
-/* the tty lock */
-static spinlock_t tty_lock = SPIN_UNLOCKED;
 
 /* the VGA port base */
 static uint16_t vga_port_base;
@@ -200,19 +196,15 @@ void tty_init(void)
 /* atomically writes a string */
 void tty_puts(const char *str)
 {
-  spin_lock(&tty_lock);
   _tty_puts(str);
   tty_sync();
-  spin_unlock(&tty_lock);
 }
 
 /* atomically writes a character */
 void tty_putch(char ch)
 {
-  spin_lock(&tty_lock);
   _tty_putch(ch);
   tty_sync();
-  spin_unlock(&tty_lock);
 }
 
 /* internal function for writing a string */
@@ -300,7 +292,6 @@ static void _tty_putch(char c)
 /* print a formatted string to the terminal using the given va_list */
 void tty_vprintf(const char *fmt, va_list args)
 {
-  spin_lock(&tty_lock);
   char c;
   while ((c = *fmt++))
   {
@@ -464,5 +455,4 @@ void tty_vprintf(const char *fmt, va_list args)
   }
 
   tty_sync();
-  spin_unlock(&tty_lock);
 }

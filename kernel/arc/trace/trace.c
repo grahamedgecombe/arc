@@ -16,6 +16,9 @@
 
 #include <arc/trace.h>
 #include <arc/trace/tty.h>
+#include <arc/lock/spinlock.h>
+
+static spinlock_t trace_lock = SPIN_UNLOCKED;
 
 void trace_init(void)
 {
@@ -24,12 +27,16 @@ void trace_init(void)
 
 void trace_putch(char c)
 {
+  spin_lock(&trace_lock);
   tty_putch(c);
+  spin_unlock(&trace_lock);
 }
 
 void trace_puts(const char *str)
 {
+  spin_lock(&trace_lock);
   tty_puts(str);
+  spin_unlock(&trace_lock);
 }
 
 void trace_printf(const char *fmt, ...)
@@ -42,5 +49,7 @@ void trace_printf(const char *fmt, ...)
 
 void trace_vprintf(const char *fmt, va_list args)
 {
+  spin_lock(&trace_lock);
   tty_vprintf(fmt, args);
+  spin_unlock(&trace_lock);
 }
