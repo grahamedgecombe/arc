@@ -42,9 +42,6 @@
 
 * x2APIC support in MADT parsing code
 
-* make it so cmdline doesn't depend on a memory allocator, this way it can be
-  used early enough to select the trace output(s)
-
 * check which trigger/level should be use for NMIs by default, and if we need
   to put this in the LVT for local NMIs
 
