@@ -41,6 +41,7 @@
 #include <arc/proc/sched.h>
 #include <arc/proc/syscall.h>
 #include <arc/proc/module.h>
+#include <arc/proc/idle.h>
 #include <arc/lock/intr.h>
 #include <string.h>
 #include <stdbool.h>
@@ -137,6 +138,9 @@ void init(uint32_t magic, multiboot_t *multiboot)
   panic_init();
   fault_init();
   tlb_init();
+
+  /* set up idle process, this must be done before we are in SMP mode */
+  idle_init();
 
   /* set up symmetric multi-processing */
   if (!up_fallback)

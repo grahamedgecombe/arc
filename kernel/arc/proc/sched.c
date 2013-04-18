@@ -71,6 +71,10 @@ void sched_tick(intr_state_t *state)
 
   spin_unlock(&thread_queue_lock);
 
+  /* if there is no new thread, switch to the idle thread */
+  if (!new_thread)
+    new_thread = cpu->idle_thread;
+
   /* check if we're actually switching threads */
   if (cur_thread != new_thread)
   {
@@ -89,23 +93,15 @@ void sched_tick(intr_state_t *state)
     }
 
     /* restore the register file for the new thread */
-    if (new_thread)
-    {
-      memcpy(state->regs, new_thread->regs, sizeof(state->regs));
-      state->rip = new_thread->rip;
-      state->rsp = new_thread->rsp;
-      state->rflags = new_thread->rflags;
-      state->cs = new_thread->cs;
-      state->ss = new_thread->ss;
+    memcpy(state->regs, new_thread->regs, sizeof(state->regs));
+    state->rip = new_thread->rip;
+    state->rsp = new_thread->rsp;
+    state->rflags = new_thread->rflags;
+    state->cs = new_thread->cs;
+    state->ss = new_thread->ss;
 
-      /* if we're switcing between processes, we need to switch address spaces */
-      if (!cur_thread || cur_thread->proc != new_thread->proc)
-        proc_switch(new_thread->proc); /* (this also sets cpu->proc) */
-    }
-    else
-    {
-      // TODO: switch to idle thread ?
-      panic("nothing to do!");
-    }
+    /* if we're switcing between processes, we need to switch address spaces */
+    if (!cur_thread || cur_thread->proc != new_thread->proc)
+      proc_switch(new_thread->proc); /* (this also sets cpu->proc) */
   }
 }

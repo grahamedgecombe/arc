@@ -71,6 +71,9 @@ typedef struct cpu
   proc_t *proc;
   thread_t *thread;
 
+  /* idle thread for this cpu */
+  thread_t *idle_thread;
+
   /* number of APIC ticks per millisecond */
   uint32_t apic_ticks_per_ms;
 
