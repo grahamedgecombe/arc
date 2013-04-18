@@ -66,8 +66,14 @@ static void print_banner(void)
 
 void init(uint32_t magic, multiboot_t *multiboot)
 {
+  /* convert physical 32-bit multiboot address to virtual address */
+  multiboot = phy32_to_virt(multiboot);
+
   /* set up the BSP's percpu structure */
   cpu_bsp_init();
+
+  /* parse command line arguments */
+  cmdline_init(multiboot);
 
   /* initialise tracing */
   trace_init();
@@ -79,9 +85,6 @@ void init(uint32_t magic, multiboot_t *multiboot)
   if (magic != MULTIBOOT_MAGIC)
     panic("invalid multiboot magic (expected %0#10x, got %0#10x)", MULTIBOOT_MAGIC,
       magic);
-
-  /* convert physical 32-bit multiboot address to virtual address */
-  multiboot = phy32_to_virt(multiboot);
 
   /* set up the GDT, TSS, IDT and SYSCALL/RET */
   gdt_init();
@@ -107,9 +110,6 @@ void init(uint32_t magic, multiboot_t *multiboot)
   /* set up the heap */
   trace_puts("Setting up the heap...\n");
   heap_init();
-
-  /* parse command line arguments now we can malloc */
-  cmdline_init(multiboot);
 
   /* init ISA bus */
   isa_init();

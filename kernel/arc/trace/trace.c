@@ -16,9 +16,18 @@
 
 #include <arc/trace.h>
 #include <arc/trace/tty.h>
+#include <arc/trace/uart.h>
 #include <arc/lock/spinlock.h>
+#include <arc/cmdline.h>
+#include <arc/panic.h>
 #include <string.h>
 #include <stdint.h>
+
+#define max(x,y) (((x) > (y)) ? (x) : (y))
+
+/* backends */
+#define TRACE_TTY  0x1
+#define TRACE_UART 0x2
 
 /* tty_vprintf() flags */
 #define FLAG_JUSTIFY 0x1
@@ -28,6 +37,7 @@
 #define FLAG_ZERO    0x10
 
 static spinlock_t trace_lock = SPIN_UNLOCKED;
+static int trace_backends = 0;
 
 /* reverses a string */
 static char *reverse(char *str)
@@ -107,24 +117,67 @@ static int skip_atoi(const char **str)
   return i;
 }
 
+static void _trace_putch(char c) {
+  if (trace_backends & TRACE_TTY)
+    tty_putch(c);
+  if (trace_backends & TRACE_UART)
+    uart_putch(c);
+}
+
+static void _trace_puts(const char *str) {
+  if (trace_backends & TRACE_TTY)
+    tty_puts(str);
+  if (trace_backends & TRACE_UART)
+    uart_puts(str);
+}
+
 void trace_init(void)
 {
-  tty_init();
+  const char *trace = cmdline_get("trace");
+  if (trace)
+  {
+    for (const char *c = trace, *backend = trace;; c++)
+    {
+      if (*c == ',' || *c == 0)
+      {
+        if (memcmp(backend, "tty", max(c - backend, 3)) == 0)
+          trace_backends |= TRACE_TTY;
+        if (memcmp(backend, "uart", max(c - backend, 4)) == 0)
+          trace_backends |= TRACE_UART;
+
+        if (*c)
+          backend = c + 1;
+        else
+          break;
+      }
+    }
+  }
+
+  if (trace_backends & TRACE_TTY)
+    tty_init();
+  if (trace_backends & TRACE_UART)
+    uart_init();
 }
 
 void trace_putch(char c)
 {
   spin_lock(&trace_lock);
-  tty_putch(c);
-  tty_sync();
+
+  _trace_putch(c);
+  if (trace_backends & TRACE_TTY)
+    tty_sync();
+
   spin_unlock(&trace_lock);
 }
 
 void trace_puts(const char *str)
 {
   spin_lock(&trace_lock);
-  tty_puts(str);
-  tty_sync();
+
+  _trace_puts(str);
+  if (trace_backends & TRACE_TTY)
+    tty_sync();
+
   spin_unlock(&trace_lock);
 }
 
@@ -145,7 +198,7 @@ void trace_vprintf(const char *fmt, va_list args)
   {
     if (c != '%')
     {
-      tty_putch(c);
+      _trace_putch(c);
     }
     else
     {
@@ -218,13 +271,13 @@ void trace_vprintf(const char *fmt, va_list args)
       switch (c)
       {
         case '%':
-          tty_putch('%');
+          _trace_putch('%');
           break;
         case 'c':
-          tty_putch((char) va_arg(args, int));
+          _trace_putch((char) va_arg(args, int));
           break;
         case 's':
-          tty_puts(va_arg(args, const char *));
+          _trace_puts(va_arg(args, const char *));
           break;
         case 'u':
         case 'd':
@@ -266,14 +319,14 @@ void trace_vprintf(const char *fmt, va_list args)
             /* add the 0x prefix */
             if (flags & FLAG_HASH && base == 16)
             {
-              tty_puts("0x");
+              _trace_puts("0x");
               len += 2;
             }
 
             /* add a plus or a space if the number is not negative */
             if (((flags & FLAG_PLUS) || (flags & FLAG_SPACE)) && buf[0] != '-' && c != 'u' && base != 6)
             {
-              tty_putch((flags & FLAG_PLUS) ? '+' : ' ');
+              _trace_putch((flags & FLAG_PLUS) ? '+' : ' ');
               len++;
             }
 
@@ -282,19 +335,19 @@ void trace_vprintf(const char *fmt, va_list args)
             {
               int pad = width - len;
               for (int i = 0; i < pad; i++)
-                tty_putch((flags & FLAG_ZERO) ? '0' : ' ');
+                _trace_putch((flags & FLAG_ZERO) ? '0' : ' ');
               len += pad;
             }
 
             /* print the actual buffer */
-            tty_puts(buf);
+            _trace_puts(buf);
 
             /* perform right justification */
             if (width > len && !((flags & FLAG_JUSTIFY) || (flags & FLAG_ZERO)))
             {
               int pad = width - len;
               for (int i = 0; i < pad; i++)
-                tty_putch(' ');
+                _trace_putch(' ');
               len += pad;
             }
           }
@@ -302,6 +355,8 @@ void trace_vprintf(const char *fmt, va_list args)
     }
   }
 
-  tty_sync();
+  if (trace_backends & TRACE_TTY)
+    tty_sync();
+
   spin_unlock(&trace_lock);
 }
