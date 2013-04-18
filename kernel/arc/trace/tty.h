@@ -17,8 +17,6 @@
 #ifndef ARC_TRACE_TTY_H
 #define ARC_TRACE_TTY_H
 
-#include <stdarg.h>
-
 /* the dimensions of the terminal */
 #define TTY_WIDTH  80
 #define TTY_HEIGHT 25
@@ -32,7 +30,7 @@ void tty_putch(char c);
 /* puts a string onto the screen */
 void tty_puts(const char *str);
 
-/* prints formatted strings onto the screen */
-void tty_vprintf(const char *fmt, va_list args);
+/* copies the shadow buffer to the video buffer, and updates the cursor */
+void tty_sync();
 
 #endif
