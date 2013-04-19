@@ -66,6 +66,9 @@ void uart_init(void)
 
 void uart_putch(char c)
 {
+  if (c == '\n')
+    uart_putch('\r');
+
   while (!(inb_p(uart_port_base + UART_LSR) & UART_TX_READY));
   outb_p(uart_port_base + UART_RXTX, c);
 }
