@@ -16,6 +16,8 @@
 
 #include <arc/cmdline.h>
 #include <arc/mm/seq.h>
+#include <arc/util/container.h>
+#include <arc/util/list.h>
 #include <arc/panic.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -23,11 +25,11 @@
 
 typedef struct cmdline_pair
 {
-  struct cmdline_pair *next;
+  list_node_t node;
   const char *key, *value;
 } cmdline_pair_t;
 
-static cmdline_pair_t *cmdline_head = 0;
+static list_t cmdline_list = LIST_EMPTY;
 
 static void cmdline_put(const char *key, const char *value)
 {
@@ -37,8 +39,8 @@ static void cmdline_put(const char *key, const char *value)
 
   pair->key = key;
   pair->value = value;
-  pair->next = cmdline_head;
-  cmdline_head = pair;
+
+  list_add_tail(&cmdline_list, &pair->node);
 }
 
 // TODO: more error checking for malformed command line
@@ -96,10 +98,11 @@ void cmdline_init(multiboot_t *multiboot)
 
 const char *cmdline_get(const char *key)
 {
-  for (cmdline_pair_t *node = cmdline_head; node; node = node->next)
+  list_for_each(&cmdline_list, node)
   {
-    if (strcmp(key, node->key) == 0)
-      return node->value;
+    cmdline_pair_t *pair = container_of(node, cmdline_pair_t, node);
+    if (strcmp(key, pair->key) == 0)
+      return pair->value;
   }
 
   return 0;
