@@ -36,11 +36,11 @@
 #define UART_MSR  0x6 /* modem status register */
 
 /* line control register bits */
-#define UART_LCR_8BIT 0x03
-#define UART_LCR_DLAB 0x80 /* divisor latch access bit */
+#define LCR_8BIT 0x03
+#define LCR_DLAB 0x80 /* divisor latch access bit */
 
 /* line status register bits */
-#define UART_TX_READY 0x20
+#define LSR_TX_READY 0x20
 
 static uint16_t uart_port_base = 0x3F8;
 
@@ -56,12 +56,12 @@ void uart_init(void)
 
   /* set the baud rate */
   uint16_t divisor = (uint16_t) (UART_FREQ / UART_BAUD);
-  outb_p(uart_port_base + UART_LCR, UART_LCR_DLAB);
+  outb_p(uart_port_base + UART_LCR, LCR_DLAB);
   outb_p(uart_port_base + UART_RXTX, divisor);
   outb_p(uart_port_base + UART_IER,  divisor >> 8);
 
   /* set frame format (8 data bits, no parity, 1 stop bit) */
-  outb_p(uart_port_base + UART_LCR, UART_LCR_8BIT);
+  outb_p(uart_port_base + UART_LCR, LCR_8BIT);
 }
 
 void uart_putch(char c)
@@ -69,7 +69,7 @@ void uart_putch(char c)
   if (c == '\n')
     uart_putch('\r');
 
-  while (!(inb_p(uart_port_base + UART_LSR) & UART_TX_READY));
+  while (!(inb_p(uart_port_base + UART_LSR) & LSR_TX_READY));
   outb_p(uart_port_base + UART_RXTX, c);
 }
 
