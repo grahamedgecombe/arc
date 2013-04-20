@@ -62,7 +62,7 @@ typedef struct cpu
 
   /* the gdt and gdtr for this processor */
   gdtr_t gdtr;
-  gdt_gate_t gdt_gates[GDT_GATES];
+  gdt_descriptor_t gdt_descriptors[GDT_DESCRIPTORS];
 
   /* the tss for this processor */
   tss_t tss;
