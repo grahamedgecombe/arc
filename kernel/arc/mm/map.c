@@ -28,8 +28,8 @@ static list_t entry_list = LIST_EMPTY;
 
 static int mm_map_entry_compare(const void *left, const void *right)
 {
-  uintptr_t left_addr = ((mm_map_entry_t *) left)->addr_start;
-  uintptr_t right_addr = ((mm_map_entry_t *) right)->addr_start;
+  uintptr_t left_addr = ((mm_map_entry_t *) container_of(left, mm_map_entry_t, node))->addr_start;
+  uintptr_t right_addr = ((mm_map_entry_t *) container_of(right, mm_map_entry_t, node))->addr_start;
 
   if (left_addr < right_addr)
     return -1;
