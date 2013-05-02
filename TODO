@@ -67,3 +67,7 @@
 * try to avoid the need to preserve the value of CR3 so many times during boot
 
 * panic() can be called before trace is ready to print the message out
+
+* fix leak of stack allocated for idle processes by thread_init()
+
+* print kernel stack trace, registers, etc. in panic()
