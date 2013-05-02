@@ -17,7 +17,7 @@
 #ifndef ARC_MM_PMM_H
 #define ARC_MM_PMM_H
 
-#include <arc/mm/map.h>
+#include <arc/util/list.h>
 #include <stdint.h>
 
 /* where the stacks start in virtual memory */
@@ -33,7 +33,7 @@
 #define ZONE_LIMIT_DMA   0xFFFFFF   /* 2^24 - 1 */
 #define ZONE_LIMIT_DMA32 0xFFFFFFFF /* 2^32 - 1 */
 
-void pmm_init(mm_map_t *map);
+void pmm_init(list_t *map);
 uintptr_t pmm_alloc(void);
 uintptr_t pmm_allocs(int size);
 uintptr_t pmm_allocz(int zone);

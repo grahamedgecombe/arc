@@ -97,7 +97,7 @@ void init(uint32_t magic, multiboot_t *multiboot)
 
   /* map physical memory */
   trace_puts("Mapping physical memory...\n");
-  mm_map_t *map = mm_map_init(multiboot);
+  list_t *map = mm_map_init(multiboot);
 
   /* set up the physical memory manager */
   trace_puts("Setting up the physical memory manager...\n");

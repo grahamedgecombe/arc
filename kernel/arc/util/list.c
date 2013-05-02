@@ -91,3 +91,8 @@ void list_remove(list_t *list, list_node_t *node)
 
   list->size--;
 }
+
+void list_sort(list_t *list, list_compare_t compare)
+{
+  /* TODO implement */
+}

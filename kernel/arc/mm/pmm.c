@@ -17,8 +17,10 @@
 #include <arc/mm/pmm.h>
 #include <arc/mm/align.h>
 #include <arc/mm/common.h>
+#include <arc/mm/map.h>
 #include <arc/cpu/tlb.h>
 #include <arc/lock/spinlock.h>
+#include <arc/util/container.h>
 #include <arc/trace.h>
 #include <string.h>
 
@@ -248,7 +250,7 @@ static void pmm_push_range(uintptr_t start, uintptr_t end, int size)
   }
 }
 
-void pmm_init(mm_map_t *map)
+void pmm_init(list_t *map)
 {
   for (int size = 0; size < SIZE_COUNT; size++)
   {
@@ -260,11 +262,9 @@ void pmm_init(mm_map_t *map)
     }
   }
 
-  for (size_t id = 0; id < map->count; id++)
+  list_for_each(map, node)
   {
-    mm_map_entry_t *entry = &map->entries[id];
-    if (entry->type != MULTIBOOT_MMAP_AVAILABLE)
-      continue;
+    mm_map_entry_t *entry = container_of(node, mm_map_entry_t, node);
 
     uintptr_t start = PAGE_ALIGN(entry->addr_start);
     uintptr_t end = PAGE_ALIGN_REVERSE(entry->addr_end + 1);

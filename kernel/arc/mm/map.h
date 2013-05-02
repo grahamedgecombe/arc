@@ -20,32 +20,16 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <arc/multiboot.h>
-
-/* 
- * Doing the memory map allocation dynamically is actually quite difficult
- * early during boot, especially with the way the Multiboot structures are
- * layed out (it can be absolutely anywhere in the first 4G). For simplicity
- * the physical memory map is allocated statically with this maximum size
- * instead.
- *
- * You may need to adjust this if the e820 table created by your BIOS is
- * unusually large.
- */
-#define MM_MAP_MAX_ENTRIES 64
+#include <arc/util/list.h>
 
 typedef struct
 {
+  struct list_node node;
   int type;
   uintptr_t addr_start;
   uintptr_t addr_end;
 } mm_map_entry_t;
 
-typedef struct
-{
-  size_t count;
-  mm_map_entry_t entries[MM_MAP_MAX_ENTRIES];
-} mm_map_t;
-
-mm_map_t *mm_map_init(multiboot_t *multiboot);
+list_t *mm_map_init(multiboot_t *multiboot);
 
 #endif

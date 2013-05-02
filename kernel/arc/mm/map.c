@@ -17,15 +17,27 @@
 #include <arc/mm/map.h>
 #include <arc/mm/common.h>
 #include <arc/mm/phy32.h>
+#include <arc/mm/seq.h>
 #include <arc/panic.h>
 #include <arc/trace.h>
+#include <arc/util/container.h>
 #include <string.h>
 #include <stdbool.h>
 
-/* unused type id (prefixed to fit in with other #defines from multiboot.h) */
-#define MULTIBOOT_MMAP_UNUSED 0
+static list_t entry_list = LIST_EMPTY;
 
-static mm_map_t map;
+static int mm_map_entry_compare(const void *left, const void *right)
+{
+  uintptr_t left_addr = ((mm_map_entry_t *) left)->addr_start;
+  uintptr_t right_addr = ((mm_map_entry_t *) right)->addr_start;
+
+  if (left_addr < right_addr)
+    return -1;
+  else if (left_addr == right_addr)
+    return 0;
+  else
+    return 1;
+}
 
 static const char *mm_map_type_desc(int type)
 {
@@ -48,25 +60,14 @@ static const char *mm_map_type_desc(int type)
 
 static void mm_map_add(int type, uintptr_t addr_start, uintptr_t addr_end)
 {
-  for (size_t id = 0; id < map.count; id++)
-  {
-    mm_map_entry_t *entry = &map.entries[id];
-    if (entry->type == MULTIBOOT_MMAP_UNUSED)
-    {
-      entry->type = type;
-      entry->addr_start = addr_start;
-      entry->addr_end = addr_end;
-      return;
-    }
-  }
+  mm_map_entry_t *entry = seq_alloc(sizeof(*entry));
+  if (!entry)
+    panic("failed to allocate memory map entry");
 
-  if (map.count == MM_MAP_MAX_ENTRIES)
-    panic("memory map is full (max entries = %d)", MM_MAP_MAX_ENTRIES);
-
-  mm_map_entry_t *entry = &map.entries[map.count++];
   entry->type = type;
   entry->addr_start = addr_start;
   entry->addr_end = addr_end;
+  list_add_tail(&entry_list, &entry->node);
 }
 
 /* a rather naive function that sanitizes the memory map */
@@ -74,111 +75,69 @@ static void mm_map_sanitize(void)
 {
   /* do as many passes as required to fully simplify the map */
 next_pass:
-  for (size_t id = 0; id < map.count; id++)
+  list_for_each(&entry_list, node)
   {
-    /* get entry, skip if it is unused */
-    mm_map_entry_t entry = map.entries[id];
-    if (entry.type == MULTIBOOT_MMAP_UNUSED)
-      continue;
+    mm_map_entry_t *entry = container_of(node, mm_map_entry_t, node);
 
-    for (size_t inner_id = 0; inner_id < map.count; inner_id++)
+    list_for_each(&entry_list, node)
     {
-      /* don't compare an entry with itself */
-      if (id == inner_id)
-        continue;
+      mm_map_entry_t *inner_entry = container_of(node, mm_map_entry_t, node);
 
-      /* get inner entry, skip if it is unused */
-      mm_map_entry_t inner_entry = map.entries[inner_id];
-      if (inner_entry.type == MULTIBOOT_MMAP_UNUSED)
+      /* don't compare an entry with itself */
+      if (entry == inner_entry)
         continue;
 
       /* try to coalesce adjacent entries of the same type */
-      if (entry.type == inner_entry.type && (entry.addr_end + 1) == inner_entry.addr_start)
+      if (entry->type == inner_entry->type && (entry->addr_end + 1) == inner_entry->addr_start)
       {
-        map.entries[id].addr_end = inner_entry.addr_end;
-        map.entries[inner_id].type = MULTIBOOT_MMAP_UNUSED;
+        entry->addr_end = inner_entry->addr_end;
+        list_remove(&entry_list, &inner_entry->node);
         goto next_pass;
       }
 
       /* deal with overlapping entries - higher type ids take precedence */
-      if (inner_entry.type >= entry.type)
+      if (inner_entry->type >= entry->type)
       {
         /* inner encloses */
-        if (entry.addr_start >= inner_entry.addr_start && entry.addr_end <= inner_entry.addr_end)
+        if (entry->addr_start >= inner_entry->addr_start && entry->addr_end <= inner_entry->addr_end)
         {
-          map.entries[id].type = MULTIBOOT_MMAP_UNUSED;
+          list_remove(&entry_list, &entry->node);
           goto next_pass;
         }
         /* inner enclosed */
-        else if (inner_entry.addr_start >= entry.addr_start && inner_entry.addr_end <= entry.addr_end)
+        else if (inner_entry->addr_start >= entry->addr_start && inner_entry->addr_end <= entry->addr_end)
         {
-          if (entry.addr_start != inner_entry.addr_start)
-            mm_map_add(entry.type, entry.addr_start, inner_entry.addr_start - 1);
+          /* TODO repurpose an existing entry to save memory? */
+          if (entry->addr_start != inner_entry->addr_start)
+            mm_map_add(entry->type, entry->addr_start, inner_entry->addr_start - 1);
 
-          if (entry.addr_end != inner_entry.addr_end)
-            mm_map_add(entry.type, inner_entry.addr_end + 1, entry.addr_end);
+          if (entry->addr_end != inner_entry->addr_end)
+            mm_map_add(entry->type, inner_entry->addr_end + 1, entry->addr_end);
 
-          map.entries[id].type = MULTIBOOT_MMAP_UNUSED;
+          list_remove(&entry_list, &entry->node);
           goto next_pass;
         }
         /* inner overlaps left side check */
-        else if (entry.addr_start >= inner_entry.addr_start && entry.addr_start <= inner_entry.addr_end)
+        else if (entry->addr_start >= inner_entry->addr_start && entry->addr_start <= inner_entry->addr_end)
         {
-          map.entries[id].addr_start = inner_entry.addr_end + 1;
+          entry->addr_start = inner_entry->addr_end + 1;
           goto next_pass;
         }
         /* inner overlaps right side check */
-        else if (entry.addr_end >= inner_entry.addr_start && entry.addr_end <= inner_entry.addr_end)
+        else if (entry->addr_end >= inner_entry->addr_start && entry->addr_end <= inner_entry->addr_end)
         {
-          map.entries[id].addr_end = inner_entry.addr_start - 1;
+          entry->addr_end = inner_entry->addr_start - 1;
           goto next_pass;
         }
       }
     }
   }
 
-  /* delete unused entries by making a copy then re-adding them all */
-  mm_map_t tmp_map;
-  memcpy(&tmp_map, &map, sizeof(map));
-
-  map.count = 0;
-
-  for (size_t id = 0; id < tmp_map.count; id++)
-  {
-    mm_map_entry_t *entry = &tmp_map.entries[id];
-    if (entry->type != MULTIBOOT_MMAP_UNUSED)
-      mm_map_add(entry->type, entry->addr_start, entry->addr_end);
-  }
-
-  /* bail out right now if a sort isn't required */
-  if (map.count <= 1)
-    return;
-
   /* sort the entries */
-  for (;;)
-  {
-    /* a flag that indicates if any swaps were performed this pass */
-    bool swap = false;
-
-    /* iterate through the list swapping adjacent pairs if required */
-    for (size_t id = 0; id < map.count - 1; id++)
-    {
-      if (map.entries[id].addr_start > map.entries[id + 1].addr_start)
-      {
-        mm_map_entry_t tmp = map.entries[id];
-        map.entries[id] = map.entries[id + 1];
-        map.entries[id + 1] = tmp;
-        swap = true;
-      }
-    }
-
-    /* stop when the list is sorted */
-    if (!swap)
-      break;
-  }
+  list_sort(&entry_list, &mm_map_entry_compare);
 }
 
-mm_map_t *mm_map_init(multiboot_t *multiboot)
+list_t *mm_map_init(multiboot_t *multiboot)
 {
   /* find the mmap multiboot tag */
   multiboot_tag_t *mmap_tag = multiboot_get(multiboot, MULTIBOOT_TAG_MMAP);
@@ -239,14 +198,15 @@ mm_map_t *mm_map_init(multiboot_t *multiboot)
   mm_map_sanitize();
 
   /* print the final map */
-  for (size_t id = 0; id < map.count; id++)
+  list_for_each(&entry_list, node)
   {
-    uintptr_t start = map.entries[id].addr_start;
-    uintptr_t end = map.entries[id].addr_end;
-    int type = map.entries[id].type;
+    mm_map_entry_t *entry = container_of(node, mm_map_entry_t, node);
+    uintptr_t start = entry->addr_start;
+    uintptr_t end = entry->addr_end;
+    int type = entry->type;
     trace_printf(" => %0#18x -> %0#18x (%s)\n", start, end, mm_map_type_desc(type));
   }
 
   /* and return a pointer to it */
-  return &map;
+  return &entry_list;
 }
