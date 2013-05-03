@@ -54,7 +54,7 @@ void intr_dispatch(intr_state_t *state)
   rw_rlock(&intr_route_lock);
   list_t *handler_list = &intr_handlers[state->id];
   if (handler_list->size == 0)
-    panic("unhandled interrupt %d", state->id);
+    panic("unhandled interrupt %d at %0#18x", state->id, state->rip);
 
   /* call all the handlers */
   list_for_each(handler_list, node)
