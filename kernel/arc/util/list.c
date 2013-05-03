@@ -17,6 +17,11 @@
 #include <arc/util/list.h>
 #include <assert.h>
 
+typedef struct
+{
+  list_node_t *head, *tail;
+} pair_t;
+
 void list_init(list_t *list)
 {
   list->head = 0;
@@ -92,7 +97,83 @@ void list_remove(list_t *list, list_node_t *node)
   list->size--;
 }
 
+static list_node_t *split(list_node_t *head)
+{
+  list_node_t *slow = head, *fast = head->next;
+
+  while (fast)
+  {
+    fast = fast->next;
+    if (fast)
+    {
+      slow = slow->next;
+      fast = fast->next;
+    }
+  }
+
+  list_node_t *midpoint = slow->next;
+  slow->next = 0;
+
+  return midpoint;
+}
+
+static pair_t merge(list_node_t *left, list_node_t *right, list_compare_t compare)
+{
+  list_node_t *head = 0, *tail = 0, *ptr;
+
+  while (left || right)
+  {
+    if (!left)
+    {
+      ptr = right;
+      right = right->next;
+    }
+    else if (!right)
+    {
+      ptr = left;
+      left = left->next;
+    }
+    else if ((*compare)(left, right) >= 0)
+    {
+      ptr = right;
+      right = right->next;
+    }
+    else
+    {
+      ptr = left;
+      left = left->next;
+    }
+
+    if (!head)
+      head = ptr;
+    else
+      tail->next = ptr;
+
+    ptr->prev = tail;
+    tail = ptr;
+  }
+
+  return (pair_t) { .head = head, .tail = tail };
+}
+
+static pair_t mergesort(list_node_t *head, list_compare_t compare)
+{
+  if (!head)
+    return (pair_t) { .head = head, .tail = 0 };
+  if (!head->next)
+    return (pair_t) { .head = head, .tail = head->next };
+
+  list_node_t *midpoint = split(head);
+
+  pair_t left = mergesort(head, compare);
+  pair_t right = mergesort(midpoint, compare);
+
+  return merge(left.head, right.head, compare);
+}
+
 void list_sort(list_t *list, list_compare_t compare)
 {
-  /* TODO implement */
+  pair_t pair = mergesort(list->head, compare);
+  list->head = pair.head;
+  list->tail = pair.tail;
 }
