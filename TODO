@@ -61,6 +61,7 @@
 * bochs isn't firing local APIC tick interrupts
 
 * check SMP code more carefully - do we need memory fences/barriers anywhere?
+  and are they correct where they are being used?
 
 * look at using kpartx in run/ shell scripts, instead of hard-coded offsets
 
