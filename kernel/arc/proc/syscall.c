@@ -24,7 +24,8 @@
 uintptr_t syscall_table[] =
 {
   /* 0 */ (uintptr_t) &sys_trace,
-  /* 1 */ (uintptr_t) &sys_exit
+  /* 1 */ (uintptr_t) &sys_exit,
+  /* 2 */ (uintptr_t) &sys_yield
 };
 uint64_t syscall_table_size = sizeof(syscall_table) / sizeof(*syscall_table);
 

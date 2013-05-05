@@ -14,13 +14,10 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef ARC_PROC_SYSCALLS_H
-#define ARC_PROC_SYSCALLS_H
+#include <arc/proc/syscalls.h>
 
-#include <stdint.h>
-
-int64_t sys_trace(const char *message);
-int64_t sys_exit(int status);
-int64_t sys_yield(void);
-
-#endif
+int64_t sys_yield(void)
+{
+  // TODO: make current thread yield
+  return 0;
+}
