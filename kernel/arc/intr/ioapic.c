@@ -16,6 +16,7 @@
 
 #include <arc/intr/ioapic.h>
 #include <arc/intr/common.h>
+#include <arc/lock/barrier.h>
 #include <arc/mm/mmio.h>
 #include <arc/types.h>
 #include <stdlib.h>
@@ -46,12 +47,14 @@ list_t ioapic_list = LIST_EMPTY;
 static uint32_t ioapic_read(ioapic_t *apic, uint32_t reg)
 {
   *(apic->reg) = reg;
+  barrier();
   return *(apic->val);
 }
 
 static void ioapic_write(ioapic_t *apic, uint32_t reg, uint32_t val)
 {
   *(apic->reg) = reg;
+  barrier();
   *(apic->val) = val;
 }
 
@@ -70,8 +73,8 @@ bool ioapic_init(ioapic_id_t id, uintptr_t addr, irq_t irq_base)
 
   apic->id = id;
   apic->irq_base = irq_base;
-  apic->reg = (volatile uint32_t *) virt_addr;
-  apic->val = (volatile uint32_t *) (virt_addr + 16);
+  apic->reg = (uint32_t *) virt_addr;
+  apic->val = (uint32_t *) (virt_addr + 16);
   apic->irqs = ((ioapic_read(apic, IOAPIC_VER) >> 16) & 0xFF) + 1;
 
   list_add_tail(&ioapic_list, &apic->node);
