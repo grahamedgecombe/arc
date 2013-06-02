@@ -14,19 +14,19 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef ARC_TRACE_TTY_H
-#define ARC_TRACE_TTY_H
+#ifndef ARC_TRACE_VGA_H
+#define ARC_TRACE_VGA_H
 
-/* initializes the tty driver */
-void tty_init(void);
+/* initializes the vga 80x25 text mode driver */
+void vga_init(void);
 
 /* puts a character onto the screen */
-void tty_putch(char c);
+void vga_putch(char c);
 
 /* puts a string onto the screen */
-void tty_puts(const char *str);
+void vga_puts(const char *str);
 
 /* copies the shadow buffer to the video buffer, and updates the cursor */
-void tty_sync();
+void vga_sync();
 
 #endif

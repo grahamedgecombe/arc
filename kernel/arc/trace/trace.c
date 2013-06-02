@@ -15,7 +15,7 @@
  */
 
 #include <arc/trace.h>
-#include <arc/trace/tty.h>
+#include <arc/trace/vga.h>
 #include <arc/trace/uart.h>
 #include <arc/trace/e9.h>
 #include <arc/lock/spinlock.h>
@@ -27,11 +27,11 @@
 #define max(x,y) (((x) > (y)) ? (x) : (y))
 
 /* backends */
-#define TRACE_TTY  0x1
+#define TRACE_VGA  0x1
 #define TRACE_UART 0x2
 #define TRACE_E9   0x4
 
-/* tty_vprintf() flags */
+/* vga_vprintf() flags */
 #define FLAG_JUSTIFY 0x1
 #define FLAG_PLUS    0x2
 #define FLAG_SPACE   0x4
@@ -120,8 +120,8 @@ static int skip_atoi(const char **str)
 }
 
 static void _trace_putch(char c) {
-  if (trace_backends & TRACE_TTY)
-    tty_putch(c);
+  if (trace_backends & TRACE_VGA)
+    vga_putch(c);
   if (trace_backends & TRACE_UART)
     uart_putch(c);
   if (trace_backends & TRACE_E9)
@@ -129,8 +129,8 @@ static void _trace_putch(char c) {
 }
 
 static void _trace_puts(const char *str) {
-  if (trace_backends & TRACE_TTY)
-    tty_puts(str);
+  if (trace_backends & TRACE_VGA)
+    vga_puts(str);
   if (trace_backends & TRACE_UART)
     uart_puts(str);
   if (trace_backends & TRACE_E9)
@@ -146,8 +146,8 @@ void trace_init(void)
     {
       if (*c == ',' || *c == 0)
       {
-        if (memcmp(backend, "tty", max(c - backend, 3)) == 0)
-          trace_backends |= TRACE_TTY;
+        if (memcmp(backend, "vga", max(c - backend, 3)) == 0)
+          trace_backends |= TRACE_VGA;
         if (memcmp(backend, "uart", max(c - backend, 4)) == 0)
           trace_backends |= TRACE_UART;
         if (memcmp(backend, "e9", max(c - backend, 2)) == 0)
@@ -161,8 +161,8 @@ void trace_init(void)
     }
   }
 
-  if (trace_backends & TRACE_TTY)
-    tty_init();
+  if (trace_backends & TRACE_VGA)
+    vga_init();
   if (trace_backends & TRACE_UART)
     uart_init();
   if (trace_backends & TRACE_E9)
@@ -174,8 +174,8 @@ void trace_putch(char c)
   spin_lock(&trace_lock);
 
   _trace_putch(c);
-  if (trace_backends & TRACE_TTY)
-    tty_sync();
+  if (trace_backends & TRACE_VGA)
+    vga_sync();
 
   spin_unlock(&trace_lock);
 }
@@ -185,8 +185,8 @@ void trace_puts(const char *str)
   spin_lock(&trace_lock);
 
   _trace_puts(str);
-  if (trace_backends & TRACE_TTY)
-    tty_sync();
+  if (trace_backends & TRACE_VGA)
+    vga_sync();
 
   spin_unlock(&trace_lock);
 }
@@ -365,8 +365,8 @@ void trace_vprintf(const char *fmt, va_list args)
     }
   }
 
-  if (trace_backends & TRACE_TTY)
-    tty_sync();
+  if (trace_backends & TRACE_VGA)
+    vga_sync();
 
   spin_unlock(&trace_lock);
 }

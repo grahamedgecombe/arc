@@ -14,7 +14,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <arc/trace/tty.h>
+#include <arc/trace/vga.h>
 #include <arc/bda.h>
 #include <arc/cpu/port.h>
 #include <arc/mm/phy32.h>
@@ -22,8 +22,8 @@
 #include <string.h>
 
 /* the dimensions of the terminal */
-#define TTY_WIDTH  80
-#define TTY_HEIGHT 25
+#define VGA_WIDTH  80
+#define VGA_HEIGHT 25
 
 /* the tab width */
 #define TAB_WIDTH 4
@@ -36,14 +36,14 @@
 #define CRTC_CURSOR_HIGH 0x0E
 
 /* turns row and column into an index into the video buffer */
-#define TTY_POS(r, c) ((r) * TTY_WIDTH + (c))
+#define VGA_POS(r, c) ((r) * VGA_WIDTH + (c))
 
 /* the VGA port base */
 static uint16_t vga_port_base;
 
 /* a pointer to the video buffer */
 static uint16_t *video_buf;
-static uint16_t shadow_video_buf[TTY_WIDTH * TTY_HEIGHT];
+static uint16_t shadow_video_buf[VGA_WIDTH * VGA_HEIGHT];
 
 /* cursor row and column */
 static uint8_t row, col;
@@ -58,7 +58,7 @@ static bool dirty_cursor, dirty_text;
 static void crtc_sync(void)
 {
   /* get the index of the cursor */
-  uint16_t index = TTY_POS(row, col);
+  uint16_t index = VGA_POS(row, col);
 
   /* get the addresses of the CRTC ports */
   uint16_t crtc_addr = vga_port_base;
@@ -74,7 +74,7 @@ static void crtc_sync(void)
 }
 
 /* initializes the terminal */
-void tty_init(void)
+void vga_init(void)
 {
   /* grab the VGA port base from the BIOS data area */
   vga_port_base = bda_reads(BDA_VGA_PORT);
@@ -88,22 +88,22 @@ void tty_init(void)
   attrib = 0x07;
 
   /* clear the screen */
-  for (int i = 0; i < (TTY_WIDTH * TTY_HEIGHT); i++)
+  for (int i = 0; i < (VGA_WIDTH * VGA_HEIGHT); i++)
     shadow_video_buf[i] = (attrib << 8);
 
   /* set flags and sync */
   dirty_text = true;
   dirty_cursor = true;
-  tty_sync();
+  vga_sync();
 }
 
-void tty_puts(const char *str)
+void vga_puts(const char *str)
 {
   for (char c; (c = *str++);)
-    tty_putch(c);
+    vga_putch(c);
 }
 
-void tty_putch(char c)
+void vga_putch(char c)
 {
   /* allocate some room for temp vars */
   int tmp;
@@ -138,18 +138,18 @@ void tty_putch(char c)
         col--;
         dirty_cursor = true;
       }
-      shadow_video_buf[TTY_POS(row, col)] = (attrib << 8);
+      shadow_video_buf[VGA_POS(row, col)] = (attrib << 8);
       dirty_text = true;
       break;
     default:
-      shadow_video_buf[TTY_POS(row, col++)] = (attrib << 8) | c;
+      shadow_video_buf[VGA_POS(row, col++)] = (attrib << 8) | c;
       dirty_text = true;
       dirty_cursor = true;
       break;
   }
 
   /* perform wrapping */
-  if (col >= TTY_WIDTH)
+  if (col >= VGA_WIDTH)
   {
     col = 0;
     row++;
@@ -158,15 +158,15 @@ void tty_putch(char c)
   }
 
   /* perform scrolling */
-  if (row >= TTY_HEIGHT)
+  if (row >= VGA_HEIGHT)
   {
     /* shift all lines up */
-    size_t size = (TTY_HEIGHT - 1) * TTY_WIDTH * sizeof(*shadow_video_buf);
-    memmove(shadow_video_buf, shadow_video_buf + TTY_WIDTH, size);
+    size_t size = (VGA_HEIGHT - 1) * VGA_WIDTH * sizeof(*shadow_video_buf);
+    memmove(shadow_video_buf, shadow_video_buf + VGA_WIDTH, size);
 
     /* clear the last line */
-    for (int i = 0; i < TTY_WIDTH; i++)
-      shadow_video_buf[TTY_POS(TTY_HEIGHT - 1, i)] = (attrib << 8);
+    for (int i = 0; i < VGA_WIDTH; i++)
+      shadow_video_buf[VGA_POS(VGA_HEIGHT - 1, i)] = (attrib << 8);
 
     /* update the cursor position */
     row--;
@@ -178,7 +178,7 @@ void tty_putch(char c)
 }
 
 /* copys the shadow buffer to the real buffer */
-void tty_sync(void)
+void vga_sync(void)
 {
   if (dirty_text)
     memcpy(video_buf, shadow_video_buf, sizeof(shadow_video_buf));

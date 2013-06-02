@@ -49,13 +49,13 @@
 static void print_banner(void)
 {
   const char *banner = "Arc Operating System";
-  int tty_width = 80;
-  int gap_len = tty_width / 2 - strlen(banner) / 2;
+  int width = 80;
+  int gap_len = width / 2 - strlen(banner) / 2;
 
-  char dashes[tty_width + 1], gap[gap_len + 1];
+  char dashes[width + 1], gap[gap_len + 1];
 
-  memset(dashes, '-', tty_width);
-  dashes[tty_width] = 0;
+  memset(dashes, '-', width);
+  dashes[width] = 0;
 
   for (int i = 0; i < gap_len; i++)
     gap[i] = ' ';

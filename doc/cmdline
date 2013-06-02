@@ -2,7 +2,7 @@ Arc Kernel Command Line
 
 The kernel command line can be specified in the multiboot2 GRUB entry e.g.
 
-  multiboot2 /boot/vmarc acpi=off trace=tty
+  multiboot2 /boot/vmarc acpi=off trace=vga
 
 The general syntax is:
 
@@ -15,6 +15,6 @@ The following keys can be used:
 
   trace:
     a comma-separated list of trace backends, possible backends are:
-      tty  (CGA 80x25 text mode video output)
+      vga  (VGA 80x25 text mode video output)
       uart (COM1 serial port with 8N1 frame format)
       e9   (Bochs E9 port hack)
