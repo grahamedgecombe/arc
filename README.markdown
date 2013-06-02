@@ -129,41 +129,13 @@ From time to time it may be a good idea to run `run/fsck.sh`, which mounts the
 disk image and runs `e2fsck` on it, to avoid complaints in the host kernel's log
 after the requisite number of mounts have passed.
 
-### Patching GRUB
+### Old versions of GRUB
 
 GRUB up to and including version 1.99 has a bug where it load parts of a 64-bit
-ELF file as if it were a 32-bit ELF file. If booting with your distribution's
-GRUB package doesn't work, or if you downloaded GRUB 1.99 from source, you will
-need to patch it to fix this problem.
-
-In `grub-core/loader/multiboot_elfxx.c` you should add the following:
-
-    # define Elf_Shdr Elf32_Shdr
-
-After:
-
-    # define Elf_Phdr Elf32_Phdr
-
-Likewise add:
-
-    # define Elf_Shdr Elf64_Shdr
-
-After:
-
-    # define Elf_Phdr Elf64_Phdr
-
-Finally add:
-
-    #undef Elf_Shdr
-
-After:
-
-    #undef Elf_Phdr
-
-Thomas Haller, who submitted this fix to the GRUB mailing list, also provided a
-[diff and some more information][grub-fix]. It is also in the
-[Bazaar repository][grub-fix-bzr] and therefore this step is not necessary for
-GRUB 2.00 and above.
+ELF file as if it were a 32-bit ELF file. Thomas Haller submitted a
+[patch to fix this bug][grub-fix] to the GRUB mailing list. If you use one of
+the affected versions of GRUB, you'll either need to upgrade to version 2.00 or
+above, or apply the patch.
 
 License
 -------
@@ -194,7 +166,6 @@ various manuals and specifications.
 [isc]: http://isc.org/software/license/
 [grub]: http://gnu.org/software/grub/
 [grub-fix]: http://lists.gnu.org/archive/html/bug-grub/2011-09/msg00026.html
-[grub-fix-bzr]: http://bzr.savannah.gnu.org/lh/grub/trunk/grub/revision/3427
 [vbox]: http://virtualbox.org/
 [dl]: http://g.oswego.edu/
 [dlmalloc]: http://g.oswego.edu/dl/html/malloc.html
