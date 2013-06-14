@@ -17,6 +17,7 @@
 #ifndef ARC_CPU_STATE_H
 #define ARC_CPU_STATE_H
 
+#include <bool.h>
 #include <stdint.h>
 
 /* CPU state passed to intr_dispatch() (and various other places) */
@@ -37,7 +38,13 @@ typedef struct
   uint64_t ss;
 } __attribute__((__packed__)) cpu_state_t;
 
-void cpu_state_save(cpu_state_t *state);
+/*
+ * the return flag is to indicate why we have returned from the function. if
+ * true, we returned because we have just saved the cpu state. if false, we
+ * returned, because cpu_state_restore() was just called and we are now
+ * carrying on execution as normal
+ */
+bool cpu_state_save(cpu_state_t *state);
 void cpu_state_restore(cpu_state_t *state);
 
 #endif

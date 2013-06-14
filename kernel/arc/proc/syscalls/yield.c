@@ -18,6 +18,19 @@
 
 int64_t sys_yield(void)
 {
-  // TODO: make current thread yield
+  cpu_state_t state;
+  if (cpu_state_save(&state)) {
+    /*
+     * if cpu_save_state() returned true, we just saved the cpu state, so we
+     * should run the scheduler to pick the next process
+     */
+    sched_tick(&state);
+    cpu_state_restore(&state);
+  }
+
+  /*
+   * if it returns false, we have been restored, so simply return back to user
+   * mode
+   */
   return 0;
 }
