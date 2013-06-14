@@ -15,6 +15,7 @@
  */
 
 #include <arc/intr/nmi.h>
+#include <arc/intr/common.h>
 #include <arc/intr/route.h>
 #include <arc/util/container.h>
 #include <arc/util/list.h>
@@ -29,7 +30,7 @@ typedef struct
   list_node_t node;
 } nmi_t;
 
-static void nmi_handle(intr_state_t *state)
+static void nmi_handle(cpu_state_t *state)
 {
   panic("non-maskable interrupt - possible hardware failure?");
 }

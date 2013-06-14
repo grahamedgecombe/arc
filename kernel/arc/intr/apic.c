@@ -18,6 +18,7 @@
 #include <arc/time/apic.h>
 #include <arc/time/pit.h>
 #include <arc/cpu/msr.h>
+#include <arc/cpu/state.h>
 #include <arc/intr/common.h>
 #include <arc/lock/spinlock.h>
 #include <arc/lock/intr.h>

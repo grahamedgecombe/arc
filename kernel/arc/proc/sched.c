@@ -47,7 +47,7 @@ void sched_thread_ready(thread_t *thread)
   spin_unlock(&thread_queue_lock);
 }
 
-void sched_tick(intr_state_t *state)
+void sched_tick(cpu_state_t *state)
 {
   cpu_t *cpu = cpu_get();
 

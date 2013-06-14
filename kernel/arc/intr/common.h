@@ -17,8 +17,6 @@
 #ifndef ARC_INTR_COMMON_H
 #define ARC_INTR_COMMON_H
 
-#include <stdint.h>
-
 /* the max number of interrupts */
 #define INTERRUPTS 256
 
@@ -107,23 +105,5 @@
 
 /* LAPIC spurious interrupt */
 #define SPURIOUS 0xFF /* in old processors bits 0-3 are hardwired to 1 */
-
-/* interrupt state passed to intr_dispatch() */
-typedef struct
-{
-  /* the register file */
-  uint64_t regs[15];
-
-  /* the error code and interrupt id */
-  uint64_t id;
-  uint64_t error;
-
-  /* these are pushed automatically by the CPU */
-  uint64_t rip;
-  uint64_t cs;
-  uint64_t rflags;
-  uint64_t rsp;
-  uint64_t ss;
-} __attribute__((__packed__)) intr_state_t;
 
 #endif

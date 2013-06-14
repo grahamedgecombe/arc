@@ -35,7 +35,7 @@ typedef struct intr_handler_node
 static rwlock_t intr_route_lock = RWLOCK_UNLOCKED;
 static list_t intr_handlers[INTERRUPTS];
 
-void intr_dispatch(intr_state_t *state)
+void intr_dispatch(cpu_state_t *state)
 {
   /* acknowledge we received this interrupt if it came from the APIC */
   intr_t intr = state->id;

@@ -19,6 +19,7 @@
 #include <arc/smp/mode.h>
 #include <arc/cpu/intr.h>
 #include <arc/cpu/halt.h>
+#include <arc/intr/common.h>
 #include <arc/intr/route.h>
 #include <arc/intr/apic.h>
 
@@ -28,7 +29,7 @@ void panic_init(void)
     panic("failed to route panic IPI");
 }
 
-void panic_handle_ipi(intr_state_t *state)
+void panic_handle_ipi(cpu_state_t *state)
 {
   intr_disable();
   halt_forever();

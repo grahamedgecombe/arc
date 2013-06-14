@@ -14,12 +14,30 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef ARC_INTR_FAULT_H
-#define ARC_INTR_FAULT_H
+#ifndef ARC_CPU_STATE_H
+#define ARC_CPU_STATE_H
 
-#include <arc/cpu/state.h>
+#include <stdint.h>
 
-void fault_init(void);
-void fault_handle(cpu_state_t *state);
+/* CPU state passed to intr_dispatch() (and various other places) */
+typedef struct
+{
+  /* the register file */
+  uint64_t regs[15];
+
+  /* the error code and interrupt id */
+  uint64_t id;
+  uint64_t error;
+
+  /* these are pushed automatically by the CPU */
+  uint64_t rip;
+  uint64_t cs;
+  uint64_t rflags;
+  uint64_t rsp;
+  uint64_t ss;
+} __attribute__((__packed__)) cpu_state_t;
+
+void cpu_state_save(cpu_state_t *state);
+void cpu_state_restore(cpu_state_t *state);
 
 #endif

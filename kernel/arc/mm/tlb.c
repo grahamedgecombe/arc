@@ -68,7 +68,7 @@ static void tlb_handle_ops(void)
   }
 }
 
-static void tlb_handle_ipi(intr_state_t *state)
+static void tlb_handle_ipi(cpu_state_t *state)
 {
   /* acknowledge that this CPU is ready to flush its TLB */
   spin_lock(&tlb_wait_lock);

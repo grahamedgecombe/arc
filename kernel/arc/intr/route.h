@@ -18,15 +18,15 @@
 #define ARC_INTR_ROUTE_H
 
 #include <arc/types.h>
-#include <arc/intr/common.h>
+#include <arc/cpu/state.h>
 #include <stdbool.h>
 
-typedef void (*intr_handler_t)(intr_state_t *state);
+typedef void (*intr_handler_t)(cpu_state_t *state);
 
 void intr_route_init(void);
 
 /* dispatches an interrupt */
-void intr_dispatch(intr_state_t *state);
+void intr_dispatch(cpu_state_t *state);
 
 /* route by interrupt id */
 bool intr_route_intr(intr_t intr, intr_handler_t handler);

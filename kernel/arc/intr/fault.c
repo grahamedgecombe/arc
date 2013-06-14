@@ -15,6 +15,7 @@
  */
 
 #include <arc/intr/fault.h>
+#include <arc/intr/common.h>
 #include <arc/intr/route.h>
 #include <arc/panic.h>
 
@@ -66,7 +67,7 @@ void fault_init(void)
   }
 }
 
-void fault_handle(intr_state_t *state)
+void fault_handle(cpu_state_t *state)
 {
   const char *name = fault_names[state->id];
   panic("%s at %0#18x", name, state->rip);
