@@ -95,6 +95,13 @@
  * interrupt, IRQ25 will be mapped to IRQ1, etc. - essentially doing irq%24
  */
 
+/*
+ * reserved interrupt that should never be generated, used to indicate in
+ * cpu_state_t if the state was actually pushed by cpu_state_save(), and not
+ * automatically by the processor upon an interrupt
+ */
+#define NOT_INTR 0xFA
+
 /* IPIs */
 #define IPI_PANIC 0xFB
 #define IPI_TLB   0xFC
