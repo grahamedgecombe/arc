@@ -23,6 +23,7 @@
 #include <arc/cpu/pause.h>
 #include <arc/cpu/halt.h>
 #include <arc/cpu/tlb.h>
+#include <arc/lock/barrier.h>
 #include <arc/lock/intr.h>
 #include <arc/lock/spinlock.h>
 #include <arc/intr/apic.h>
@@ -41,8 +42,8 @@
 #define IDLE_STACK_ALIGN 16
 
 /* some variables used to exchange data between the BSP and APs */
-static volatile bool ack_sipi = false;
-static cpu_t * volatile booted_cpu;
+static bool ack_sipi = false;
+static cpu_t *booted_cpu;
 
 /* a counter of ready CPUs, smp_init() blocks until all APs are ready */
 static int ready_cpus = 1;
@@ -86,6 +87,7 @@ static void smp_boot(cpu_t *cpu)
 
   /* reset the ack flag */
   ack_sipi = false;
+  barrier();
  
   /* send INIT IPI */
   apic_ipi_init(cpu->lapic_id);
@@ -153,6 +155,7 @@ void smp_ap_init(void)
 
   /* acknowledge the STARTUP IPI */
   ack_sipi = true;
+  barrier();
 
   /* now start the real work! - set up the GDT, TSS, BSP and SYSCALL/RET */
   gdt_init();
