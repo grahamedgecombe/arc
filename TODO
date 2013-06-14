@@ -71,3 +71,6 @@
 * fix leak of stack allocated for idle processes by thread_init()
 
 * print kernel stack trace, registers, etc. in panic()
+
+* mark functions as _Noreturn. is there stdnoreturn.h with a nice #define for
+  it?
