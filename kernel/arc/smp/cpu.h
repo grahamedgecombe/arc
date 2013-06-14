@@ -47,8 +47,15 @@ typedef struct cpu
    */
   uintptr_t user_stack;
 
-  /* current 'depth' of the interrupt lock, also must not be moved */
+  /*
+   * current 'depth' of the interrupts. 0 when this cpu is not within an
+   * interrupt. incremented upon entering an interrupt handler, decremented
+   * upon leaving. this must not be moved.
+   */
   uint64_t intr_depth;
+
+  /* the hold count of the 'interrupt lock' (intr_enable/disable()) */
+  uint64_t intr_mask_count;
 
   /* global CPU list node */
   list_node_t node;
