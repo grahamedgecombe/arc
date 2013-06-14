@@ -17,7 +17,7 @@
 #ifndef ARC_CPU_STATE_H
 #define ARC_CPU_STATE_H
 
-#include <bool.h>
+#include <stdbool.h>
 #include <stdint.h>
 
 /* CPU state passed to intr_dispatch() (and various other places) */

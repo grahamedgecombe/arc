@@ -15,6 +15,8 @@
  */
 
 #include <arc/proc/syscalls.h>
+#include <arc/cpu/state.h>
+#include <arc/proc/sched.h>
 
 int64_t sys_yield(void)
 {
