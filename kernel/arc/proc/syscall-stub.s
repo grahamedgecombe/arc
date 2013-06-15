@@ -43,7 +43,6 @@ syscall_stub:
   ; call the function in the syscall table
   mov r11, qword syscall_table
   mov rcx, r10 ; syscall ABI uses R10 instead of RCX, fix that for normal ABI
-
   call [r11 + rax * 8]
 
 .invalid_syscall:
