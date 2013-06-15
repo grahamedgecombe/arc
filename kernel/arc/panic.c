@@ -29,13 +29,13 @@ void panic_init(void)
     panic("failed to route panic IPI");
 }
 
-void panic_handle_ipi(cpu_state_t *state)
+noreturn void panic_handle_ipi(cpu_state_t *state)
 {
   intr_disable();
   halt_forever();
 }
 
-void panic(const char *message, ...)
+noreturn void panic(const char *message, ...)
 {
   va_list args;
   va_start(args, message);
@@ -43,7 +43,7 @@ void panic(const char *message, ...)
   va_end(args);
 }
 
-void vpanic(const char *message, va_list args)
+noreturn void vpanic(const char *message, va_list args)
 {
   if (smp_mode == MODE_SMP)
     apic_ipi_all_exc_self(IPI_PANIC);

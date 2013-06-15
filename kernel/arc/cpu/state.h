@@ -19,6 +19,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdnoreturn.h>
 
 /* CPU state passed to intr_dispatch() (and various other places) */
 typedef struct
@@ -45,6 +46,6 @@ typedef struct
  * carrying on execution as normal
  */
 bool cpu_state_save(cpu_state_t *state);
-void cpu_state_restore(cpu_state_t *state);
+noreturn void cpu_state_restore(cpu_state_t *state);
 
 #endif

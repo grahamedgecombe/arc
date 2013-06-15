@@ -19,10 +19,11 @@
 
 #include <arc/cpu/state.h>
 #include <stdarg.h>
+#include <stdnoreturn.h>
 
 void panic_init(void);
-void panic_handle_ipi(cpu_state_t *state);
-void panic(const char *message, ...);
-void vpanic(const char *message, va_list args);
+noreturn void panic_handle_ipi(cpu_state_t *state);
+noreturn void panic(const char *message, ...);
+noreturn void vpanic(const char *message, va_list args);
 
 #endif

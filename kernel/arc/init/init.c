@@ -14,7 +14,6 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <arc/init.h>
 #include <arc/trace.h>
 #include <arc/cmdline.h>
 #include <arc/mm/map.h>
@@ -64,7 +63,7 @@ static void print_banner(void)
   trace_printf("%s%s%s%s%s", dashes, gap, banner, gap, dashes);
 }
 
-void init(uint32_t magic, multiboot_t *multiboot)
+noreturn void init(uint32_t magic, multiboot_t *multiboot)
 {
   /* convert physical 32-bit multiboot address to virtual address */
   multiboot = phy32_to_virt(multiboot);

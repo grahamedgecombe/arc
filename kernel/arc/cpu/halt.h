@@ -17,7 +17,9 @@
 #ifndef ARC_CPU_HALT_H
 #define ARC_CPU_HALT_H
 
+#include <stdnoreturn.h>
+
 void halt_once(void);
-void halt_forever(void);
+noreturn void halt_forever(void);
 
 #endif
