@@ -104,7 +104,8 @@ intr_stub:
   swapgs
 
 .supervisor_enter:
-  ; increment interrupt locking depth
+  ; increment mask count as we configure all interrupts to mask IF
+  ; automatically in the IDT
   inc qword [gs:24]
 
   ; call the C routine for dispatching an interrupt
@@ -112,7 +113,7 @@ intr_stub:
   mov rdi, rsp ; first argument points to the processor state
   call intr_dispatch
 
-  ; decrement interrupt locking depth
+  ; decrement mask count
   dec qword [gs:24]
 
   ; check if we are switching from supervisor to user mode
