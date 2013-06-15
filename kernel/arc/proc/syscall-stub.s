@@ -25,7 +25,7 @@ syscall_stub:
   ; switch to the kernel stack (use R12, a callee-saved register, as temporary)
   mov r12, [gs:16]   ; find current thread_t
   mov [r12 + 8], rsp ; save current RSP in thread->syscall_rsp
-  mov rsp, [r12]     ; load new RSP from thread->krsp
+  mov rsp, [r12]     ; load new RSP from thread->kernel_rsp
 
   ; it is safe for to re-enable interrupts now, for information about the
   ; race condition see syscall.c where the SYSCALL flags mask is set
