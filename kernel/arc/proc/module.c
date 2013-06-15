@@ -43,7 +43,7 @@ static void module_load(multiboot_tag_t *tag)
     panic("couldn't load elf64 file");
 
   /* make a new thread */
-  thread_t *thread = thread_create(proc);
+  thread_t *thread = thread_create(proc, 0);
   if (!thread)
     panic("couldn't create thread for module");
 

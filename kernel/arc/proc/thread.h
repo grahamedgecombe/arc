@@ -21,8 +21,22 @@
 #include <stdlib.h>
 #include <stdint.h>
 
+#define THREAD_KERNEL 0x1 /* flag to indicate the thread runs in kernel mode */
+
 typedef struct
 {
+  /*
+   * kernel stack for this thread. syscall_stub() relies on this being the
+   * first 8 bytes
+   */
+  uint64_t kernel_rsp;
+
+  /*
+   * value of rsp to restore when leaving syscall_stub(). must be the second
+   * group of 8 bytes
+   */
+  uint64_t syscall_rsp;
+
   /* node used by proc_t's thread_list */
   list_node_t proc_node;
 
@@ -38,7 +52,7 @@ typedef struct
   uint64_t cs, ss;
 } thread_t;
 
-thread_t *thread_create(struct proc *proc);
+thread_t *thread_create(struct proc *proc, int flags);
 thread_t *thread_get(void);
 
 #endif

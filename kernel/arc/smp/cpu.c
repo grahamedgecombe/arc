@@ -19,18 +19,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define KERNEL_STACK_SIZE 8192
-#define KERNEL_STACK_ALIGN 16
-
 list_t cpu_list = LIST_EMPTY;
 
 static cpu_t cpu_bsp;
-static uint8_t bsp_stack[KERNEL_STACK_SIZE] __attribute__((__aligned__(KERNEL_STACK_ALIGN)));
 
 void cpu_bsp_init(void)
 {
   memset(&cpu_bsp, 0, sizeof(cpu_bsp));
-  cpu_bsp.stack = (uintptr_t) bsp_stack + KERNEL_STACK_SIZE;
   cpu_bsp.self = &cpu_bsp;
   cpu_bsp.bsp = true;
   cpu_bsp.intr_mask_count = 1; // as when this is called, interrupts are masked
@@ -50,13 +45,6 @@ bool cpu_ap_init(cpu_lapic_id_t lapic_id, cpu_acpi_id_t acpi_id)
 
   memclr(cpu, sizeof(*cpu));
 
-  void *stack = memalign(KERNEL_STACK_ALIGN, KERNEL_STACK_SIZE);
-  if (!stack)
-  {
-    free(cpu);
-    return false;
-  }
-  cpu->stack = (uintptr_t) stack + KERNEL_STACK_SIZE;
   cpu->self = cpu;
   cpu->lapic_id = lapic_id;
   cpu->acpi_id = acpi_id;

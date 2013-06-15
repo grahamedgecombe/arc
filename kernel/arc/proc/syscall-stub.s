@@ -22,9 +22,10 @@ syscall_stub:
   ; switch the GS base to the kernel's
   swapgs
 
-  ; switch to the kernel stack
-  mov [gs:16], rsp
-  mov rsp, [gs:8]
+  ; switch to the kernel stack (use R12, a callee-saved register, as temporary)
+  mov r12, [gs:16]   ; find current thread_t
+  mov [r12 + 8], rsp ; save current RSP in thread->syscall_rsp
+  mov rsp, [r12]     ; load new RSP from thread->krsp
 
   ; it is safe for to re-enable interrupts now, for information about the
   ; race condition see syscall.c where the SYSCALL flags mask is set
@@ -42,6 +43,7 @@ syscall_stub:
   ; call the function in the syscall table
   mov r11, qword syscall_table
   mov rcx, r10 ; syscall ABI uses R10 instead of RCX, fix that for normal ABI
+
   call [r11 + rax * 8]
 
 .invalid_syscall:
@@ -55,7 +57,8 @@ syscall_stub:
   cli
 
   ; switch back to the user stack
-  mov rsp, [gs:16]
+  mov r12, [gs:16]   ; find current thread_t
+  mov rsp, [r12 + 8] ; load original RSP from thread->syscall_rsp
 
   ; switch the GS base to the user's
   swapgs

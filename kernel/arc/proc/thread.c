@@ -21,26 +21,54 @@
 #include <arc/mm/seg.h>
 #include <stdlib.h>
 
-#define THREAD_STACK_SIZE 8192
+#define USER_STACK_SIZE 8192
+#define KERNEL_STACK_SIZE 8192
+#define STACK_ALIGN 32
 
-thread_t *thread_create(proc_t *proc)
+thread_t *thread_create(proc_t *proc, int flags)
 {
   thread_t *thread = malloc(sizeof(*thread));
   if (!thread)
     return 0;
 
-  void *stack = seg_alloc(THREAD_STACK_SIZE, VM_R | VM_W);
-  if (!stack)
+  /* allocate kernel-space stack */
+  void *kstack = memalign(STACK_ALIGN, KERNEL_STACK_SIZE);
+  if (!kstack)
   {
     free(thread);
     return 0;
   }
 
+  /* allocate user-space stack */
+  void *stack;
+  if (!(flags & THREAD_KERNEL))
+  {
+    stack = seg_alloc(USER_STACK_SIZE, VM_R | VM_W);
+    if (!stack)
+    {
+      free(kstack);
+      free(thread);
+      return 0;
+    }
+  }
+
   thread->proc = proc;
-  thread->rsp = (uintptr_t) stack + THREAD_STACK_SIZE;
-  thread->rflags = FLAGS_IOPL3 | FLAGS_IF;
-  thread->cs = SLTR_USER_CODE | RPL3;
-  thread->ss = SLTR_USER_DATA | RPL3;
+  thread->rsp = (flags & THREAD_KERNEL) ? ((uintptr_t) kstack + KERNEL_STACK_SIZE) : ((uintptr_t) stack + USER_STACK_SIZE);
+  thread->kernel_rsp = (uintptr_t) kstack + KERNEL_STACK_SIZE;
+  thread->rflags = FLAGS_IF;
+
+  if (flags & THREAD_KERNEL)
+  {
+    thread->cs = SLTR_KERNEL_CODE | RPL0;
+    thread->ss = SLTR_KERNEL_DATA | RPL0;
+  }
+  else
+  {
+    thread->rflags |= FLAGS_IOPL3;
+    thread->cs = SLTR_USER_CODE | RPL3;
+    thread->ss = SLTR_USER_DATA | RPL3;
+  }
+
   return thread;
 }
 

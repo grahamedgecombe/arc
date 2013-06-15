@@ -39,6 +39,7 @@ typedef struct
 } __attribute__((__packed__)) tss_t;
 
 void tss_init(void);
+void tss_set_rsp0(uint64_t rsp0);
 void tss_install(uint16_t selector);
 
 #endif

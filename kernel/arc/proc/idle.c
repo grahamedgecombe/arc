@@ -47,17 +47,12 @@ void idle_init(void)
   list_for_each(&cpu_list, node)
   {
     cpu_t *cpu = container_of(node, cpu_t, node);
-    thread_t *thread = thread_create(idle_proc);
+    thread_t *thread = thread_create(idle_proc, THREAD_KERNEL);
     if (!thread)
       panic("couldn't create idle thread");
 
     thread->rip = (uint64_t) &halt_forever;
     proc_thread_add(idle_proc, thread);
-
-    thread->rsp = cpu->stack;
-    thread->cs = SLTR_KERNEL_CODE;
-    thread->ss = SLTR_KERNEL_DATA;
-    thread->rflags &= ~FLAGS_IOPL3;
 
     cpu->idle_thread = thread;
   }

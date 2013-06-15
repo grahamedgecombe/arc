@@ -75,5 +75,3 @@
 
 * mark functions as _Noreturn. is there stdnoreturn.h with a nice #define for
   it?
-
-* use per-thread kernel stacks

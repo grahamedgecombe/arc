@@ -35,23 +35,17 @@ typedef struct cpu
   struct cpu *self;
 
   /*
-   * the kernel stack for this cpu (used in interrupt & syscalls), do not move
-   * as the syscall entry point relies on the fact that the second 8 bytes in
-   * the structure point to a valid kernel stack
-   */
-  uintptr_t stack;
-
-  /*
-   * the user stack pointer is saved here during a SYSCALL, again, this must
-   * not be moved
-   */
-  uintptr_t user_stack;
-
-  /*
-   * the hold count of the 'interrupt lock' (intr_enable/disable()). this must
-   * not be moved
+   * the hold count of the 'interrupt lock' (intr_enable/disable()).
+   * intr_stub() relies on the fact that the second 8 bytes in the structure
+   * are occupied by this field
    */
   uint64_t intr_mask_count;
+
+  /*
+   * the current thread running on this cpu. syscall_stub() relies on the fact
+   * that this is the third group of 8 bytes in this structure
+   */
+  thread_t *thread;
 
   /* global CPU list node */
   list_node_t node;
@@ -70,9 +64,8 @@ typedef struct cpu
   /* the tss for this processor */
   tss_t tss;
 
-  /* current process/thread running on this cpu */
+  /* current process running on this cpu */
   proc_t *proc;
-  thread_t *thread;
 
   /* idle thread for this cpu */
   thread_t *idle_thread;

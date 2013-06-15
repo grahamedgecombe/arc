@@ -103,5 +103,8 @@ void sched_tick(cpu_state_t *state)
     /* if we're switcing between processes, we need to switch address spaces */
     if (!cur_thread || cur_thread->proc != new_thread->proc)
       proc_switch(new_thread->proc); /* (this also sets cpu->proc) */
+
+    /* write new kernel stack pointer into the TSS */
+    tss_set_rsp0(new_thread->kernel_rsp);
   }
 }
