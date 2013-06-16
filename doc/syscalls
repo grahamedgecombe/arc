@@ -8,12 +8,13 @@ RAX - system call number
 RDI - argument 1
 RSI - argument 2
 RDX - argument 3
-R10 - argument 4
+R10 - argument 4 (note this is normally RCX, but RCX is used by SYSCALL)
 R8  - argument 5
 R9  - argument 6
 
-The kernel will trash the RCX and R11 registers. The result will be returned in
-the RAX register (and the RDX register, if a second return register is
-required.)
+The kernel will trash the RCX, R11 and R12 registers. The result will be
+returned in the RAX register (and the RDX register, if a second return register
+is required.)
 
-The kernel may also trash callee-saved registers (R12-R15.)
+Note that R12 is defined to be callee-saved in the normal ABI, so the system
+call wrapping functions in user-space must be careful to manually preserve it.

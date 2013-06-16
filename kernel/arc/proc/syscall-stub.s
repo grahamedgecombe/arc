@@ -22,7 +22,8 @@ syscall_stub:
   ; switch the GS base to the kernel's
   swapgs
 
-  ; switch to the kernel stack (use R12, a callee-saved register, as temporary)
+  ; switch to the kernel stack (use R12, a callee-saved register - so care must
+  ; be taken in user-space - as a temporary)
   mov r12, [gs:16]   ; find current thread_t
   mov [r12 + 8], rsp ; save current RSP in thread->syscall_rsp
   mov rsp, [r12]     ; load new RSP from thread->kernel_rsp
