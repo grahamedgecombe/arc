@@ -17,6 +17,10 @@
 #ifndef STDNORETURN_H
 #define STDNORETURN_H
 
+#if defined(__clang__) && __clang_major__ == 3 && __clang_minor__ == 0
+#define noreturn
+#else
 #define noreturn _Noreturn
+#endif
 
 #endif
