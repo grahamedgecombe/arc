@@ -2,5 +2,6 @@
 *~
 *.o
 *.d
+/tags
 !.git*
 !.mailmap
