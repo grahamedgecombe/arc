@@ -25,7 +25,7 @@
 #define SYS_YIELD 2
 
 int64_t sys_trace(const char *message);
-int64_t sys_exit(int status);
+void sys_exit(cpu_state_t *state);
 void sys_yield(cpu_state_t *state);
 
 #endif

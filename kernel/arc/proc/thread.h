@@ -17,11 +17,20 @@
 #ifndef ARC_PROC_THREAD_H
 #define ARC_PROC_THREAD_H
 
+#include <arc/lock/spinlock.h>
 #include <arc/util/list.h>
 #include <stdlib.h>
 #include <stdint.h>
 
 #define THREAD_KERNEL 0x1 /* flag to indicate the thread runs in kernel mode */
+
+typedef enum
+{
+  THREAD_RUNNABLE,
+  THREAD_RUNNING,
+  THREAD_SUSPENDED,
+  THREAD_ZOMBIE
+} thread_state_t;
 
 typedef struct
 {
@@ -36,6 +45,12 @@ typedef struct
    * group of 8 bytes
    */
   uint64_t syscall_rsp;
+
+  /* spinlock used to protect concurrent access to this structure */
+  spinlock_t lock;
+
+  /* state */
+  thread_state_t state;
 
   /* node used by proc_t's thread_list */
   list_node_t proc_node;
@@ -54,5 +69,9 @@ typedef struct
 
 thread_t *thread_create(struct proc *proc, int flags);
 thread_t *thread_get(void);
+void thread_suspend(thread_t *thread);
+void thread_resume(thread_t *thread);
+void thread_kill(thread_t *thread);
+void thread_destroy(thread_t *thread);
 
 #endif

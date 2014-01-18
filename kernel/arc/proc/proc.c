@@ -51,6 +51,7 @@ proc_t *proc_create(void)
     return 0;
   }
 
+  proc->state = PROC_RUNNING;
   list_init(&proc->thread_list);
   return proc;
 }

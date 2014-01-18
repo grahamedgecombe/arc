@@ -15,6 +15,7 @@
  */
 
 #include <arc/proc/thread.h>
+#include <arc/proc/sched.h>
 #include <arc/cpu/flags.h>
 #include <arc/cpu/gdt.h>
 #include <arc/smp/cpu.h>
@@ -52,6 +53,8 @@ thread_t *thread_create(proc_t *proc, int flags)
     }
   }
 
+  thread->lock = SPIN_UNLOCKED;
+  thread->state = THREAD_RUNNING;
   thread->proc = proc;
   thread->rsp = (flags & THREAD_KERNEL) ? ((uintptr_t) kstack + KERNEL_STACK_SIZE) : ((uintptr_t) stack + USER_STACK_SIZE);
   thread->kernel_rsp = (uintptr_t) kstack + KERNEL_STACK_SIZE;
@@ -76,4 +79,33 @@ thread_t *thread_get(void)
 {
   cpu_t *cpu = cpu_get();
   return cpu->thread;
+}
+
+void thread_suspend(thread_t *thread)
+{
+  spin_lock(&thread->lock);
+  // TODO what if thread is zombie etc.?
+  thread->state = THREAD_SUSPENDED;
+  sched_thread_suspend(thread); // TODO is this the best way? another thread might beat us to this call
+  spin_unlock(&thread->lock);
+}
+
+void thread_resume(thread_t *thread)
+{
+  spin_lock(&thread->lock);
+  // TODO as above
+  thread->state = THREAD_RUNNABLE;
+  spin_unlock(&thread->lock);
+}
+
+void thread_kill(thread_t *thread)
+{
+  spin_lock(&thread->lock);
+  // TODO impl
+  spin_unlock(&thread->lock);
+}
+
+void thread_destroy(thread_t *thread)
+{
+  // TODO impl
 }

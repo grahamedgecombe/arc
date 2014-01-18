@@ -42,6 +42,7 @@ uint64_t syscall_table_size = sizeof(syscall_table) / sizeof(*syscall_table);
 void syscall_init(void)
 {
   /* unset SYSCALL_DIRECT bit on syscalls which may perform a context switch */
+  syscall_table[SYS_EXIT]  &= ~SYSCALL_DIRECT;
   syscall_table[SYS_YIELD] &= ~SYSCALL_DIRECT;
 
   /* set the SYSCALL and SYSRET selectors */

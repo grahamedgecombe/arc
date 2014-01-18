@@ -22,6 +22,7 @@
 
 void sched_init(void);
 void sched_thread_ready(thread_t *thread);
+void sched_thread_suspend(thread_t *thread);
 void sched_tick(cpu_state_t *state);
 
 #endif

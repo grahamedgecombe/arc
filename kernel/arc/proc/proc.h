@@ -23,8 +23,16 @@
 #include <arc/util/list.h>
 #include <stdint.h>
 
+typedef enum
+{
+  PROC_RUNNING
+} proc_state_t;
+
 typedef struct proc
 {
+  /* state */
+  proc_state_t state;
+
   /* physical address of the pml4 table of this process */
   uintptr_t pml4_table;
 

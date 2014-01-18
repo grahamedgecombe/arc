@@ -15,9 +15,17 @@
  */
 
 #include <arc/proc/syscalls.h>
+#include <arc/proc/sched.h>
+#include <arc/proc/thread.h>
 
-int64_t sys_exit(int status)
+void sys_exit(cpu_state_t *state)
 {
-  // TODO: terminate current process
-  return 0;
+  // TODO use status code:
+  // int status = state->regs[RDI];
+
+  // TODO real impl which actually kills the whole proc
+
+  thread_t *thread = thread_get();
+  thread_suspend(thread);
+  sched_tick(state);
 }

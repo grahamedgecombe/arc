@@ -47,6 +47,13 @@ void sched_thread_ready(thread_t *thread)
   spin_unlock(&thread_queue_lock);
 }
 
+void sched_thread_suspend(thread_t *thread)
+{
+  spin_lock(&thread_queue_lock);
+  list_remove(&thread_queue, &thread->sched_node);
+  spin_unlock(&thread_queue_lock);
+}
+
 void sched_tick(cpu_state_t *state)
 {
   cpu_t *cpu = cpu_get();
@@ -57,9 +64,10 @@ void sched_tick(cpu_state_t *state)
 
   spin_lock(&thread_queue_lock);
 
-  /* add the current thread to the queue */
-  if (cur_thread)
+  /* add the current thread to the queue if it is runnable */
+  if (cur_thread && cur_thread->state == THREAD_RUNNABLE) {
     list_add_tail(&thread_queue, &cur_thread->sched_node);
+  }
 
   /* pick the next thread to run */
   list_node_t *head = thread_queue.head;
