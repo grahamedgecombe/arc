@@ -91,6 +91,17 @@ typedef struct
     {
       char string[1];
     } __attribute__((__packed__)) cmdline;
+
+    /* elf tag */
+    struct
+    {
+      uint32_t size;
+      uint16_t sh_num;
+      uint16_t sh_entsize;
+      uint16_t sh_shstrndx;
+      uint16_t reserved;
+      char data[1];
+    } __attribute__((__packed__)) elf;
   };
 } __attribute__((__packed__)) multiboot_tag_t;
 

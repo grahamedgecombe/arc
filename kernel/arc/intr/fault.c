@@ -70,5 +70,5 @@ void fault_init(void)
 void fault_handle(cpu_state_t *state)
 {
   const char *name = fault_names[state->id];
-  panic("%s at %0#18x", name, state->rip);
+  spanic("Fault: %s (num=%d, error=%0#18x)", state, name, state->id, state->error, state->rip);
 }

@@ -14,18 +14,12 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef ARC_PANIC_H
-#define ARC_PANIC_H
+#ifndef ARC_STACKTRACE_H
+#define ARC_STACKTRACE_H
 
-#include <arc/cpu/state.h>
-#include <stdarg.h>
-#include <stdnoreturn.h>
+#include <arc/multiboot.h>
 
-void panic_init(void);
-noreturn void panic_handle_ipi(cpu_state_t *state);
-noreturn void panic(const char *message, ...);
-noreturn void spanic(const char *message, cpu_state_t *state, ...);
-noreturn void vpanic(const char *message, va_list args);
-noreturn void vspanic(const char *message, cpu_state_t *state, va_list args);
+void stacktrace_init(multiboot_t *multiboot);
+void stacktrace_emit(void);
 
 #endif

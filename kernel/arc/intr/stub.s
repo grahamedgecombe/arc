@@ -111,6 +111,7 @@ intr_stub:
   ; call the C routine for dispatching an interrupt
   cld          ; amd64 SysV ABI states the DF must be cleared by the caller
   mov rdi, rsp ; first argument points to the processor state
+  mov rbp, 0   ; terminate stack traces here
   call intr_dispatch
 
   ; decrement mask count

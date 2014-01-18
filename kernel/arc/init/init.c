@@ -16,6 +16,7 @@
 
 #include <arc/trace.h>
 #include <arc/cmdline.h>
+#include <arc/stacktrace.h>
 #include <arc/mm/map.h>
 #include <arc/mm/phy32.h>
 #include <arc/mm/pmm.h>
@@ -84,6 +85,9 @@ noreturn void init(uint32_t magic, multiboot_t *multiboot)
   if (magic != MULTIBOOT_MAGIC)
     panic("invalid multiboot magic (expected %0#10x, got %0#10x)", MULTIBOOT_MAGIC,
       magic);
+
+  /* set up stack traces */
+  stacktrace_init(multiboot);
 
   /* set up the GDT, TSS, IDT and SYSCALL/RET */
   gdt_init();

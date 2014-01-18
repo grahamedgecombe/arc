@@ -114,7 +114,7 @@ code64:
 vcode64:
 
   ; set up the stack
-  mov rbp, 0x0
+  mov rbp, 0x0 ; terminate stack traces here
   mov rax, [qword trampoline_stack]
   mov rsp, rax
 

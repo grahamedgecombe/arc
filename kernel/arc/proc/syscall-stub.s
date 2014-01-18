@@ -39,6 +39,10 @@ syscall_stub:
   push rcx
   push r11
 
+  ; preserve RBP, we set it to zero to terminate stack traces in kernel land
+  ; TODO consider making user land preserve it?
+  push rbp
+
   ; check if the syscall number is out of range
   mov r11, qword syscall_table_size
   cmp rax, [r11]
@@ -57,6 +61,7 @@ syscall_stub:
 
   ; call the syscall function in the kernel directly
   mov rcx, r10 ; syscall ABI uses R10 instead of RCX, fix that for normal ABI
+  mov rbp, 0   ; terminate stack traces here
   call r11
 
 .invalid_syscall:
@@ -64,6 +69,9 @@ syscall_stub:
   ; i.e. mov rax, <error code>
 
 .post_syscall:
+  ; restore the RBP register
+  pop rbp
+
   ; restore the RCX and R11 registers
   pop r11
   pop rcx
@@ -148,6 +156,7 @@ syscall_stub:
 
   ; call the system call routine
   mov rdi, rsp ; first argument points to the processor state
+  mov rbp, 0   ; terminate stack traces here
   call r11
 
   ; decrement mask count

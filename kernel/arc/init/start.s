@@ -268,7 +268,7 @@ start:
 
   ; set up the new stack (multiboot2 spec says the stack pointer could be
   ; anything - even pointing to invalid memory)
-  mov rbp, 0
+  mov rbp, 0 ; terminate stack traces here
   mov rsp, qword stack + STACK_SIZE
 
   ; unmap the identity-mapped memory
