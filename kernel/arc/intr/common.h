@@ -97,8 +97,8 @@
 
 /*
  * reserved interrupt that should never be generated, used to indicate in
- * cpu_state_t if the state was actually pushed by cpu_state_save(), and not
- * automatically by the processor upon an interrupt
+ * cpu_state_t if the state was actually pushed by a faux interrupt generated
+ * by SYSCALL, and not automatically by the processor upon an interrupt
  */
 #define NOT_INTR 0xFA
 

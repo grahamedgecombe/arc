@@ -21,6 +21,16 @@
 #include <arc/cpu/msr.h>
 #include <arc/cpu/gdt.h>
 
+/*
+ * As the kernel is in the higher high we know that the MSB of function
+ * pointers is always set to one - therefore we can reuse the bit as a flag
+ * which indicates if the syscall should be a direct method call (suitable for
+ * anything which doesn't need to perform a context switch) or if it should
+ * emulate an interrupt (allowing calls which may switch the context e.g.
+ * yield() to be implemented.
+ */
+#define SYSCALL_DIRECT 0x8000000000000000UL
+
 uintptr_t syscall_table[] =
 {
   /* 0 */ (uintptr_t) &sys_trace,
@@ -31,6 +41,9 @@ uint64_t syscall_table_size = sizeof(syscall_table) / sizeof(*syscall_table);
 
 void syscall_init(void)
 {
+  /* unset SYSCALL_DIRECT bit on syscalls which may perform a context switch */
+  syscall_table[SYS_YIELD] &= ~SYSCALL_DIRECT;
+
   /* set the SYSCALL and SYSRET selectors */
   uint64_t star = 0;
   star |= ((uint64_t) (SLTR_KERNEL_DATA | RPL3)) << 48;

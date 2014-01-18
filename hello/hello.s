@@ -17,9 +17,20 @@
 [section .text]
 [global _start]
 _start:
+  ; sys_yield
+  mov rax, 2
+  syscall
+
+  ; sys_trace
   mov rax, 0
   mov rdi, hello_str
   syscall
+
+  ; sys_yield
+  mov rax, 2
+  syscall
+
+  ; sys_exit
   mov rax, 1
   syscall
   jmp $

@@ -18,9 +18,14 @@
 #define ARC_PROC_SYSCALLS_H
 
 #include <stdint.h>
+#include <arc/cpu/state.h>
+
+#define SYS_TRACE 0
+#define SYS_EXIT  1
+#define SYS_YIELD 2
 
 int64_t sys_trace(const char *message);
 int64_t sys_exit(int status);
-int64_t sys_yield(void);
+void sys_yield(cpu_state_t *state);
 
 #endif

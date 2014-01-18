@@ -39,13 +39,21 @@ typedef struct
   uint64_t ss;
 } __attribute__((__packed__)) cpu_state_t;
 
-/*
- * the return flag is to indicate why we have returned from the function. if
- * true, we returned because we have just saved the cpu state. if false, we
- * returned, because cpu_state_restore() was just called and we are now
- * carrying on execution as normal
- */
-bool cpu_state_save(cpu_state_t *state);
-noreturn void cpu_state_restore(cpu_state_t *state);
+#define RAX 0
+#define RBX 1
+#define RCX 2
+#define RDX 3
+#define RSI 4
+#define RDI 5
+#define RBP 6
+/* RSP is stored in a separate field */
+#define R8  7
+#define R9  8
+#define R10 9
+#define R11 10
+#define R12 11
+#define R13 12
+#define R14 13
+#define R15 14
 
 #endif
