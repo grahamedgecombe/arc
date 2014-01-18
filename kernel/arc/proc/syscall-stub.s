@@ -123,7 +123,7 @@ syscall_stub:
   push rax
   pushf
   push 0x08 ; SLTR_KERNEL_CODE | RPLO
-  mov rax, .faux_intr_exit
+  mov rax, qword .faux_intr_exit
   push rax
 
   ; push fake error code/interrupt id
