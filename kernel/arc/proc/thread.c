@@ -54,7 +54,7 @@ thread_t *thread_create(proc_t *proc, int flags)
   }
 
   thread->lock = SPIN_UNLOCKED;
-  thread->state = THREAD_RUNNING;
+  thread->state = THREAD_RUNNABLE;
   thread->proc = proc;
   thread->rsp = (flags & THREAD_KERNEL) ? ((uintptr_t) kstack + KERNEL_STACK_SIZE) : ((uintptr_t) stack + USER_STACK_SIZE);
   thread->kernel_rsp = (uintptr_t) kstack + KERNEL_STACK_SIZE;
