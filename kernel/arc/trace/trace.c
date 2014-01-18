@@ -119,7 +119,8 @@ static int skip_atoi(const char **str)
   return i;
 }
 
-static void _trace_putch(char c) {
+static void _trace_putch(char c)
+{
   if (trace_backends & TRACE_VGA)
     vga_putch(c);
   if (trace_backends & TRACE_UART)
@@ -128,7 +129,8 @@ static void _trace_putch(char c) {
     e9_putch(c);
 }
 
-static void _trace_puts(const char *str) {
+static void _trace_puts(const char *str)
+{
   if (trace_backends & TRACE_VGA)
     vga_puts(str);
   if (trace_backends & TRACE_UART)

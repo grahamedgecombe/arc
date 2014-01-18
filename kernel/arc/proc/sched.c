@@ -65,7 +65,8 @@ void sched_tick(cpu_state_t *state)
   spin_lock(&thread_queue_lock);
 
   /* add the current thread to the queue if it is runnable */
-  if (cur_thread && cur_thread->state == THREAD_RUNNABLE) {
+  if (cur_thread && cur_thread->state == THREAD_RUNNABLE)
+  {
     list_add_tail(&thread_queue, &cur_thread->sched_node);
   }
 

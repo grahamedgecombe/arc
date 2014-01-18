@@ -32,7 +32,8 @@ void tss_init(void)
   tss_install(SLTR_TSS);
 }
 
-void tss_set_rsp0(uint64_t rsp0) {
+void tss_set_rsp0(uint64_t rsp0)
+{
   /* find this CPU's TSS */
   cpu_t *cpu = cpu_get();
   tss_t *tss = &cpu->tss;

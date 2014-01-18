@@ -61,7 +61,8 @@ bool elf64_load(elf64_ehdr_t *elf, size_t size)
 
   elf64_phdr_t *phdrs = (elf64_phdr_t *) ((uintptr_t) elf + elf->e_phoff);
   size_t i;
-  for (i = 0; i < elf->e_phnum; i++) {
+  for (i = 0; i < elf->e_phnum; i++)
+  {
     elf64_phdr_t *phdr = &phdrs[i];
     if (phdr->p_type != PT_LOAD)
       continue;
@@ -97,7 +98,8 @@ bool elf64_load(elf64_ehdr_t *elf, size_t size)
   return true;
 
 rollback:
-  for (size_t j = 0; j < i; j++) {
+  for (size_t j = 0; j < i; j++)
+  {
     elf64_phdr_t *phdr = &phdrs[j];
     seg_free((void *) phdr->p_vaddr);
   }
