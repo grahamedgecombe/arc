@@ -74,6 +74,11 @@ void proc_thread_add(proc_t *proc, thread_t *thread)
   list_add_tail(&proc->thread_list, &thread->proc_node);
 }
 
+void proc_thread_remove(proc_t *proc, thread_t *thread)
+{
+  list_remove(&proc->thread_list, &thread->proc_node);
+}
+
 void proc_destroy(proc_t *proc)
 {
   // TODO: destroy threads within the process and make sure they aren't queued

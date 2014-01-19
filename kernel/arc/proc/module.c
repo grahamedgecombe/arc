@@ -19,7 +19,6 @@
 #include <arc/lock/intr.h>
 #include <arc/proc/proc.h>
 #include <arc/proc/elf64.h>
-#include <arc/proc/sched.h>
 #include <arc/mm/phy32.h>
 #include <arc/panic.h>
 #include <stddef.h>
@@ -47,11 +46,11 @@ static void module_load(multiboot_tag_t *tag)
   if (!thread)
     panic("couldn't create thread for module");
 
+  /* set entry point of the thread */
   thread->rip = elf->e_entry;
-  proc_thread_add(proc, thread);
 
   /* add thread to the scheduler's ready queue */
-  sched_thread_ready(thread);
+  thread_resume(thread);
 }
 
 void module_init(multiboot_t *multiboot)

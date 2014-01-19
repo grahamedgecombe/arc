@@ -33,31 +33,32 @@ thread_t *thread_create(proc_t *proc, int flags)
     return 0;
 
   /* allocate kernel-space stack */
-  void *kstack = memalign(STACK_ALIGN, KERNEL_STACK_SIZE);
-  if (!kstack)
+  thread->kstack = memalign(STACK_ALIGN, KERNEL_STACK_SIZE);
+  if (!thread->kstack)
   {
     free(thread);
     return 0;
   }
 
   /* allocate user-space stack */
-  void *stack;
   if (!(flags & THREAD_KERNEL))
   {
-    stack = seg_alloc(USER_STACK_SIZE, VM_R | VM_W);
-    if (!stack)
+    // TODO seg_alloc() means we need to be in the address space of proc
+    thread->stack = seg_alloc(USER_STACK_SIZE, VM_R | VM_W);
+    if (!thread->stack)
     {
-      free(kstack);
+      free(thread->kstack);
       free(thread);
       return 0;
     }
   }
 
   thread->lock = SPIN_UNLOCKED;
-  thread->state = THREAD_RUNNABLE;
+  thread->state = THREAD_SUSPENDED;
   thread->proc = proc;
-  thread->rsp = (flags & THREAD_KERNEL) ? ((uintptr_t) kstack + KERNEL_STACK_SIZE) : ((uintptr_t) stack + USER_STACK_SIZE);
-  thread->kernel_rsp = (uintptr_t) kstack + KERNEL_STACK_SIZE;
+  thread->flags = flags;
+  thread->rsp = (flags & THREAD_KERNEL) ? ((uintptr_t) thread->kstack + KERNEL_STACK_SIZE) : ((uintptr_t) thread->stack + USER_STACK_SIZE);
+  thread->kernel_rsp = (uintptr_t) thread->kstack + KERNEL_STACK_SIZE;
   thread->rflags = FLAGS_IF;
 
   if (flags & THREAD_KERNEL)
@@ -72,6 +73,9 @@ thread_t *thread_create(proc_t *proc, int flags)
     thread->ss = SLTR_USER_DATA | RPL3;
   }
 
+  /* attach thread to parent process */
+  proc_thread_add(proc, thread);
+
   return thread;
 }
 
@@ -84,9 +88,9 @@ thread_t *thread_get(void)
 void thread_suspend(thread_t *thread)
 {
   spin_lock(&thread->lock);
-  // TODO what if thread is zombie etc.?
+  // TODO what if thread is zombie etc.? what if it is already running?
   thread->state = THREAD_SUSPENDED;
-  sched_thread_suspend(thread); // TODO is this the best way? another thread might beat us to this call
+  sched_thread_suspend(thread);
   spin_unlock(&thread->lock);
 }
 
@@ -95,6 +99,7 @@ void thread_resume(thread_t *thread)
   spin_lock(&thread->lock);
   // TODO as above
   thread->state = THREAD_RUNNABLE;
+  sched_thread_resume(thread);
   spin_unlock(&thread->lock);
 }
 
@@ -107,5 +112,18 @@ void thread_kill(thread_t *thread)
 
 void thread_destroy(thread_t *thread)
 {
-  // TODO impl
+  // TODO need to switch address spaces to be able to free the user-space stack
+
+  /* detach thread from parent process */
+  proc_thread_remove(thread->proc, thread);
+
+  /* free user-space stack */
+  if (!(thread->flags & THREAD_KERNEL))
+    seg_free(thread->stack);
+
+  /* free kernel-space stack */
+  free(thread->kstack);
+
+  /* free thread structure itself */
+  free(thread);
 }

@@ -46,6 +46,12 @@ typedef struct
    */
   uint64_t syscall_rsp;
 
+  /* base of the stacks (only used upon thread_destroy) */
+  void *kstack, *stack;
+
+  /* flags the thread was created with (ditto) */
+  int flags;
+
   /* spinlock used to protect concurrent access to this structure */
   spinlock_t lock;
 

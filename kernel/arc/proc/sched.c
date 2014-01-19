@@ -40,7 +40,7 @@ void sched_init(void)
     pit_monotonic(SCHED_TIMESLICE, &sched_tick);
 }
 
-void sched_thread_ready(thread_t *thread)
+void sched_thread_resume(thread_t *thread)
 {
   spin_lock(&thread_queue_lock);
   list_add_tail(&thread_queue, &thread->sched_node);
