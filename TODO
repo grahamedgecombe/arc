@@ -9,6 +9,7 @@
 * check if in*_p() and out*_p() are still required
 
 * split features into local CPU features and features that all CPUs share
+  (or shall we just force all CPUs to be identical?)
 
 * elf64 size checks to check we don't read outside the bounds of the elf64 file
 
@@ -18,8 +19,6 @@
   countdown has finished seems to be unreliable on modern hardware
   (note: this issue actually seems to be the APs not responding to the init
   sequence and seems to happen in Linux as well on this hardware sometimes?)
-
-* use enums in more places (e.g. heap node state)
 
 * use a more efficient user-space heap structure (red black tree?)
 
@@ -32,7 +31,7 @@
 * consider issue that proc and thread in cpu_t might not be consistent - is
   this going to cause problems? do we need any locking there also?
 
-* make uheap_alloc() always zero memory it gives out, for security reasons. or
+* make seg_alloc() always zero memory it gives out, for security reasons. or
   should this be done by its callers?
 
 * switch from NASM to GNU AS? also switch more stuff to inline asm (e.g. locks)
@@ -71,7 +70,4 @@
 
 * fix leak of stack allocated for idle processes by thread_init()
 
-* print kernel stack trace, registers, etc. in panic()
-
-* mark functions as _Noreturn. is there stdnoreturn.h with a nice #define for
-  it?
+* figure out what gcc is doing to memset() at -O3 which makes it crash
