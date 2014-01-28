@@ -98,7 +98,7 @@ void thread_resume(thread_t *thread)
 {
   spin_lock(&thread->lock);
   // TODO as above
-  thread->state = THREAD_RUNNABLE;
+  thread->state = THREAD_RUNNING;
   sched_thread_resume(thread);
   spin_unlock(&thread->lock);
 }
