@@ -16,7 +16,7 @@
 
 MODULES := kernel hello
 
-.PHONY: all clean $(MODULES)
+.PHONY: all clean run $(MODULES)
 
 all: $(MODULES)
 
@@ -25,3 +25,6 @@ $(MODULES):
 
 clean:
 	$(foreach module,$(MODULES),$(MAKE) -C $(module) clean;)
+
+run: all
+	./run/qemu.sh
