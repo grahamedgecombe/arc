@@ -106,7 +106,24 @@ void thread_resume(thread_t *thread)
 void thread_kill(thread_t *thread)
 {
   spin_lock(&thread->lock);
-  // TODO impl
+  // TODO as above
+
+  /* suspend the thread if it is runnable */
+  if (thread->state == THREAD_RUNNING)
+    sched_thread_suspend(thread);
+
+  /*
+   * we need to keep the struct around as it may be referenced in other places
+   * (e.g. one thread may be waiting for another to another to deliver a
+   * message), therefore we use a zombie state to indicate a process is dead.
+   *
+   * once the reference count drops to zero the struct can be cleaned up for
+   * good.
+   */
+  thread->state = THREAD_ZOMBIE;
+
+  // TODO we can probably free the user-space stack etc. here?
+
   spin_unlock(&thread->lock);
 }
 
