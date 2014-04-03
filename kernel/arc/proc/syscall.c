@@ -27,7 +27,7 @@
  * which indicates if the syscall should be a direct method call (suitable for
  * anything which doesn't need to perform a context switch) or if it should
  * emulate an interrupt (allowing calls which may switch the context e.g.
- * yield() to be implemented.
+ * yield() to be implemented).
  */
 #define SYSCALL_DIRECT 0x8000000000000000UL
 
