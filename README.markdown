@@ -168,7 +168,7 @@ various manuals and specifications.
 [cross]: http://wiki.osdev.org/GCC_Cross-Compiler
 [qemu]: http://qemu.org/
 [bochs]: http://bochs.sourceforge.net/
-[isc]: http://isc.org/software/license/
+[isc]: https://www.isc.org/downloads/software-support-policy/isc-license/
 [grub]: http://gnu.org/software/grub/
 [grub-fix]: http://lists.gnu.org/archive/html/bug-grub/2011-09/msg00026.html
 [vbox]: http://virtualbox.org/
