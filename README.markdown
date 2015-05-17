@@ -101,8 +101,13 @@ Format this partition as ext2 and mount it to a temporary location:
 
 Install GRUB to the partition:
 
-    sudo grub-install --root-directory=temp --disk-module=biosdisk \
-      --modules="part_msdos ext2" /dev/loop0
+    sudo grub-install --target=i386-pc --root-directory=temp \
+      --disk-module=biosdisk --modules="part_msdos ext2" /dev/loop0
+
+Newer versions of GRUB require the following invocation instead:
+
+    sudo grub-install --target=i386-pc --boot-directory=temp/boot \
+      --modules="biosdisk part_msdos ext2" /dev/loop0
 
 Finally unmount the partition, remove the loop devices and remove the temporary
 mount point:
