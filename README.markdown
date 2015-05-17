@@ -145,7 +145,7 @@ above, or apply the patch.
 License
 -------
 
-Arc is available under the terms of the [ISC license][isc], which is a
+Arc is available under the terms of the [ISC license][isc], which is
 similar to the 2-clause BSD license. See the `LICENSE` file for the copyright
 information and licensing terms.
 
